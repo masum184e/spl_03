@@ -1,0 +1,444 @@
+\documentclass[12pt,a4paper]{report}
+
+
+\usepackage[margin=1in]{geometry} % set margin
+\usepackage[margin=1in]{geometry} % set margin
+\usepackage{newtxtext,newtxmath} % set font
+\usepackage{enumitem} % control over list
+\usepackage[hidelinks]{hyperref} % enable hyperlinks
+\usepackage{graphicx} % read image
+\usepackage{longtable} % long table
+\usepackage{titlesec} % customize section title
+
+%=======================================================%
+%   Compact Table of Contents, Figures, and Tables
+%=======================================================%
+
+\usepackage{tocloft} 
+% TOC spacing
+\setlength{\cftbeforetoctitleskip}{0pt}
+\setlength{\cftaftertoctitleskip}{15pt}
+
+% List of Figures spacing
+\setlength{\cftbeforeloftitleskip}{0pt}
+\setlength{\cftafterloftitleskip}{15pt}
+
+% List of Tables spacing
+\setlength{\cftbeforelottitleskip}{0pt}
+\setlength{\cftafterlottitleskip}{15pt}  
+
+% ==================================================
+% Chapter Page
+% ==================================================
+\newcommand{\chapterpage}[1]{%
+    \clearpage
+    \phantomsection
+    \addcontentsline{toc}{chapter}{\protect\numberline{\thechapter}#1}
+    \thispagestyle{empty}
+
+    \vspace*{\fill}
+    \begin{center}
+        {\fontsize{32}{38}\selectfont\bfseries #1}
+    \end{center}
+    \vspace*{\fill}
+
+    \clearpage
+}
+
+% ==================================================
+% Chapter Heading
+% ==================================================
+\newcommand{\mychapter}[1]{%
+    \noindent
+    {\normalfont\bfseries\fontsize{18}{22}\selectfont
+    Chapter \thechapter: #1}\par
+    \vspace{0pt}
+}
+
+% ==================================================
+% Section Formatting
+% ==================================================
+\titleformat{\section}
+    {\normalfont\bfseries\fontsize{14}{17}\selectfont}
+    {\thesection}
+    {0.5em}
+    {}
+
+\titlespacing*{\section}
+    {0pt}    % left
+    {8pt}    % before
+    {4pt}    % after
+
+
+%=======================================================%
+%           General Formatting
+%=======================================================%
+\setlength{\parindent}{0pt}  
+\setlength{\parskip}{6pt} 
+% \pagenumbering{arabic}% Page Number
+
+\begin{document}
+
+%=======================================================%
+%       Cover Page
+%=======================================================%
+\begin{center}
+
+\vspace{1cm}
+
+{\LARGE \textbf{Enhanced Urban Mobility through Deep Learning Based Real-Time Passenger Head Counting and Occupancy Estimation }}
+
+\vspace{1.5cm}
+
+{\large \textbf{Project Type:} Research Based Project}
+
+\vspace{2.5cm}
+
+\textbf{Submitted By}
+
+\vspace{1cm}
+
+{\large \textit{Name: Md Masum Billah}}
+
+\vspace{0.3cm}
+
+Student ID: ASH2125033M
+
+\vspace{0.3cm}
+
+Session: 2020-2021
+
+\vspace{2.5cm}
+
+\textbf{Supervisor }
+
+\vspace{0.5cm}
+
+{\large \textit{Name: 
+Nazmun Nahar}}
+
+\vspace{0.3cm}
+
+Designation: Assistant Professor
+
+\vspace{3cm}
+
+\textbf{Software Engineering Program (BSc. Hons.)}\\
+Institute of Information Technology (IIT)\\
+Noakhali Science and Technology University
+
+\vspace{2.5cm}
+
+\textbf{Submission Date:} 13/08/2026
+
+\end{center}
+
+
+% ============================================================
+% SIGNATURE PAGE (Student and Supervisor)
+% ============================================================
+\newpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Declaration}
+\thispagestyle{empty}
+\begin{center}
+    \Large\textbf{Declaration}
+\end{center}
+\vspace{1cm}
+
+\noindent This is to certify that the thesis titled \textbf{``Enhanced Urban Mobility through Deep Learning Based Real-Time Passenger Head Counting and Occupancy Estimation''}
+submitted by \textbf{Md Masum Billah} (ID: ASH2125033M) has been carried out under my
+supervision and is approved for submission.
+
+\vspace{3cm}
+
+\noindent
+\begin{minipage}[t]{0.45\textwidth}
+    \rule{6cm}{0.4pt}\\
+    \textbf{Md Masum Billah}\\
+    ASH2125033M\\
+    Institute of Information Technology (IIT)
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+    \rule{6cm}{0.4pt}\\
+    \textbf{Nazmun Nahar}\\
+    Supervisor, Assistant Professor\\
+    Institute of Information Technology (IIT)
+\end{minipage}
+
+
+% ============================================================
+% DEDICATION
+% ============================================================
+\newpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Dedication}
+\thispagestyle{empty}
+\vspace*{5cm}
+\begin{center}
+    \textit{Dedicated to my beloved parents}
+\end{center}
+
+
+% ============================================================
+% APPROVAL (Exam Committee)
+% ============================================================
+\newpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Approval}
+\thispagestyle{empty}
+\begin{center}
+    \Large\textbf{Approval}
+\end{center}
+\vspace{1cm}
+
+\noindent The thesis titled \textbf{``Enhanced Urban Mobility through Deep Learning Based Real-Time Passenger Head Counting and Occupancy Estimation''} submitted by
+\textbf{Md Masum Billah} (ID: ASH2125033M) has been accepted as satisfactory in partial
+fulfillment of the requirements for the degree of \textbf{BSc. (Hons.) in Software Engineering} on
+[Date of Defense].
+
+\vspace{1cm}
+\noindent\textbf{Board of Examiners}
+
+\vspace{2cm}
+\noindent
+\rule{6cm}{0.4pt}\\
+\textbf{[Name]}\\
+Chairman\\
+[Designation, Department]
+
+\vspace{2cm}
+\noindent
+\rule{6cm}{0.4pt}\\
+\textbf{[Name]}\\
+Member (Internal)\\
+[Designation, Department]
+
+\vspace{2cm}
+\noindent
+\rule{6cm}{0.4pt}\\
+\textbf{[Name]}\\
+Member (External)\\
+[Designation, Department]
+
+% ============================================================
+% ACKNOWLEDGEMENT
+% ============================================================
+\newpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Acknowledgement}
+\thispagestyle{empty}
+\begin{center}
+    \Large\textbf{Acknowledgement}
+\end{center}
+\vspace{1cm}
+
+\noindent I would like to express my sincere gratitude to my supervisor,
+\textbf{Nazmun Nahar}, for her invaluable guidance, patience, and support
+throughout this research. I am also thankful to the faculty members of the
+Institute of Information Technology (IIT) for their encouragement.
+
+I extend my heartfelt thanks to my family and friends for their unwavering support
+and motivation during this journey.
+
+% ============================================================
+% ABSTRACT (150-250 words)
+% ============================================================
+\newpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Abstract}
+\thispagestyle{empty}
+\begin{center}
+    \Large\textbf{Abstract}
+\end{center}
+
+\noindent
+Write your abstract here. It should briefly cover the background/motivation of the
+study, the problem statement, the methodology used, key findings, and the
+significance/contribution of the work. Keep the total length between 150 and 250
+words, written as a single, self-contained paragraph without citations.
+
+\clearpage
+
+% --------------------------------------------------
+% Table of Contents
+% --------------------------------------------------
+\renewcommand{\contentsname}{Table of Contents}
+\tableofcontents
+\clearpage
+
+% --------------------------------------------------
+% List of Figures
+% --------------------------------------------------
+\listoffigures
+\addcontentsline{toc}{chapter}{List of Figures}
+\clearpage
+
+% --------------------------------------------------
+% List of Tables
+% --------------------------------------------------
+\listoftables
+\addcontentsline{toc}{chapter}{List of Tables}
+\clearpage
+
+% ============================================================
+% LIST OF ABBREVIATIONS
+% ============================================================
+\newpage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Abbreviations}
+\begin{center}
+    \Large\textbf{List of Abbreviations}
+\end{center}
+\vspace{1cm}
+
+\noindent
+\begin{tabular}{ll}
+    \textbf{Abbreviation} & \textbf{Full Form} \\[0.3cm]
+    AI   & Artificial Intelligence \\
+    ML   & Machine Learning \\
+    CNN  & Convolutional Neural Network \\
+    YOLO & You Only Look Once \\
+    IoU  & Intersection over Union \\
+    mAP  & Mean Average Precision \\
+    FPS  & Frames Per Second \\
+    % Add more rows as needed
+\end{tabular}
+
+\clearpage
+
+% ==================================================
+% CHAPTER 1
+% ==================================================
+\refstepcounter{chapter}
+\chapterpage{Introduction}
+\mychapter{Introduction}
+\section{Background and Motivation}
+
+Public transportation systems constitute a critical pillar of modern urban infrastructure. Among all transit modes, buses serve the largest share of daily commuters worldwide, particularly in rapidly urbanising developing nations \cite{itf_outlook_2023}. Accurate information regarding passenger occupancy is important for improving route planning, optimizing fleet management, monitoring overcrowding, and enhancing passenger safety.
+
+Traditional APC systems commonly employ hardware based sensors such as infrared beams, pressure mats, or ticketing systems. Although these approaches are widely used, they often suffer from several limitations, including high installation and maintenance costs, sensitivity to environmental conditions, and reduced accuracy when multiple passengers enter or exit simultaneously \cite{mccarthy2025video}.
+
+Recent advancements in computer vision and deep learning have enabled the development of camera based passenger counting systems. Since many buses are already equipped with surveillance cameras for security purposes, vision based methods offer a cost effective and scalable solution \cite{McCarthy2023DeepLearning}. Deep learning models encompassing both object detection and density estimation approaches have achieved state of the art performance on crowd counting benchmarks, demonstrating that neural networks can reliably estimate occupancy in complex visual scenes.
+
+However, bus interiors present unique challenges that distinguish them from general crowd scenes. Passengers frequently occlude each other, surveillance cameras are typically mounted on the ceiling causing perspective distortion, and passenger heads often appear as small objects in the captured images.
+
+\section{Problem Statement}
+
+Accurate passenger counting is a fundamental requirement for intelligent public transportation systems. Reliable passenger statistics enable transport authorities and bus operators to optimize routes, monitor occupancy levels, improve passenger safety, and make data-driven operational decisions. Conventional passenger counting systems, such as infrared sensors, pressure sensors, and ticketing-based methods, often suffer from inaccuracies due to sensor malfunction, passenger overlap, and simultaneous boarding or alighting events.
+
+Recent advances in computer vision and deep learning have demonstrated promising results for crowd counting and object detection in surveillance applications. However, applying these methods to bus passenger counting remains challenging because of the unique characteristics of bus interiors. Passengers are often densely packed, causing severe occlusion where individuals partially or completely block one another. In addition, surveillance cameras are usually installed on the ceiling, resulting in perspective distortion and making passenger heads appear small, especially in the rear sections of the bus. Variations in illumination, motion blur caused by vehicle movement, and frequent passenger movement further complicate accurate counting.
+
+Most existing crowd counting methods have been developed and evaluated on public datasets such as ShanghaiTech\cite{Zhu2020}, UCF-QNRF\cite{ucf_qnrf_dataset}, and NWPU-Crowd\cite{wang2020nwpu}, which mainly consist of outdoor scenes or general crowd environments. These datasets do not adequately represent the visual characteristics and challenges of bus interiors. Furthermore, many studies focus on estimating crowd density rather than identifying individual passengers across video frames, which may lead to unstable counts and double-counting problems in video-based applications.
+
+Therefore, there is a need to investigate whether head detection can provide accurate passenger counts in bus environments, determine which detection models are most effective for detecting small passenger heads, and examine whether integrating object tracking can improve counting stability and reduce duplicate counts across frames.
+
+\section{Research Objectives}
+
+\subsection{General Objective}
+
+The main objective of this study is to develop and evaluate a vision based passenger counting system for bus interiors using head detection and object tracking.
+
+\subsection{Specific Objectives}
+
+The specific objectives are as follows:
+
+\begin{itemize}[itemsep=0pt]
+    \item To investigate whether head detection can be used to count passengers accurately in bus interiors.
+    
+    \item To compare different object detection models and determine which model performs best for detecting small passenger heads in real bus scenes.
+    
+    \item To evaluate the effectiveness of object tracking techniques in improving counting stability and reducing double counting across video frames.
+    
+\end{itemize}
+
+\section{Scope and Limitations}
+\subsection{Scope}
+This study focuses on the development and evaluation of a vision based passenger counting system for bus interiors using deep learning based head detection and object tracking techniques. The proposed system utilizes surveillance video captured from cameras installed inside buses to estimate the number of passengers in real time.
+
+The scope of this study includes:
+
+\begin{itemize}[itemsep=0pt]
+
+\item Developing a passenger counting framework based on head detection rather than full body detection to better handle crowded bus environments and severe occlusion.
+
+\item Evaluating and comparing multiple object detection models for detecting small passenger heads in bus surveillance videos.
+
+\item Investigating the effectiveness of multi object tracking algorithms in maintaining passenger identities across consecutive video frames and reducing double counting errors.
+
+% \item Assessing the performance of the proposed system using standard evaluation metrics such as Precision, Recall, mAP, MOTA, MAE, and counting accuracy.
+
+% \item Conducting experiments on bus interior videos captured from ceiling mounted surveillance cameras under different occupancy levels and lighting conditions.
+
+\end{itemize}
+
+This study is limited to passenger counting inside buses and does not consider other public transportation systems such as trains, subways, or airports.
+
+\subsection{Limitations}
+
+
+Although the proposed approach aims to provide an accurate and robust passenger counting system, several limitations exist.
+
+\begin{itemize}[itemsep=0pt]
+
+\item The system relies on video captured from ceiling mounted surveillance cameras. Different camera positions or viewpoints may affect detection and tracking performance.
+
+\item Severe occlusion remains a challenging problem. When passengers are completely hidden behind others, head detection may fail, leading to undercounting.
+
+\item The performance of the tracking algorithm depends heavily on the quality of the object detector. Missed detections or false detections may cause identity switches or fragmented trajectories.
+
+\item Variations in lighting conditions, shadows, motion blur caused by bus movement, and image quality may negatively affect the detection accuracy.
+
+\item The proposed system assumes that the surveillance camera remains fixed. Camera movement or vibration beyond normal bus operation is not considered in this study.
+
+\item The study focuses on passenger counting only and does not address related tasks such as passenger identification, behavior analysis, age estimation, or demographic analysis.
+
+\end{itemize}
+
+Despite these limitations, the study is expected to provide valuable insights into the feasibility of using head detection and object tracking for accurate passenger counting in bus environments and serve as a foundation for future research in intelligent transportation systems.
+
+
+\section{Significance of the Study}
+
+
+This study is significant for both academic research and practical applications. From an academic perspective, the research contributes to the growing field of vision based passenger counting by investigating the integration of head detection and object tracking in bus environments. Unlike conventional crowd counting methods that rely on density estimation, this study focuses on detecting and tracking individual passengers, thereby addressing issues such as occlusion, small object detection, and counting stability.
+
+From a practical perspective, an accurate passenger counting system can provide valuable information for intelligent transportation systems. Real time passenger occupancy data can assist transport authorities in optimizing bus schedules, reducing overcrowding, improving service quality, and enhancing passenger safety. Furthermore, because many buses are already equipped with surveillance cameras, the proposed approach can potentially be deployed without requiring additional hardware, making it a cost effective solution for public transportation systems.
+
+The findings of this study may also contribute to the development of smart city applications where real-time monitoring and data-driven decision-making are essential.
+
+
+
+% ==================================================
+% CHAPTER 7
+% ==================================================
+\refstepcounter{chapter}
+\chapterpage{Results Analysis and Discussion}
+\mychapter{Results Analysis and Discussion}
+\section{Data Collection and Analysis}
+\section{Evaluation Metrics and Criteria}
+\section{Interpretation of Results}
+\section{Comparison with Related Work}
+\section{Discussion of Findings}
+
+% ==================================================
+% CHAPTER 8
+% ==================================================
+\refstepcounter{chapter}
+\chapterpage{Conclusion and Future Work}
+\mychapter{Conclusion and Future Work}
+\section{Summary of Contributions}
+\section{Limitations and Challenges}
+\section{Recommendations for Future Enhancements}
+
+
+% ==================================================
+% References
+% ==================================================
+\newpage
+\renewcommand{\bibname}{References}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
