@@ -1,0 +1,62 @@
+# LaTeX auxiliary files
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex
+*.synctex.gz
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+
+# Bibliography
+*.idx
+*.ilg
+*.ind
+
+# Glossaries / acronyms
+*.glo
+*.glg
+*.gls
+*.glsdefs
+*.acn
+*.acr
+*.alg
+
+# Beamer
+*.nav
+*.snm
+*.vrb
+
+# LaTeX temporary files
+*.dvi
+*.xdv
+*.pdfsync
+*.tdo
+
+# Build directories
+/build/
+/out/
+/dist/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Editor / IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Latexmk
+.latexmkrc
+
+# Ignore generated PDF (remove this if you want PDFs version-controlled)
+*.pdf
