@@ -1,0 +1,111 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[margin=1in]{geometry} % set margin
+\usepackage{newtxtext,newtxmath} % set font
+\usepackage{titlesec} % customize section title
+\usepackage[hidelinks]{hyperref} % enable hyperlinks
+\usepackage{cleveref} % Enables automatic cross-references
+\usepackage{graphicx} % read image
+\usepackage{longtable} % long table
+\usepackage{array}
+\usepackage{enumitem} % control over list
+
+% ==================================================
+% Algorithm Packages
+% ==================================================
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{float}
+
+% ==================================================
+% Number figures and tables by chapter
+% ==================================================
+\usepackage{chngcntr}
+
+\counterwithin{figure}{chapter}
+\counterwithin{table}{chapter}
+
+% ==================================================
+% Custom Chapter Page
+% ==================================================
+\newcommand{\mychapter}[1]{%
+    \clearpage
+    \refstepcounter{chapter}
+
+    \phantomsection
+    \addcontentsline{toc}{chapter}
+        {\protect\numberline{\thechapter}#1}
+
+    \thispagestyle{empty}
+
+    \vspace*{\fill}
+
+    \begin{center}
+
+        {\fontsize{32}{38}\selectfont\bfseries
+        Chapter \thechapter}
+
+        \vspace{1.5cm}
+
+        {\fontsize{32}{38}\selectfont\bfseries
+        #1}
+
+    \end{center}
+
+    \vspace*{\fill}
+
+    \clearpage
+}
+
+\begin{document}
+
+%=======================================================%
+%       Cover Page
+%=======================================================%
+\include{chapters/cover}
+
+% ==================================================
+% Table of Contents
+% ==================================================
+\renewcommand{\contentsname}{Table of Contents}
+\tableofcontents
+\clearpage
+
+% ==================================================
+% List of Figures
+% ==================================================
+\listoffigures
+% \addcontentsline{toc}{chapter}{List of Figures}
+\clearpage
+
+% ==================================================
+% List of Tables
+% ==================================================
+\listoftables
+% \addcontentsline{toc}{chapter}{List of Tables}
+\clearpage
+
+% ==================================================
+% CHAPTER 1
+% ==================================================
+\include{chapters/SPL_03_Final_Report_Chapter_1}	
+
+% ==================================================
+% CHAPTER 2
+% ==================================================
+\include{chapters/SPL_03_Final_Report_Chapter_2}	
+
+% ==================================================
+% CHAPTER 3
+% ==================================================
+\include{chapters/SPL_03_Final_Report_Chapter_3}	
+
+% ==================================================
+% References
+% ==================================================
+\newpage
+\renewcommand{\bibname}{References}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+	
+\end{document}
