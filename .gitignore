@@ -13,6 +13,7 @@
 *.bcf
 *.blg
 *.run.xml
+*.synctex(busy)
 
 # Bibliography
 *.idx
@@ -60,3 +61,8 @@ Thumbs.db
 
 # Ignore generated PDF (remove this if you want PDFs version-controlled)
 *.pdf
+
+
+
+
+public_transport_crowd_count_dataset
