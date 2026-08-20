@@ -8,6 +8,26 @@
 \usepackage{array}
 \usepackage{enumitem} % control over list
 
+\setlength{\parindent}{0pt}  % remove paragraph indentation
+\setlength{\parskip}{6pt}    % add space between paragraphs
+
+%=======================================================%
+%   Compact Table of Contents, Figures, and Tables
+%=======================================================%
+\usepackage{tocloft} 
+
+% TOC spacing
+\setlength{\cftbeforetoctitleskip}{0pt}
+\setlength{\cftaftertoctitleskip}{15pt}
+
+% List of Figures spacing
+\setlength{\cftbeforeloftitleskip}{0pt}
+\setlength{\cftafterloftitleskip}{15pt}
+
+% List of Tables spacing
+\setlength{\cftbeforelottitleskip}{0pt}
+\setlength{\cftafterlottitleskip}{15pt}  
+
 % ==================================================
 % Algorithm Packages
 % ==================================================
@@ -101,7 +121,7 @@
 % ==================================================
 % CHAPTER 4
 % ==================================================
-% \include{chapters/SPL_03_Final_Report_Chapter_4}	
+\include{chapters/SPL_03_Final_Report_Chapter_4}	
 
 % ==================================================
 % References
