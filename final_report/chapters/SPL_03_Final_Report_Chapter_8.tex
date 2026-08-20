@@ -1,0 +1,97 @@
+\chapterpage{Conclusion and Future Work}
+\mychapter{Conclusion and Future Work}
+\label{chap:conclusion}
+
+This final chapter draws together the research design, implementation, and empirical results presented in the preceding chapters into a single account of what this work has established, where it falls short, and what should be done next. It is organised into three parts: a summary of the concrete contributions made, a candid discussion of the limitations and challenges encountered, and a set of prioritised recommendations for future enhancement.
+
+% ============================================================
+\section{Summary of Contributions}
+
+The research problem motivating this work was that neither of the two dominant strategies for automated crowd counting is individually sufficient across the full range of real world crowd densities: detection-based counting is precise in sparse-to-moderate scenes but degrades under occlusion, while density-regression counting is robust to occlusion but comparatively imprecise for small, easily-resolved groups. The response to that problem, developed across this work, is a scene-aware hybrid architecture that runs both strategies and arbitrates between them.
+
+% % Figure~\ref{fig:contributions} summarises the resulting contributions, spanning the architectural design, the engineering implementation, and the empirical evidence gathered to test it.
+
+% \begin{figure}[h]
+% \centering
+% \includegraphics[width=\textwidth]{images/contributions_map.png}
+% \caption{Summary of the contributions made across this work}
+% \label{fig:contributions}
+% \end{figure}
+
+\subsection{Architectural and Methodological Contributions}
+
+A layered, pipe-and-filter system architecture was designed in which a sparse (detection-based) branch and a dense (density-regression) branch operate in parallel over the same pre-processed input, arbitrated by a lightweight, rule-based scene-density classifier. This decomposition was specified as a formal research design and methodology, then independently re-derived at the system-design level as a data-flow decomposition, a set of module-level detailed designs, and a UML component diagram exposing each module's provided and required interfaces. Presenting the same architecture from three complementary angles -- research methodology, high-level data flow, and component-level structure -- was a deliberate choice to make the design traceable from problem statement through to implementation, rather than leaving the connection between the stated methodology and the resulting code implicit.
+
+The fusion mechanism itself is a specific, reproducible contribution in its own right: rather than a fixed-weight ensemble, a disagreement-gated decision rule was specified in which the two branch estimates are blended when they broadly agree, but the branch designated authoritative for the detected scene type is trusted outright when they diverge sharply. This directly targets the known failure mode of naive ensembling, where averaging with a badly-miscalibrated second estimate can make a result worse rather than better.
+
+\subsection{Engineering Contributions}
+
+The architecture was translated into a modular, configuration-driven implementation in which every tunable parameter across every processing stage is centralised in a single, inspectable configuration object, and every major component (detection backend, density-estimation backend) is built behind a stable interface with interchangeable underlying implementations. This is what makes the system's central architectural claim empirically testable at all: because backends can be swapped by configuration rather than by code change, the sparse-only baseline evaluated in this work could be isolated and measured cleanly, and the same protocol can later be re-applied unchanged to the fused configuration.
+
+A complete, four-level testing strategy (unit, integration, system, and user acceptance) was specified and, alongside it, a full requirements baseline of 12 functional and 8 non-functional requirements, each traced to at least one of seven concrete use cases. Together these give the implementation a defined, checkable contract rather than an informal notion of ``working.''
+
+\subsection{Empirical Contribution}
+
+Perhaps the most consequential contribution of this work is that its central design hypothesis was actually tested against real, manually annotated data, rather than asserted on theoretical grounds alone. A 30-image evaluation sample spanning a wide range of crowd densities was manually annotated and used to measure the sparse branch's standalone accuracy, yielding a mean absolute error of 1.83 people per image overall, but with a roughly 3.9$\times$ larger error in dense scenes (MAE 3.45) than in sparse scenes (MAE 0.89). This is direct empirical evidence for the specific failure mode -- density-dependent degradation of detection-based counting -- that motivated the hybrid architecture in the first place, and it is corroborated in direction, if not in absolute scale, by the sparse/dense performance gap reported across standard benchmark splits in the published crowd-counting literature~\cite{Zhang2016}.
+
+\subsection{Reusable Research Deliverables}
+
+Beyond the core system, this work also produced deliverables intended to outlive the specific evaluation reported here: a browser-based point-annotation labeling tool requiring no server or installation, an adapter-pattern inference runner that decouples the evaluation protocol from any specific model implementation, and a metrics-and-plotting evaluation script implementing the stratified MAE/RMSE/MAPE/bias analysis used throughout this work. These are designed to be re-run, unmodified, against the fused pipeline and against larger future samples, which is what makes the recommendations in Section~8.3 concrete next steps rather than open-ended suggestions.
+
+% ============================================================
+\section{Limitations and Challenges}
+
+% No part of this work should be read as a finished, unqualified result. Figure~\ref{fig:limitations} groups the limitations identified across the research design, implementation, and evaluation into four categories, each discussed below.
+
+% \begin{figure}[h]
+% \centering
+% \includegraphics[width=0.92\textwidth]{images/limitations_quadrant.png}
+% \caption{Limitations identified, grouped by category}
+% \label{fig:limitations}
+% \end{figure}
+
+\subsection{Data and Evaluation Limitations}
+
+The empirical results reported in this work rest on ground truth produced by a single reviewer rather than a reconciled multi-annotator consensus, which is a recognised source of measurement noise, particularly in heavily occluded scenes where reasonable reviewers can disagree by a person or two. The evaluation sample itself, at 30 images (only 11 of which fall in the dense stratum), is large enough to establish a clear directional pattern but too small to report the stratified metrics with tight statistical confidence. Most importantly, the reported results characterise the sparse branch evaluated \emph{in isolation}; the fused pipeline's accuracy against the same ground truth has not yet been measured, so while the evidence strongly motivates the value of fusion, it does not yet directly confirm the magnitude of improvement fusion delivers.
+
+\subsection{Model and Algorithmic Limitations}
+
+The empirical results themselves surface the central algorithmic limitation directly: accuracy degrades sharply under heavy occlusion, which is precisely the condition the dense branch and fusion logic exist to mitigate but which no purely 2D, single-frame visual method fully solves. The scene-density decision rule is threshold-based rather than learned, which makes it interpretable and cheap to compute but means its thresholds must be manually tuned and may not transfer well to camera angles or crowd compositions very different from those used during development. The classical density-estimation backend, being a kernel-smoothed approximation built from detected points rather than a model trained directly on density-map supervision, is a comparatively coarse instrument relative to a fully learned density-regression network.
+
+% \subsection{System and Engineering Limitations}
+
+% The system persists run artefacts to the file system rather than to a managed database; a normalised logical schema was designed for this purpose but was not implemented in the delivered system, so run history and per-frame results are not currently queryable at scale. The multi-object tracking module was implemented and is independently usable, but its invocation inside the video-processing path was not enabled pending further integration testing, meaning the video-level unique-individual count described in the methodology is not yet produced automatically end-to-end. Finally, the testing strategy defines four levels of testing conceptually, but no automated continuous-integration test suite accompanies the implementation to enforce them on every change.
+
+\subsection{Deployment and Operational Limitations}
+
+The system was designed and evaluated as a single-machine, offline, single-operator tool; it has not been tested under continuous or multi-camera deployment, concurrent multi-user access, or sustained real-time throughput requirements. Inference latency, while within the performance target specified in the requirements baseline, still scales with input resolution and was measured on a single hardware configuration rather than across the range of lower-powered or edge devices a field deployment might realistically use. No accessibility or multi-language interface evaluation was performed, since the current interaction layer is a command-line tool aimed at a technically capable operator.
+
+% ============================================================
+\section{Recommendations for Future Enhancements}
+
+% The limitations above translate directly into a set of concrete next steps, organised by time horizon.
+
+% in Figure~\ref{fig:roadmap} and detailed below.
+
+% \begin{figure}[h]
+% \centering
+% \includegraphics[width=\textwidth]{images/future_roadmap.png}
+% \caption{Prioritised roadmap of recommended future enhancements}
+% \label{fig:roadmap}
+% \end{figure}
+
+\subsection{Closing the Evaluation Loop}
+
+The single highest-priority next step is to re-run the existing evaluation protocol, unchanged against the fully fused pipeline on the same images and the same ground truth. This is the direct, decisive test of this work's central hypothesis: if fusion substantially narrows the sparse/dense accuracy gap reported in Chapter~\ref{chap:results}, that is strong confirmation of the architecture's value; if it does not, that is equally important information about where the fusion logic or the dense backend needs further work. Alongside this, adopting the multi-annotator consensus protocol specified in the original methodology (independent counts from at least two annotators, reconciled by a third) would materially strengthen confidence in any accuracy figures reported thereafter, and enabling the already-implemented tracking module in the video execution path would complete the video-mode capability the methodology describes.
+
+\subsection{Scaling and Hardening}
+
+Growing the evaluation sample in both size and diversity, with particular attention to increasing the number of densely crowded examples, which are currently the smaller and statistically less certain stratum -- would tighten confidence in the stratified accuracy figures reported in this work. On the engineering side, implementing the proposed persistent-storage schema would enable querying run history and trends over time rather than only inspecting individual run artefacts, and introducing an automated continuous-integration test suite covering the four testing levels specified in the methodology would convert the testing strategy from a documented intention into an enforced practice.
+
+\subsection{Architectural and Operational Evolution}
+
+Looking further ahead, three directions stand out. First, the dense-estimation backend could be replaced or augmented with a transformer-based crowd-counting architecture; transformer-based localisation and counting models have recently demonstrated strong performance on dense, highly-occluded benchmark scenes~\cite{liang2022cltr}, which is exactly the regime where this work's results show the largest remaining accuracy gap. Second, deploying the system to resource-constrained or edge hardware would require model compression: techniques such as structured pruning and quantisation~\cite{han2016deepcompression,jacob2018quantization}, or knowledge distillation from a larger teacher network into a smaller deployable one~\cite{hinton2015distillation}, are well-established routes to reducing inference cost without a proportional loss of accuracy. Third, given that manual annotation is the single largest cost identified in the evaluation methodology, an active-learning annotation workflow~\cite{settles2009active} -- in which the system itself flags the frames it is least confident about for priority human labeling -- could substantially reduce the annotation effort needed to grow the evaluation sample recommended above.
+
+\subsection{Closing Remark}
+
+Taken together, the work presented across this thesis moves the underlying research question from a theoretical argument -- that a hybrid sparse/dense approach should outperform either strategy alone -- to a partially, honestly evidenced one: the specific failure mode motivating that hybrid design has now been directly measured, and a complete, reproducible toolchain exists to finish measuring the rest. That is the appropriate note on which to end a piece of applied systems research: not a claim of a finished, optimal system, but a working one, evaluated as far as the available time and data allowed, with the exact next measurements it needs clearly identified.
