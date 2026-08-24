@@ -37,8 +37,16 @@ Specific objectives are given below:
     
     \item To analyze various object detection models and choose the most suitable model for detecting mini passenger heads in the real bus scenes.
     
-    % \item To assess the usefulness of object tracking methods to achieve more stable counting and avoid double counting between video frames.
+    \item To investigate density estimation based counting as an alternative to head detection under severe occlusion and high passenger density, where individual heads are difficult to separately localize.
     
+    \item To design a density decision mechanism capable of distinguishing sparse from dense bus interior scenes, so that the most appropriate counting strategy can be applied on a per-scene basis.
+    
+    \item To develop an adaptive hybrid counting framework that combines head detection and density estimation outputs into a single, more reliable passenger count.
+    
+    % \item To evaluate the proposed system's counting accuracy against manually verified ground truth using standard quantitative metrics, including Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), precision, and recall.
+    
+    % \item To assess the generalizability of the trained models by testing them on external, previously unseen bus interior images and video footage.
+
 \end{itemize}
 
 \section{Scope and Limitations}
