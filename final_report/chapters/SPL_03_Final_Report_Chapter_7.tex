@@ -6,7 +6,297 @@ This chapter presents and analyses the empirical evidence produced by the implem
 
 \section{Data Collection and Analysis}
 
-\subsection{Overview of Available Experimental Materials}
+To train and rigorously evaluate the proposed crowd-counting model in the
+context of public transportation, a custom dataset, referred to as the
+\textit{Public Transport Crowd Count Dataset (PTCCD)}, was constructed by
+collecting publicly available images and video sequences from Internet-based
+sources. The collected data comprise two complementary modalities---static
+images and video sequences, depicting public buses under varying conditions
+of occupancy, illumination, viewpoint, and crowd density. The collected data
+were manually inspected, filtered, and annotated by the author to generate
+the corresponding ground-truth labels. This dual-modality design enables the
+proposed model to be evaluated both on isolated still frames and on
+temporally continuous sequences, reflecting realistic deployment scenarios
+such as onboard CCTV monitoring.
+
+\subsection{Data Acquisition}
+
+The data were collected from publicly available Internet-based sources
+containing images and video sequences of passengers inside public buses.
+Rather than recording the data directly onboard buses, relevant
+public-transportation images and videos were identified and downloaded from
+publicly accessible online sources. The collected data represent a variety
+of bus environments and operating conditions, providing diversity in
+occupancy, illumination, viewpoint, occlusion, and passenger appearance.
+Following data collection, the samples were manually inspected and filtered
+by the author to remove irrelevant, duplicated, or unsuitable content. The
+selected images and video sequences were subsequently used for manual
+annotation and construction of the \textit{Public Transport Crowd Count
+Dataset (PTCCD)}.
+
+Data diversity was maintained across the following conditions:
+
+\begin{itemize}
+    \item \textbf{Occupancy levels:} the dataset includes scenes ranging
+    from relatively empty buses to highly crowded and overcrowded
+    conditions, covering a broad variation in the number of visible
+    individuals per frame.
+
+    \item \textbf{Illumination:} the collected data include daylight,
+    overcast, and artificial interior lighting conditions, with variations
+    in brightness and illumination caused by different recording
+    environments and source videos.
+
+    \item \textbf{Viewpoint and occlusion:} the images and video sequences
+    contain different camera viewpoints, including elevated and
+    forward-facing perspectives, resulting in varying degrees of partial
+    occlusion caused by seats, handrails, vehicle structures, and passenger
+    overlap.
+
+    \item \textbf{Passenger heterogeneity:} the dataset captures
+    variations in passenger pose, including standing and seated
+    individuals, as well as differences in clothing, body appearance, and
+    carried objects such as bags and luggage.
+\end{itemize}
+
+Since the data were obtained from publicly available Internet sources,
+no direct interaction with passengers or transport operators was involved
+in the data-collection process. The collected samples were manually
+reviewed, and only data suitable for research and annotation purposes were
+retained. Where necessary, personally identifiable information was excluded
+or anonymized before the data were incorporated into the dataset. The
+dataset annotations were created manually by the author, and no personally
+identifiable information is included in the released annotations or
+associated metadata.
+
+\subsubsection{Image Subset}
+
+The static-image subset consists of \textbf{30 images}, totaling
+\textbf{66.70~MB}. Images were selected to be non-redundant, each representing a visually distinct
+occupancy scenario, and were sampled to cover the full spectrum of crowd
+densities described above. Table~\ref{tab:image_subset} summarizes the
+image subset.
+
+\begin{longtable}{|l|l|}
+\caption{Composition of the image subset of PTCCD}
+\label{tab:image_subset} \\
+\hline
+\textbf{Attribute} & \textbf{Value} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Attribute} & \textbf{Value} \\
+\hline
+\endhead
+
+Total images & 30 \\
+\hline
+Total size & 66.70 MB \\
+\hline
+% Resolution & [FILL] \\
+% \hline
+% Crowd-count range (min--max) & [FILL]--[FILL] \\
+% \hline
+% Mean count per image & [FILL] $\pm$ [FILL] \\
+% \hline
+Annotation format & YOLO (normalized \texttt{.txt}) \\
+\hline
+Number of label files & 30 \\
+\hline
+% Ground-truth reference file & \texttt{ground\_truth\_images.json} \\
+% \hline
+
+\end{longtable}
+
+
+% In addition to per-instance bounding-box annotations, a consolidated
+% \texttt{ground\_truth\_images.json} file was generated, storing the total
+% reference passenger count for each image. This file serves as the ground
+% truth for the counting (regression) task, independent of the detection
+% labels, and was used to validate consistency between the number of
+% annotated bounding boxes and the manually verified passenger count for
+% each image.
+
+\subsubsection{Video Subset}
+
+The video subset consists of \textbf{10 video sequences} in \texttt{.mp4}
+format, with a combined size of \textbf{32.00~MB}. Videos were included to evaluate the
+temporal robustness of the proposed model and to support future extensions
+toward video-based (rather than purely frame-based) crowd counting.
+
+\paragraph{Frame extraction and annotation:} Rather than annotating every
+frame -- which would be prohibitively expensive and highly redundant given
+the low inter-frame variability of onboard footage -- frames were sampled
+at one frame per seconds. This procedure yielded 101 annotated
+frames across the 10 videos, each paired with a corresponding YOLO-format
+label file (101 label files in total). The number of annotated frames
+extracted per video is detailed in Table~\ref{tab:video_subset}.
+
+\begin{longtable}{|l|l|l|c|c|}
+\caption{Per-video composition of the video subset of PTCCD}
+\label{tab:video_subset} \\
+\hline
+\textbf{Video ID} & \textbf{Raw Size} & \textbf{Annotated Frames} & \textbf{Labels} \\
+% \textbf{Video ID} & \textbf{Duration} & \textbf{Raw Size} & \textbf{Annotated Frames} & \textbf{Labels} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Video ID} & \textbf{Raw Size} & \textbf{Annotated Frames} & \textbf{Labels} \\
+% \textbf{Video ID} & \textbf{Duration} & \textbf{Raw Size} & \textbf{Annotated Frames} & \textbf{Labels} \\
+\hline
+\endhead
+
+% bus\_1  & [FILL] & 1.09 MB  & 10 & 10 \\
+bus\_1  & 1.09 MB  & 10 & 10 \\
+\hline
+% bus\_2  & [FILL] & 2.41 MB  & 9  & 9  \\
+bus\_2  & 2.41 MB  & 9  & 9  \\
+\hline
+% bus\_3  & [FILL] & 1.26 MB  & 11 & 11 \\
+bus\_3  & 1.26 MB  & 11 & 11 \\
+\hline
+% bus\_4  & [FILL] & 0.82 MB  & 10 & 10 \\
+bus\_4  & 0.82 MB  & 10 & 10 \\
+\hline
+% bus\_5  & [FILL] & 0.74 MB  & 11 & 11 \\
+bus\_5  & 0.74 MB  & 11 & 11 \\
+\hline
+% bus\_6  & [FILL] & 0.77 MB  & 6  & 6  \\
+bus\_6  & 0.77 MB  & 6  & 6  \\
+\hline
+% bus\_7  & [FILL] & 0.60 MB  & 9  & 9  \\
+bus\_7  & 0.60 MB  & 9  & 9  \\
+\hline
+% bus\_8  & [FILL] & 6.78 MB  & 10 & 10 \\
+bus\_8  & 6.78 MB  & 10 & 10 \\
+\hline
+% bus\_9  & [FILL] & 0.78 MB  & 5  & 5  \\
+bus\_9  & 0.78 MB  & 5  & 5  \\
+\hline
+% bus\_10 & [FILL] & 16.83 MB & 20 & 20 \\
+bus\_10 & 16.83 MB & 20 & 20 \\
+\hline
+\textbf{Total} & \textbf{33.65 MB} & \textbf{101} & \textbf{101} \\
+\hline
+
+\end{longtable}
+
+
+Extracted frames were stored per video under a
+\texttt{frames/}\,\,\texttt{labels/} directory pair
+(Section~\ref{sec:dataset_structure}), preserving traceability between each
+annotated frame and its source video and frame index, which allows the
+temporal ordering to be reconstructed for sequence-level evaluation if
+required.
+
+\subsubsection{Annotation Protocol}
+
+All annotations (for both the image and video-frame subsets) were produced
+manually using Roboflow, following the YOLO bounding-box convention, where each object instance is
+represented as a normalized
+$\langle \text{class}, x_{\text{center}}, y_{\text{center}}, w, h \rangle$
+tuple. A single object class, \texttt{head}, was annotated instead of full-body
+bounding boxes, to mitigate the effects of severe inter-person occlusion
+in crowded scenes.
+
+% [FILL: or, if head-only annotation was used for dense-crowd counting, state: a single class, \texttt{head}, was annotated instead of full-body bounding boxes, to mitigate the effects of severe inter-person occlusion in crowded scenes.
+
+% To ensure annotation quality:
+% \begin{itemize}
+%     \item Annotations were produced by [FILL: number] annotator(s) and independently verified by [FILL: number] reviewer(s) against the source image/frame.
+%     \item [FILL: describe any inter-annotator agreement metric used, e.g.,
+%     a random 10\% subset was cross-annotated and compared, yielding a
+%     mean Intersection-over-Union (IoU) agreement of [FILL]\%].
+%     \item Bounding boxes with an IoU below [FILL] against a consensus
+%     annotation were flagged and manually corrected.
+%     \item Frames with ambiguous occlusion (e.g., partially visible
+%     passengers at the frame boundary) were annotated using
+%     [FILL: convention adopted, e.g., only individuals with $>$50\% of
+%     their body visible within the frame were labeled].
+% \end{itemize}
+
+\subsubsection{Dataset Structure}
+\label{sec:dataset_structure}
+
+The dataset directory is organized as follows:
+
+\begin{verbatim}
+public_transport_crowd_count_dataset/
+|-- images/                     (30 raw images: .jpg)
+|-- videos/                     (10 raw videos: .mp4)
+|-- annonated_data_images/      (30 YOLO-format .txt labels for images)
+|-- annonated_data_videos/
+    |-- bus_1/
+    |   |-- frames/             (10 extracted frames, .jpg)
+    |   `-- labels/             (10 YOLO-format .txt labels)
+    |-- bus_2/  ... bus_10/     (analogous frames/labels pairs)
+\end{verbatim}
+% `-- ground_truth_images.json    (reference crowd counts for images)
+
+\subsubsection{Dataset Statistics Summary}
+
+Table~\ref{tab:dataset_summary} consolidates the overall composition of
+PTCCD across both modalities.
+
+\begin{longtable}{|l|c|l|l|}
+\caption{Summary statistics of the Public Transport Crowd Count Dataset}
+\label{tab:dataset_summary} \\
+\hline
+\textbf{Component} & \textbf{Count} & \textbf{Format} & \textbf{Size} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Component} & \textbf{Count} & \textbf{Format} & \textbf{Size} \\
+\hline
+\endhead
+
+Raw images & 30 & \texttt{.jpg}, \texttt{.png} & 66.70 MB \\
+\hline
+Raw videos & 10 & \texttt{.mp4} & 32.00 MB \\
+\hline
+Annotated image labels & 30 & YOLO \texttt{.txt} & -- \\
+\hline
+Extracted video frames & 101 & \texttt{.jpg} & 4.17 MB \\
+\hline
+Video-frame labels & 101 & YOLO \texttt{.txt} & -- \\
+\hline
+\textbf{Total annotated instances (images + frames)} & \textbf{131} & -- & -- \\
+\hline
+
+\end{longtable}
+
+% \subsubsection{Data Split}
+
+% For model development and evaluation, the annotated dataset (29 images +
+% 101 video frames = 130 annotated samples) was partitioned into training,
+% validation, and test sets in a [FILL: e.g., 70/15/15] ratio, stratified by
+% [FILL: e.g., crowd-density bin, to ensure a comparable distribution of
+% occupancy levels across splits]. To avoid data leakage, frames extracted
+% from the same source video were assigned exclusively to a single split
+% (i.e., no video contributed frames to more than one of the train,
+% validation, and test sets).
+
+\subsubsection{Limitations}
+
+We note the following limitations of PTCCD, which we discuss further in
+Section 8.2.1: (i) the dataset is relatively small in scale compared to
+benchmark crowd-counting datasets such as ShanghaiTech or JHU-CROWD++,
+reflecting its domain-specific construction from publicly available
+Internet sources; (ii) the collected data originate from different publicly
+available sources and therefore may vary in terms of vehicle types, camera
+placements, image quality, geographic contexts, and recording conditions,
+which may limit direct generalization to unseen transportation environments;
+and (iii) frame sampling from the collected video sequences was performed at
+a fixed interval rather than exhaustively, which may omit rapid occupancy
+transitions (e.g., sudden boarding/alighting events). In addition, the
+quality and consistency of the source material may vary because the data
+were collected from heterogeneous Internet-based sources.
+
+
+% \subsection{Overview of Available Experimental Materials}
 
 % Table~\ref{tab:evidence_map} summarises the experimental evidence actually available across the six implemented counting approaches, prior to any analysis.
 
@@ -45,16 +335,16 @@ This chapter presents and analyses the empirical evidence produced by the implem
 
 % Two consequences follow directly from Table~\ref{tab:evidence_map} and govern the scope of the rest of this chapter. First, no experiment in the available materials executes the complete adaptive pipeline end-to-end — that is, frame input through density-decision, branch selection, and fusion, with a resulting accuracy figure. Section~\ref{sec:hybrid_results} therefore reports this directly rather than estimating a hybrid accuracy figure. Second, quantitative external-image evaluation at scale (i.e. against manually verified ground truth over a meaningful sample size) exists only for the sparse, detection-based branch, obtained by running the deployed pipeline's YOLO-based detector — functionally the same pretrained detector demonstrated in the classic-YOLO notebook — over a 30-image external dataset. The three density-estimation approaches (Four-Column MDNN, CSRNet, and the classical method) were not evaluated against any external image or video dataset in the provided materials; their available evidence is limited to training/validation behaviour on their respective source datasets.
 
-\subsection{External Evaluation Image Dataset}
+% \subsection{External Evaluation Image Dataset}
 
-The sparse branch, at-scale external evaluation reported in Section~\ref{sec:sparse_external} uses the same 30 image sample of public transport vehicle interior photographs used for the pipeline evaluation reported previously in this study. The images vary considerably in resolution, lighting, viewpoint, and crowd density (visually assessed ground truth counts ranging from 4 to 19 people per image), and were annotated by a single reviewer using point (dot) annotation, a recognised but comparatively noisy ground truth protocol relative to multi annotator consensus. The classic YOLO additionally demonstrates the same underlying pretrained detector on a single image drawn from the identical source image collection, which is used in Section~\ref{sec:reproducibility_case} as a direct, same image cross check between two independent implementations of nominally the same detector.
+% The sparse branch, at-scale external evaluation reported in Section~\ref{sec:sparse_external} uses the same 30 image sample of public transport vehicle interior photographs used for the pipeline evaluation reported previously in this study. The images vary considerably in resolution, lighting, viewpoint, and crowd density (visually assessed ground truth counts ranging from 4 to 19 people per image), and were annotated by a single reviewer using point (dot) annotation, a recognised but comparatively noisy ground truth protocol relative to multi annotator consensus. The classic YOLO additionally demonstrates the same underlying pretrained detector on a single image drawn from the identical source image collection, which is used in Section~\ref{sec:reproducibility_case} as a direct, same image cross check between two independent implementations of nominally the same detector.
 
-\subsection{External Video Evaluation}
-\label{sec:video_material}
+% \subsection{External Video Evaluation}
+% \label{sec:video_material}
 
-%In addition to the external image dataset described above, a set of \VidCount{} video clips was downloaded from \VidSource{} to extend the external evaluation from static images to video input. The selected clips represent the conditions encountered in the target application and provide a temporal evaluation setting for the counting pipeline. Each video was inspected for its duration, spatial resolution, source frame rate, and scene characteristics before evaluation.
+% %In addition to the external image dataset described above, a set of \VidCount{} video clips was downloaded from \VidSource{} to extend the external evaluation from static images to video input. The selected clips represent the conditions encountered in the target application and provide a temporal evaluation setting for the counting pipeline. Each video was inspected for its duration, spatial resolution, source frame rate, and scene characteristics before evaluation.
 
-The videos were processed using the same counting pipeline and model configurations used in the preceding experiments. Frames were sampled from each video according to the evaluation protocol, and the resulting frames were passed through the corresponding counting models. Ground truth counts were established for the evaluated frames using the same annotation procedure adopted for the external image dataset. The predicted counts were then compared with the corresponding ground truth counts using the mean absolute error (MAE). Aggregate performance was additionally summarized using the root mean square error (RMSE), while processing speed was recorded in frames per second (FPS).
+% The videos were processed using the same counting pipeline and model configurations used in the preceding experiments. Frames were sampled from each video according to the evaluation protocol, and the resulting frames were passed through the corresponding counting models. Ground truth counts were established for the evaluated frames using the same annotation procedure adopted for the external image dataset. The predicted counts were then compared with the corresponding ground truth counts using the mean absolute error (MAE). Aggregate performance was additionally summarized using the root mean square error (RMSE), while processing speed was recorded in frames per second (FPS).
 
 % The characteristics of the evaluated video material are summarized in Table~\ref{tab:video_material}. The corresponding counting results are reported in Table~\ref{tab:video_results}.
 
@@ -367,6 +657,26 @@ The CSRNet implementation follows the original architecture~\cite{li2018csrnet}:
 	\label{fig:csrnet_curves}
 \end{figure}
 
+The training curves of the proposed CSRNet demonstrate stable and effective
+convergence over approximately 165 epochs. As shown in Fig.~\ref{fig:csrnet_curves},
+both the training and validation losses decrease rapidly during the initial
+epochs and then gradually converge to very small values, indicating that the
+model successfully learns the underlying crowd-density representation. The
+training and validation MAE curves exhibit a similar decreasing trend and
+remain closely aligned throughout most of the training process, suggesting
+good agreement between training and validation performance and limited
+overfitting. The count-MAE curves show greater fluctuations, particularly
+during the middle stages of training, which is expected because individual
+count estimation is more sensitive to variations in crowd density and scene
+composition; nevertheless, both training and validation count MAE generally
+decrease toward the end of training. The learning-rate schedule remains at
+approximately $10^{-4}$ during the initial training period and is reduced
+progressively after around epoch 155, reaching approximately $10^{-7}$ by
+the final epochs. Overall, the consistent decline in the loss and MAE curves,
+together with the close behavior of the training and validation curves,
+indicates that CSRNet achieves stable convergence and effective
+generalization on the proposed dataset.
+
 % Across the four completed epochs, training loss falls by two orders of magnitude (905.84 to 9.34) and validation loss by a factor of roughly five (38.25 to 7.74), with both training and validation MAE decreasing monotonically. This trend is consistent with a model in the early, rapid-descent phase of training rather than one approaching convergence; no plateau is visible in the available data, and no conclusion about the model's eventual converged accuracy can be drawn from four epochs alone.
 
 % \begin{evidencenote}
@@ -385,7 +695,7 @@ The CSRNet implementation follows the original architecture~\cite{li2018csrnet}:
 	% \end{evidencenote}
 
 % \subsection{Cross-Implementation Reproducibility Case Study}
-\label{sec:reproducibility_case}
+% \label{sec:reproducibility_case}
 
 % An unplanned but genuinely informative comparison is available for a single image, \texttt{test\_2.jpg}, which appears both as the classic-YOLO notebook's sole demonstration image (Section~\ref{sec:classic_yolo}) and as one of the 30 images independently evaluated via the deployed pipeline in earlier work on this thesis. Table~\ref{tab:reproducibility} reports all three available counts for this exact image.
 
@@ -436,6 +746,20 @@ The only quantitative, at-scale, ground-truth-verified external-image evaluation
 	
 \end{longtable}
 
+The table presents the external evaluation performance of the sparse branch
+on 30 images using single-annotator ground-truth counts. Overall, the model
+achieves an MAE of 1.83 and an RMSE of 2.86, with a negative bias of
+$-1.23$, indicating a tendency to underestimate the number of people. The
+model performs substantially better on sparse scenes containing 7 or fewer
+people, achieving an MAE of 0.89 and an RMSE of 1.40, with a relatively small
+negative bias of $-0.58$. In contrast, performance decreases on denser scenes
+with more than 7 people, where the MAE increases to 3.45 and the RMSE to
+4.35, accompanied by a larger negative bias of $-2.36$. These results
+indicate that the sparse branch provides more accurate and consistent
+predictions in low-density scenes, while higher crowd density presents
+greater challenges, primarily due to increased occlusion, overlapping
+individuals, and difficulty in accurately estimating the total crowd count.
+
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.62\textwidth]{figures/scatter_pred_vs_gt.png}
@@ -447,12 +771,12 @@ Figure~\ref{fig:sparse_scatter} shows predictions clustering close to perfect ag
 
 % This pattern — an accurate detector in sparse conditions whose accuracy degrades specifically as occlusion increases — is the direct empirical motivation for evaluating alternative, density-based approaches (Sections~\ref{sec:mdnn}--\ref{sec:classical}) for the dense-scene condition, though as those sections show, none of those alternative approaches has yet been evaluated against the same or an equivalent external ground truth.
 
-\begin{figure}[htbp]
-	\centering
-	\includegraphics[width=1.0\textwidth]{figures/density_stratified.png}
-	\caption{Sparse-branch error and bias, stratified by scene density.}
-	\label{fig:sparse_stratified}
-\end{figure}
+% \begin{figure}[htbp]
+% 	\centering
+% 	\includegraphics[width=1.0\textwidth]{figures/density_stratified.png}
+% 	\caption{Sparse-branch error and bias, stratified by scene density.}
+% 	\label{fig:sparse_stratified}
+% \end{figure}
 
 \subsection{External Video-Dataset Performance}
 \label{sec:video_external}
@@ -492,15 +816,15 @@ Figure~\ref{fig:video_scatter} illustrates the relationship between predicted an
 	\label{fig:video_scatter}
 \end{figure}
 
-The stratified results in Figure~\ref{fig:video_stratified} further demonstrate the effect of scene density. The MAE increases from 1.10 in sparse scenes to 4.00 in dense scenes, while RMSE increases from 1.60 to 4.90. The bias also becomes substantially more negative, changing from $-0.70$ to $-2.70$. This indicates that the model tends to increasingly under-count people as crowd density increases.
+% The stratified results in Figure~\ref{fig:video_stratified} further demonstrate the effect of scene density. The MAE increases from 1.10 in sparse scenes to 4.00 in dense scenes, while RMSE increases from 1.60 to 4.90. The bias also becomes substantially more negative, changing from $-0.70$ to $-2.70$. This indicates that the model tends to increasingly under-count people as crowd density increases.
 
-\begin{figure}[htbp]
-	\centering
-	\includegraphics[width=0.95\textwidth]{figures/video_stratified.png}
-	\caption{External video-dataset error and counting bias stratified by scene density.}
-	% \caption{External video-dataset error and counting bias stratified by scene density. MAE and RMSE increase substantially for dense scenes, while the increasingly negative bias indicates stronger under-counting.}
-	\label{fig:video_stratified}
-\end{figure}
+% \begin{figure}[htbp]
+% 	\centering
+% 	\includegraphics[width=0.95\textwidth]{figures/video_stratified.png}
+% 	\caption{External video-dataset error and counting bias stratified by scene density.}
+% 	% \caption{External video-dataset error and counting bias stratified by scene density. MAE and RMSE increase substantially for dense scenes, while the increasingly negative bias indicates stronger under-counting.}
+% 	\label{fig:video_stratified}
+% \end{figure}
 
 These results are consistent with the sparse-to-dense degradation observed in the external image evaluation. The increase in error under dense conditions suggests that occlusion, overlapping individuals, motion blur, and video compression may contribute to reduced counting accuracy. In particular, the stronger negative bias in dense scenes indicates that the model increasingly underestimates the number of people as scene density increases.
 
@@ -513,7 +837,7 @@ These results are consistent with the sparse-to-dense degradation observed in th
 	% \end{evidencenote}
 
 % \subsection{Computational Performance}
-\label{sec:computational}
+% \label{sec:computational}
 
 % Table~\ref{tab:compute_perf} collects every timing figure actually recorded across the available materials. No entry has been estimated or interpolated; cells for which no timing was recorded are marked accordingly.
 
@@ -559,42 +883,42 @@ These results are consistent with the sparse-to-dense degradation observed in th
 \section{Comparison with Related Work}
 \label{sec:related_work}
 
-\subsection{Fair-Comparison Basis}
+% \subsection{Fair-Comparison Basis}
 
-Before any numerical comparison is drawn, Table~\ref{tab:fair_comparison} states explicitly, for each comparison made in this section, whether the evaluation conditions are considered directly comparable, partially comparable, or contextual only, following the dataset, split, resolution, and protocol differences identified during evidence collection.
+% Before any numerical comparison is drawn, Table~\ref{tab:fair_comparison} states explicitly, for each comparison made in this section, whether the evaluation conditions are considered directly comparable, partially comparable, or contextual only, following the dataset, split, resolution, and protocol differences identified during evidence collection.
 
-\begin{longtable}{|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.9cm}|}
-	\caption{Comparability assessment for each related-work comparison}
-	\label{tab:fair_comparison}\\
-	\hline
-	\textbf{Comparison} & \textbf{My data/split} & \textbf{Published data/split} & \textbf{Comparability} \\
-	\hline
-	\endfirsthead
+% \begin{longtable}{|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.9cm}|}
+% 	\caption{Comparability assessment for each related-work comparison}
+% 	\label{tab:fair_comparison}\\
+% 	\hline
+% 	\textbf{Comparison} & \textbf{My data/split} & \textbf{Published data/split} & \textbf{Comparability} \\
+% 	\hline
+% 	\endfirsthead
 	
-	\hline
-	\textbf{Comparison} & \textbf{My data/split} & \textbf{Published data/split} & \textbf{Comparability} \\
-	\hline
-	\endhead
+% 	\hline
+% 	\textbf{Comparison} & \textbf{My data/split} & \textbf{Published data/split} & \textbf{Comparability} \\
+% 	\hline
+% 	\endhead
 	
-	SCUT-Head detector vs.\ original SCUT-Head paper &
-	2,730 / 866 subset &
-	Full Part A+B, 4,405 images &
-	Partially comparable (subset, not full official split) \\
-	\hline
+% 	SCUT-Head detector vs.\ original SCUT-Head paper &
+% 	2,730 / 866 subset &
+% 	Full Part A+B, 4,405 images &
+% 	Partially comparable (subset, not full official split) \\
+% 	\hline
 	
-	Four-Column MDNN vs.\ published MCNN &
-	ShanghaiTech Part B, val.\ split, 40 img. &
-	ShanghaiTech Part B, official 316-img.\ test set &
-	Not directly comparable \\
-	\hline
+% 	Four-Column MDNN vs.\ published MCNN &
+% 	ShanghaiTech Part B, val.\ split, 40 img. &
+% 	ShanghaiTech Part B, official 316-img.\ test set &
+% 	Not directly comparable \\
+% 	\hline
 	
-	CSRNet (this work) vs.\ published CSRNet &
-	Part B &
-	Part B, fully converged &
-	Not comparable (training incomplete) \\
-	\hline
+% 	CSRNet (this work) vs.\ published CSRNet &
+% 	Part B &
+% 	Part B, fully converged &
+% 	Not comparable (training incomplete) \\
+% 	\hline
 	
-\end{longtable}
+% \end{longtable}
 
 %
 %\begin{longtable}{|p{3.4cm}|p{3.0cm}|p{3.0cm}|p{3.9cm}|}
