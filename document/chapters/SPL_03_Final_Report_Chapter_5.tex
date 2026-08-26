@@ -1,0 +1,188 @@
+The system design and architecture is addressed in this chapter.This chapter deals with the system design and architecture.
+This chapter discusses the system design and architecture.The system design and architecture are discussed in this chapter.
+\label{chap:sysdesign}
+
+The architecture and design of the proposed system is documented in this chapter. Starting at the topmost level of architecture, the chapter goes through increasingly detailed structural and behavioural depictions of the system, ending with a proposed logical data model for storing run results beyond the current session.
+
+% ============================================================
+\section{System Architecture Overview}
+
+The architecture of the system is a "layered-pipe-and-filter" architecture: namely it is composed of a fixed sequence of processing stages (``filters'') with well defined data flow (``pipes'') between each stage, and each stage has a single-purpose interface for the data flow with adjacent stages. This style was selected to avoid having to deploy multiple instances of the same operator at the same time horizontally across multiple machines and/or CPU cores, and because the work could be considered a linear transformation chain (raw frame~$\rightarrow$~enhanced frame~$\rightarrow$~detections/density~$\rightarrow$~fused count~$\rightarrow$~annotated output), which is a workload type that is not supported by either of the other options.
+
+The five architectural layers can be pinpointed as follows (see Figure~\ref{fig:archoverview}):
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{figures/architecture_overview.png}
+    \caption{The design of the system is based on five layer architecture}
+    \label{fig:archoverview}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Presentation layer}: reads input from the operator (modality/s and input selection) and gives the final output as an annotated image or video.
+
+    \item \textbf{Orchestration Layer}: orchestrates the stages of processing, stores the run-wide configuration and collects diagnostic and performance data for each processing stage of each run.
+
+    The processing stage contains the following main stages: pre-processing, two parallel estimation sub-layers (sparse and dense), scene-decision and fusion logic.
+
+    Inference Layer: models/inferences deployed by the Processing Layer that are trained and classic computer vision models.
+
+    \item \textbf{Persistence Layer}: stores for model assets, configuration and run outputs/logs.
+\end{itemize}
+
+The coupling between the levels is low and testability is high, e.g. the Processing layer can be tested with synthetic frames in stub configuration, without the deployment of the Presentation layer or using a real model asset store.
+
+% ============================================================
+\section{High-Level Design}
+The system can be viewed from a high level perspective as one logical entity, which receives an image or video from an external source, and outputs an annotated image or video and a numerical annotation. The context diagram/dfd level 0 for this system can be seen in figure ~\ref{fig:dfd}(a) and the same system decomposed into his 6 high level processes is a level 1 dfd shown in figure ~\ref{fig:dfd}(b).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/dfd_diagram.png}
+    Context Diagram & Data Flow Diagram
+    \label{fig:dfd}
+\end{figure}
+
+The high level design was intentionally made to separate two conflicting counting strategies, sparse estimation (Process 3.0) and dense estimation (Process 4.0), into concurrent (parallel) processes where both processes read-in the same pre-processed frame and write out into a shared decision/fusion-stage (Process 5.0). The hybrid behaviour of this system is coded during the definition of it, and it can be used, replaced or extended without changing the structure of the rest of the flow, since both strategies have the same abstract contract (a frame in a people count out).
+
+Table~\ref{tab:hld-processes} lists the responsibility of the high level processes listed in the level-1 diagram.
+\begin{longtable}{|
+		>{\raggedright\arraybackslash}p{1.6cm}|
+		>{\raggedright\arraybackslash}p{3.2cm}|
+		>{\raggedright\arraybackslash}p{9.7cm}|
+	}
+    High level process responsibilities (L1 DFD).
+    \label{tab:hld-processes} \\
+    \hline
+    \textbf{Process} & \textbf{Name} & \textbf{Responsibility} \\
+    \hline
+    \endfirsthead
+    \hline
+    \textbf{Process} & \textbf{Name} & \textbf{Responsibility} \\
+    \hline
+    \endhead
+    1 & Input Acquisition &
+    Reads a still image from a video source or samples frames from a video source at a defined rate \\
+    \hline
+    2 & Pre-processing &
+    Increases the contrast and noise rejection prior to estimation \\
+    \hline
+    3 & Sparse Estimation &
+    Locates and recognizes individual persons/heads in a frame, eliminates duplicate/overlapping detections and outputs the location and number of detected persons/heads
+    \hline
+    4 & Dense Estimation &
+    Estimates the continuous density map for the frame and sums it up to a count
+    \hline
+    5 & Decision + Fusion &
+    Classifies as sparse/dense, and fuses two counts into a single count.
+    \hline
+    6 & Output Rendering &
+    Creates the annotated image/video and the numeric summary \\
+    \hline
+\end{longtable}
+
+
+% ============================================================
+% Detailed Design
+% ============================================================
+\section{Detailed Design}
+\label{sec:detailed-design}
+
+This section will describe the internal structure of each of the processing modules outlined in the high level design, their role, their inputs and outputs and the major internal logic. The next module-by-module descriptions are for the interactions that are seen at runtime in one frame, as displayed in Figure~\ref{fig:sequence}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.00\textwidth]{figures/sequence_diagram.png}
+    Sequence Diagram - Single Image Processing
+    \label{fig:sequence}
+\end{figure}
+
+\subsection{Module 1: Input Acquisition}
+
+Responsibility: takes in a still image or video file path, determines whether it is a video file, and if it is a video file, performs systematic sub-sampling of temporal frames, so that the remaining stages do not have to process all of these frames.
+
+\textbf{Input:} file-path, input mode flag (image / video).
+
+\textbf{Outputs:} One or more raw frames (as in-memory arrays) and basic metadata (resolution, time stamp and/or frame index).
+
+A key design decision is to compute the sampling interval based on the ratio between the source frame-rate and a user-defined target frame-rate, which means that the module itself would adjust the sampling interval whenever the source frame-rate is different from what it is used to.
+
+\subsection{Module 2: Pre-processing}
+
+Responsibility: Apply conditions on each raw frame to improve the reliability of estimation of both estimation branches when the lighting is uneven or low.
+
+\textbf{Input:} Raw frame.
+
+\textbf{Outputs.} A contrast enhanced frame that is slightly denoised, but otherwise the same size.
+
+Key design decision: improve the contrast in the luminance channel (but not all channels) to preserve colour balance but to prevent colour artefacts from fooling the detection models.
+
+\subsection{Module 3: Sparse Estimation}
+
+Responsibility: Identifies cases where people or heads are present and returns the number of people/heads and the location of the bounding boxes.
+
+The pre-processed frame is given.
+
+\textbf{Outputs.} A list of confidence scores, along with a list of bounding boxes, all without duplication; A cardinality (sparse count) list.
+
+\textbf{Key design decision:} There is only one API for detector backend, multiple implementations: learned detector and classical cascade detector, and duplicate detections are avoided by overlap-based suppression step and avoiding duplicate detection due to overlapping candidate boxes from a single hand.
+
+\subsection{Module 4: Dense Estimation}
+
+Responsibility: Provides informative density estimate at every pixel, even for cases that are not likely to be resolved independently by people.
+
+The pre-processed frame (and, in one variant of the back-end, the sparse detections as auxiliary seed points) are referred to as \emph{inputs}.
+
+The output is a density map of the land use and a spatial sum of the density (dense count).
+
+\textbf{Key design decision:} The density-estimation backend is provided via a single interface and multiple implementations of a density-estimation backend are interchanged so that multiple approaches can be directly compared under the same upstream conditions.
+
+\subsection{Decision and Fusion Unit (Module 5)}
+
+Responsibility: Is responsible for deciding which of the two estimates from the branches is more reliable for a frame and combines the two estimates into one final number.
+
+The data that are inputted are the count/detection locations and the density count.
+
+The output is one fused count, and a label for the type of the scene (sparse/dense).
+
+\textbf{Key design decision:} If the two estimates are substantially similar, they are combined, otherwise, the estimate of the primary branch is used as is without any changes, because if it is substantially different, then one of the two branches may be incorrect without affecting the other, causing the estimate to be deflected by a silent failure in the other branch for a specific scene type.
+
+% \subsection{Track the unit (module 6)}
+
+% \textbf{Responsibility.} Associates detections for the same physical person in multiple frames of a video sequence, and reports the number of unique persons in the video sequence as well as the number of detections throughout the video.
+
+% \textbf{Inputs} – A list of detections on each frame.
+
+Outputs: a set of confirmed tracks, each of which is a different observation from a track during the clip. Track-to-detection assignment is "exactly" solved, and not based on a ‘nearest-match’ heuristic, when more than one track and detection are near the same point in the frame, in order to minimize identity-switch errors.
+
+\subsection{Module 6: Output Rendering}
+
+Responsibility: Generate the artefact that is displayed on the operator side: Bounding boxes, optional density-map overlay, burning in the operator side the fused/unique counts.
+
+\textbf{Inputs:} Original frame, output of all the previous modules.
+
+Outputs: An annotated picture or video file.
+
+% ============================================================
+Design of Components and Modules
+
+In contrast to~\cref{sec:detailed-design}, which discussed the responsibilities of each module, this section discusses how each module is structurally connected to its neighbors; what interfaces each module offers for use by its neighbors; what interfaces each module requires from neighbors; and, the flow of dependency within the system. This structural view is illustrated in UML component diagram, see Figure~\ref{fig:component}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/component_diagram.png}
+    \caption{Component Diagram}
+    \label{fig:component}
+\end{figure}
+
+They use three design patterns throughout the design of the component:
+
+\begin{itemize}[leftmargin=1.2em]
+    \item The Sparse Estimation Subsystem and the Dense Estimation Subsystem are both implemented as a stable outer interface (\texttt{IDetector} and \texttt{IDensityEstimator}) whose inner implementation is interchangeable. It is this that enables the learned vs classical backend decision as discussed in Section~5.3 to be a configuration decision and not a code change.
+
+    A run contains six distinct, independent processing components, but the Pipeline Controller interface that is exposed to the Presentation layer is a single simple interface named \texttt{IPipelineControl}. Callers of the facade don't have to know anything about, or manage any of the individual subsystems.
+
+    All components are built from a configuration object that is passed explicitly from outside, not from configuration or environment variables. Thus it enables independent testing of components and provides the ability to monitor the behaviour of the entire system at runtime to a single inspectable object per run.
+\end{itemize}
+
+The explicit definition of the required-only relationship between the Pipeline Controller and the Diagnostics \& Logging component, shows that each component returns control to the Pipeline Controller between its stages, and the Pipeline Controller is the one that controls and times the stages and logs them. This is to ensure that there are no concerns of cross cutting such as logging out of the core estimation logic.

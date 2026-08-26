@@ -1,0 +1,587 @@
+\chapterpage{Requirements Analysis and Specification}
+\mychapter{Requirements Analysis and Specification}
+\label{chap:requirements}
+
+This chapter documented the requirements used to design and implement the proposed system: Hybrid sparse / dense crowd counting application. It captures the elicitation and recording of the requirements, lists the functional and non-functional requirements that resulted from the elicitation and recording process, and describes the expected use of the system by a set of use cases and representative scenarios.
+
+% ============================================================
+% Requirements Elicitation and Documentation
+% ============================================================
+\section{Elicitation and Documentation of Requirements}
+
+Requirements were gathered through a mixture of techniques suitable to an engineering project that was characterized as research oriented, single developer. The process followed from first application of the techniques to the establishment of a validated requirements baseline.
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[
+%         width=0.92\textwidth
+%     ]{figures/elicitation_process.png}
+%     \caption{This process is called requirements elicitation and documentation.}
+%     \label{fig:elicitation}
+% \end{figure}
+
+\begin{itemize}
+
+    \item \textbf{Literature review:} Literature and prior art review revealed two types of approaches for automated crowd counting: detection based (sparse) and density regression (dense). Survey of existing crowd counting methods yielded two categories: automated crowd counting based on the detection of individual people (sparse) methods, which are less accurate when the crowd is heavily occluded, and automated crowd counting based on density regression (dense) methods, which are more accurate when the crowd is heavily occluded. The need for a \emph{hybrid} approach, not a single fixed approach, was directly triggered by this review.
+
+    \item \textbf{Stakeholder interviews:} To develop practical constraints, practical users of the system (people who would have to monitor crowd levels in a public or semi public space) were consulted informally. The system was to be usable by anyone, not require specialist machine learning knowledge, and required to work from still images as well as short video clips, and the result should be displayed as a number that an operator could check visually against their own perception of crowd density, not trust blindly.
+
+    \item \textbf{Domain observation:} To come up with the set of requirements, domain observation was used to look at examples of crowd density in the samples and find failure modes of naive counting methods, which were then translated into requirements: double counting from overlapping detections, under counting in dense occlusion, and counting instability across near identical consecutive frames.
+
+    \item \textbf{Iterative prototyping:} Single strategy prototypes were also developed and tested with sample footage: problems found during testing were incorporated into the requirements as before, and thresholds were adjusted accordingly, the requirements defined in Section~\cref{sec:functional-requirements} for the scene classification and fusion behaviour were confirmed by observing the results of testing the early prototypes. 
+    
+    % Problems identified during the testing of the early prototypes (detector only and density only prototypes) were fed back into the requirements as before, and thresholds were adjusted accordingly, while the requirements for scene classification and fusion behaviour (described in Section~\cref{sec:functional-requirements}) were confirmed by examining the results of testing the early prototypes.
+
+\end{itemize}
+
+For each elicited requirement, a uniquely identified statement was subsequently written, added priority, and checked for consistency and duplication with the other requirements before being placed in the baseline described in this chapter, in the form of either \texttt{FR-}\emph{nn} (functional requirements) or \texttt{NFR-}\emph{nn} (non-functional requirements). This identifier scheme enables all the requirements to be tracked back to the design elements that meet them and test cases that test them.
+
+% ============================================================
+\section{Functional Requirements}
+% ============================================================
+\label{sec:functional-requirements}
+
+Functional requirements are those of the system that define the observable behaviour and capabilities it must demonstrate, without regard to whether they are done well or not. Table~\ref{tab:fr} describes the functional requirements in each of the five functional areas outlined.
+
+% \begin{figure}[h]
+%     \centering
+%         \includegraphics[
+%         width=0.95\textwidth
+%     ]{figures/fr_decomposition.png}
+%     \caption{Functional requirements are broken down into functional groups.}
+%     \label{fig:frtree}
+% \end{figure}
+
+\begin{longtable}{|p{1.5cm}|p{7.5cm}|p{2.0cm}|p{3cm}|}
+\caption{Functional requirements}
+\label{tab:fr} \\
+
+\hline
+\textbf{ID} &
+\textbf{Description} &
+\textbf{Priority} &
+\textbf{Group} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{ID} &
+\textbf{Description} &
+\textbf{Priority} &
+\textbf{Group} \\
+\hline
+\endhead
+
+FR-01 &
+The system shall accept a single still image as input. &
+Must &
+Input Handling \\
+\hline
+
+FR-02 &
+Must be a video file. &
+Must &
+Input Handling \\
+\hline
+
+FR-03 &
+The system shall sample frames from a video input at a rate that is programmable and not at every frame. &
+Should &
+Input Handling \\
+\hline
+
+FR-04 &
+Detection of discrete person/head instances in a frame and reporting locations and number of instances. &
+Must &
+Estimation \\
+\hline
+
+FR-05 &
+The system shall estimate a continuous density map for a frame and integrate it to a count. &
+Must &
+Estimation \\
+\hline
+
+FR-06 &
+The detection and density estimation backends are allowed to be selected independently of each other. &
+Should &
+Estimation \\
+\hline
+
+FR-07 &
+The system shall classify each processed frame as sparse or dense based on the detections observed. &
+Must &
+Decision \& Fusion \\
+\hline
+
+FR-08 &
+The system shall fuse the detection and density based estimates to produce a single estimate. &
+Must &
+Decision \& Fusion \\
+\hline
+
+% FR-09 &
+% The system shall, in the case of video input, link detections of the same individual to subsequent frames. &
+% Must &
+% Tracking \\
+% \hline
+
+% FR-10 &
+% The system shall report the number of unique people observed in a video as opposed to the number of people observed per frame in a video. &
+% Must &
+% Tracking \\
+% \hline
+
+FR-09 &
+The system shall display an annotated image or video that displays the number of detected instances. &
+Must &
+Output \\
+\hline
+
+FR-10 &
+Output should be exposed in an externally editable configuration file, along with the operating parameters (threshold, backend choice, sampling rate) Should: &
+Should &
+Output \\
+\hline
+
+\end{longtable}
+
+% ============================================================
+% Non-functional Requirements
+% ============================================================
+\section{Non-functional Requirements}
+\label{sec:nfr}
+
+Non-functional requirements prevent the system operating in a particular way and limit the quality of the system's functions, such as its speed, robustness, user-friendliness, etc. The relative importance of each characteristic for this system is shown in Figure~\ref{fig:nfrradar} and each requirement is given in Table~\ref{tab:nfr}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[
+        width=0.55\textwidth
+    ]{figures/nfr_radar.png}
+    \caption{Quality characteristics with the relative emphasis}
+    \label{fig:nfrradar}
+\end{figure}
+
+The accuracy and the performance efficiency dominate the profile in Figure~\ref{fig:nfrradar} as the main value proposition of the system is delivering an accurate and reliable numeric estimate within a practically useful time budget, the usability is given a high weight, as the intended operator is not assumed to have machine learning expertise, and the security is comparatively low, which reflects the current deployment model of the system, as it is operated by one person and is offline.
+
+\begin{longtable}{|p{1.5cm}|p{2.5cm}|p{10.0cm}|}
+
+\caption{Non-functional requirements}
+\label{tab:nfr} \\
+
+\hline
+\textbf{ID} &
+\textbf{Category} &
+\textbf{Description} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{ID} &
+\textbf{Category} &
+\textbf{Description} \\
+\hline
+\endhead
+
+NFR-01 &
+Performance Efficiency &
+In a known and bounded time, shall the system process a single frame on commodity computing hardware? \\
+\hline
+
+NFR-02 &
+Accuracy &
+The fused count and NFR-02 (Accuracy \& The fused count) should be close to the true count in both sparse and dense scenes. \\
+\hline
+
+NFR-03 &
+Reliability &
+The system shall run a complete video without any crash on malformed or empty frames. \\
+\hline
+
+NFR-04 &
+Usability &
+An operator who is not familiar with the internal workings of the system should be able to run it without external assistance. \\
+\hline
+
+NFR-05 &
+Maintainability &
+Individual estimation backends shall be changeable without changing other modules. \\
+\hline
+
+NFR-06 &
+Portability &
+The system shall be able to be run without modification on the major desktop operating systems supported by its runtime environment. \\
+\hline
+
+NFR-07 &
+Compatibility &
+The system shall allow for common image and video formats and codecs to be accepted without being previously converted. \\
+\hline
+
+NFR-08 &
+Security &
+Input files and model assets shall be validated prior to use on each run. \\
+\hline
+
+\end{longtable}
+
+% ============================================================
+% Use Cases and Scenarios
+% ============================================================
+\section{Use Cases and Scenarios}
+
+This part states the functional requirements of Section~\cref{sec:functional-requirements} from the perspective of the actors that interact with the system. The overall use case diagram is displayed in Figure~\ref{fig:usecase} and shows the primary actor as the \emph{Operator} and the secondary actors as an \emph{External Model Repository} and (optionally) an \emph{Automated Scheduler}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[
+        width=\textwidth
+    ]{figures/use_case_diagram.png}
+    Use case diagram of proposed system
+    \label{fig:usecase}
+\end{figure}
+
+% This is an example of a use case that processes a single image.
+
+% ============================================================
+% Use Case 1
+% ============================================================
+
+% Use Case 1: Single Image
+
+\begin{longtable}{|p{3.0cm}|p{12.5cm}|}
+
+\caption{Use Case 1: Single Image}
+\label{tab:uc1} \\
+
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Field} & \textbf{Description} \\
+\hline
+\endhead
+
+\textbf{Identifier} &
+UC-1
+\\
+\hline
+
+\textbf{Actor(s)} &
+Operator (primary)
+\\
+\hline
+
+\textbf{Related requirements} &
+FR-01, FR-04, FR-05, FR-07, FR-08, FR-09
+
+The system has been started and the necessary model assets are available, the operator has an image file capable of being read.
+\\
+\hline
+
+\textbf{Main flow} &
+\begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=0pt]
+    \item The operator sets the image mode and feeds a path of an image file.
+    \item The system checks the file and reads it into the system.
+    \item The system preprocesses the image and performs sparse and dense estimation.
+    \item The system categorizes the scene and combines the two estimates together and makes a single count.
+    \item The system displays an annotated image with detections and a fused count, and displays it to the operator.
+\end{itemize}
+
+If the path provided is not readable or not a valid image, the system will print the error and will ask the operator for a path again (repeat step 1).
+
+The operator can see an annotated image and has a fused count available; the run is written in the diagnostic log.
+\\
+\hline
+
+\end{longtable}
+
+% ============================================================
+% Use Case 2
+% ============================================================
+
+% Use Case 2 is a description of a video stream passing through a process.
+
+% Use Case 2: Video Stream
+
+\begin{longtable}{|p{3.0cm}|p{12.5cm}|}
+
+\caption{Use Case 2: Video Stream}
+\label{tab:uc2} \\
+
+\hline
+
+\textbf{Identifier} &
+UC-2
+\\
+\hline
+
+\textbf{Actor(s)} &
+Operator (primary)
+\\
+\hline
+
+\textbf{Related requirements} &
+FR-02, FR-03, FR-04, FR-05, FR-07, FR-08, FR-09
+
+System is running and necessary model resources are available, operator has video file to read.
+\\
+\hline
+
+\textbf{Main flow} &
+\begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=0pt]
+    \item The video mode is selected by the operator and a video file is given.
+    
+    \item The system validates the file and identifies the native frame rate of it.
+    
+    \item Here, the system samples frames at the set rate and for each sampled frame, re-estimates and fuses the behaviour of a single frame as in UC-1.
+    
+    \item The system stores the detections for each individual across sampled frames, thus keeping the identity of each individual for the entire clip.
+    
+    \item Provides an annotated output video and summary statistics: average and maximum number of fused individuals, and the total number of unique individuals seen.
+\end{itemize}
+
+If it is not possible to open the video or there are no frames that can be read, the system will display the error and ask the operator for a path again.
+
+The operator has an annotated output video and a run summary and the run is stored in the diagnostic log.
+\\
+\hline
+
+\end{longtable}
+
+
+% ============================================================
+% Use Case 3
+% ============================================================
+
+% Use Case 3: Configure Estimation Backend
+
+\begin{longtable}{|p{3.0cm}|p{12.5cm}|}
+
+\caption{Use Case 3: Configure Estimation Backend}
+\label{tab:uc3} \\
+
+\hline
+
+\textbf{Identifier} &
+UC-3
+\\
+\hline
+
+\textbf{Actor(s)} &
+Operator (primary)
+
+The following are requirements that are related to this requirement:
+
+The operator is able to obtain configuration information of the system.
+\\
+\hline
+
+\textbf{Main flow} &
+\begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=0pt]
+    \item The operator accesses the configuration and chooses the appropriate detection backend and/or density-estimation backend.
+    
+    \item The thresholds (e.g.\ confidence thresholds, scene decision thresholds) associated with the operator are adjusted as necessary.
+    
+    \item The system checks if the values supplied for configuration are within the expected range.
+    
+    \item The new set up is used for subsequent runs (UC-1, UC-2).
+\end{itemize}
+
+If a supplied parameter is not in range, the parameter will not change, and the system will reject the change.
+
+Postconditions: subsequent runs will run using the newly selected backend(s) and parameters.
+\\
+\hline
+
+\end{longtable}
+
+% ============================================================
+% Use Case 4
+% ============================================================
+
+% In Use Case 4, Review Annotated Output, students examine their results and explain their findings.
+% Use Case 4: Review Annotated Output
+
+\begin{longtable}{|p{3.0cm}|p{12.5cm}|}
+
+\caption{Use Case 4: Review Annotated Output}
+\label{tab:uc4} \\
+
+\hline
+
+\textbf{Identifier} &
+UC-4
+\\
+\hline
+
+\textbf{Actor(s)} &
+Operator (primary)
+\\
+\hline
+
+\textbf{Related requirements} &
+At least one run (UC-1 or UC-2) has been finished and an output artefact is produced.
+\\
+\hline
+
+\textbf{Main flow} &
+\begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=0pt]
+    \item The operator opens the previously run annotated output artefact.
+    
+    \item The drawn detections, the scene classification and the fused/unique counts are visually checked by the operator.
+    
+    % \item The student decides if the outcome seems reasonable based on his or her perspective of the source material.
+\end{itemize}
+\\
+\hline
+
+\textbf{Extends} &
+UC-1, UC-2 (this use case can only be reached after output from one of those use cases).
+
+Postconditions: The operator has made a decision about the trustworthiness of the result of a given run.
+\\
+\hline
+
+\end{longtable}
+
+
+% ============================================================
+% Use Case 5
+% ============================================================
+
+% Use Case 5: Monitor Diagnostics.
+
+\begin{longtable}{|p{3.0cm}|p{12.5cm}|}
+
+\caption{Use Case 5: Monitor Diagnostics}
+\label{tab:uc5} \\
+
+\hline
+
+\textbf{Identifier} &
+UC-5
+\\
+\hline
+
+\textbf{Actor(s)} &
+Operator (primary)
+
+(intentional) = (related requirements): NFR-01, NFR-03
+\\
+\hline
+
+\textbf{Preconditions} &
+A run (UC-1 or UC-2) is in progress or has completed.
+\\
+\hline
+
+\textbf{Main flow} &
+\begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=0pt]
+    \item A start/end event and elapsed time are automatically recorded for each processing step for each processing run.
+    
+    \item The system fails with a diagnostic detail and a record of the stage that failed, rather than silently.
+    
+    \item The operator (or maintainer) checks the log recorded to ensure normal operation or to determine faulty conditions.
+\end{itemize}
+\\
+\hline
+
+\textbf{Includes} &
+UC-1, UC-2 (diagnostic recording automatically included in every run).
+
+A detailed diagnostic report of the run is produced which can be reviewed at any time in the future.
+\\
+\hline
+
+\end{longtable}
+
+
+% % ============================================================
+% % Use Case 6
+% % ============================================================
+
+% Use Case 6: Retrieve Model Assets
+
+% \begin{longtable}{|p{3.0cm}|p{12.5cm}|}
+
+% \caption{Use Case UC-6}
+% \label{tab:uc6} \\
+
+% \hline
+
+% \textbf{Identifier} &
+% UC-6
+
+% When the script is executed, it will be returned to the external model repository (primary) with a reference to the system (secondary).
+
+% The concepts of related requirements are introduced in FR-04 and FR-05.
+
+% The system can access the configured model repository location via the network or local-storage.
+% \\
+% \hline
+
+% \textbf{Main flow} &
+% \begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=0pt]
+%     \item On start-up, the system asks for the model assets which are needed by the backends it has been setup for.
+    
+%     \item The requested weights/assets are provided by the repository.
+    
+%     \item Warmup inference pass, loading the assets into memory.
+% \end{itemize}
+
+% If a required asset is not retrieved, the system is notified of the failure and waits for it to be corrected before proceeding with UC-1/UC-2.
+
+% The system contains ready to use model assets for the configured backends.
+% \\
+% \hline
+
+% \end{longtable}
+
+
+% % ============================================================
+% % Use Case 7
+% % ============================================================
+
+% Use Case 7: Batch-Schedule Runs
+
+% \begin{longtable}{|p{3.0cm}|p{12.5cm}|}
+
+% \caption{Use Case UC-7}
+% \label{tab:uc7} \\
+
+% \hline
+
+% \textbf{Identifier} &
+% UC-7
+% \\
+% \hline
+
+% \textbf{Actor(s)} &
+% Automated Scheduler (primary, optional)
+
+% Requirements are:
+
+% A scheduling mechanism (outside of the core system) has one or more input sources and run cadence configured.
+% \\
+% \hline
+
+% \textbf{Main flow} &
+% \begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=0pt]
+%     \item The scheduler automatically initiates a run (UC-1 or UC-2) at a set time or interval, without the need for an operator to press a button or make a decision.
+    
+%     \item The system runs with the current configuration (see UC-3).
+    
+%     \item The system records the output and diagnostic information for later, asynchronously, by the operator (UC-4, UC-5).
+% \end{itemize}
+
+% Output and diagnostics are built up over time, without the need of an operator for each operation.
+
+% Note: This use case is optional/forward-looking: It outlines how the current single run functionality may be built up by an external scheduler, not by the internal capability of the core system.
+% \\
+% \hline
+
+% \end{longtable}

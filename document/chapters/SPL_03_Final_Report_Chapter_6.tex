@@ -1,0 +1,281 @@
+\chapterpage{Implementation and Development}
+\mychapter{Implementation and Development}
+
+This chapter describes the process of converting the design presented in~\cref{chap:methodology} into a functional system. It includes the programming languages and third-party technologies utilized, a breakdown of the implementation throughout the interface, the orchestration, storage and algorithmic layers of the system, the testing and debugging process used during development, and a breakdown of version control and configuration management methods utilized to manage the evolution of the project.
+
+Programming Languages and Technologies Used:
+
+The system has been developed in full using the programming language of \textit{Python 3.12.8} because it is a mature computer vision and deep learning language with a high rate of iteration and excellent support for numerical and array processing libraries used in the pipeline. In the proposed system, the technology stack employed and their respective roles in the entire system are summarized in Table~\ref{tab:techstack}.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2.8cm}|>{\raggedright\arraybackslash}p{2.4cm}|>{\raggedright\arraybackslash}p{8.9cm}|}
+Caption: Technology stack and function of each component.
+\label{tab:techstack}\\
+\hline
+Technology & Category & Role in the System \\
+\hline
+\endfirsthead
+
+\hline
+1. Heating & Cooling System Technology: Temperature regulator sensor & controller.1. Heating & Cooling System: Technology: Temperature regulator sensor & controller.
+\hline
+\endhead
+
+Primary implementation language for the entire pipeline & Python 3.12.8 & Language & Primary implementation language for the entire pipeline \\
+\hline
+OpenCV (\texttt{opencv-}\allowbreak\texttt{python}) &
+Computer Vision &
+and Canny edge detection are applied to the image.The image is then subjected to image/video I/O procedures, Gaussian blur, CLAHE and Canny edge detection.
+Combining Haar-cascade detection, NMS and drawing/annotation.
+\hline
+PyTorch \& (\texttt{torchvision}) & Deep Learning & Tensor operations and inference engine for the Four-Column MDNN density-regression network \\
+\hline
+Ultralytics (\texttt{ultralytics}) & Deep Learning & YOLOv8-nano person/head detector (sparse branch) \\
+\hline
+NumPy & Numerical Computing & Array manipulation - density maps, bounding boxes, image tensors
+\hline
+Multi-object tracking: SciPy & Scientific Computing & \texttt{scipy.\allowbreak optimize.\allowbreak linear\_\allowbreak sum\_\allowbreak assignment} (Hungarian algorithm) \\
+\hline
+Matplotlib & Visualization & Diagnostic plotting of density maps and count trends.
+\hline
+% Polars & Data Processing & Lightweight tabular aggregation of per-frame statistics for video runs \\
+% \hline
+% Python logging & Diagnostics & Centralised, rotating-per-run logging and step-level latency profiling (\texttt{logger.py}) \\
+% \hline
+% \texttt{dataclasses} (stdlib) & Configuration Management & Type-safe, centralized hyper-parameter definitions (\texttt{config.py}) \\
+% \hline
+
+\end{longtable}
+
+PyTorch + Ultralytics were selected as the two parts of the hybrid architecture, one a general purpose pretrained object detector (YOLOv8), and the other a custom trained network for the dense branch of the architecture. The choice of OpenCV as common substrate for all classical image processing operations (colour space conversion, filtering, edge detection, drawing etc.) was determined by the fact that it provides a single API consistently optimized in C++ and easily accessible from Python with minimal overhead, the latter being important because of the system's per-frame latency budget.
+
+\section{System Implementation}
+
+It explains what the proposed passenger counting framework entails, and how it can be implemented as an operational software system. The implementation is broken into three big components: the user interaction layer, the backend processing layer, and the data management layer. They work together to handle input, estimate passengers, create results, monitor and store outputs of the system.
+
+\subsection{User Interaction Layer}
+
+The system offers an easy way of interaction with users, processing either images or video streams. The operator has to first choose the type of input needed, and then enter the media source. Before processing, basic input validation is done to make sure the input that was chosen will be able to be processed.
+
+Input selection and system execution are done through a command line interface that is shown in Figure~\ref{fig:cli-interface}. The interface offers an easy way to select the input type and specify which media source to process.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1.00\textwidth]{figures/cli_interface.png}
+    Input selection using CLI, and system execution.
+    \label{fig:cli-interface}
+\end{figure}
+
+The interface has been carefully designed to ensure that the operation is as easy as possible without being too complicated and to give enough feedback to the user. The system provides execution progress reports, warnings and relevant results during execution. This enables the operator to follow the analysis and detect any possible issues while running the analysis.
+
+The system also offers graphical visualization of the results obtained. The detected passengers/heads are visualised as bounding boxes and the estimated crowd density information can be visualised using Heat Map visualisation. The number of passengers and the classification of the scene is printed on the processed media, which allows the operator to visually check and confirm the system output.
+
+If a video is being input, the resulting frames are linked together in sequence to create an annotated output video. This allows a convenient representation of the counting process, and enables the operator to see the results of passenger detection and passenger occupancy estimation throughout the entire video sequence.
+
+\subsection{Backend Processing Layer}
+
+The backend represents the foundation of the system, handling the core processing logic and orchestrating various processes along the passenger counting pipeline. It controls the input data flow by processing it in the stages of preprocessing, passenger detection, density estimation, scene analysis, fusion, and result generation.
+
+The architecture of the processing is modular and configuration based. The parameters of the image preprocessing, passenger detection, passenger density estimation, tracking, and the results fusion are kept apart from the main processing logic. This separation enables the individual components' behaviour to be fine-tuned without major changes to the rest of the processing process. It also allows for experimentation on different sets of parameters in a controlled manner.
+
+The backend includes execution monitoring for system reliability and performance assessment. The execution time of individual processing stages is monitored, and the computational intensive processing stages and possible processing bottlenecks are identified. Also, system warnings and failures during execution are recorded for troubleshooting and analysis.
+
+The video processing involves backend to extract frames and sample them in time, then feed the selected frames to the counting pipeline. Temporal processing minimises unnecessary computation and provides adequate information to process passenger counting analysis. Consecutive frames are also useful for maintaining consistency of the estimated number of passengers in a video sequence.
+
+\subsection{Data Management Layer}
+
+The system is not reliant on a relational or NoSQL database. Since the proposed framework is meant to be mostly used for standalone and offline passenger counting analysis, the models, configuration information, log files and results generated by the analysis can be managed with a structured file based approach.
+
+The desired detection and density estimation models are stored as external resources and are loaded during the system execution process. The resulting processed images, annotated videos and execution records are saved at specific output locations. 
+
+This organization enables the outcomes of individual analysis sessions to be held and reviewed on their own.
+
+The information generated by execution and processing of the system is displayed in figure~\ref{fig:log-information}. The information stored helps to trace the system's activities in a chronological manner and to monitor the system's processing workflow.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1.00\textwidth]{figures/log_information.png}
+    Executes and processes a system and logs information about the system.
+    \label{fig:log-information}
+\end{figure}
+
+These records facilitate reproducibility, debugging and performance analysis after the program has been executed. Separate output artefacts of each processing session will also minimize the risk of accidentally overwriting previous results.
+
+Configuration information keeps separate from runtime generated information. This separation allows to separate the system parameters from generated artifacts, making the maintenance of the system easier and reducing the risk of inconsistencies due to outdated runtime information.
+
+% The file based data management approach is appropriate for the current standalone use case, especially for offline analysis of recorded transportation data. A more sophisticated persistence mechanism, however, could be added for future deployments with continuous camera monitoring and large scale occupancy analysis. It could be stored in a database or time series storage system for efficient storage, querying, historical analysis, and integration with monitoring dashboards.
+
+% ============================================================
+There are different approaches to testing and debugging.Testing and debugging approaches exist.
+
+The proposed passenger counting system was tested following a structured multi level approach, to assess the correctness, reliability and robustness of the system. The testing levels and the achieved objectives are summarized in Table~\ref{tab:testing-strategy}. The overall testing strategy is shown in Figure~\ref{fig:pyramid}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.62\textwidth]{figures/testing_pyramid.png}
+    A multi level testing strategy is used for the proposed system as shown:
+    \label{fig:pyramid}
+\end{figure}
+
+% ============================================================
+% Testing Strategy Table
+% ============================================================
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.3cm}|>{\raggedright\arraybackslash}p{4.3cm}|>{\raggedright\arraybackslash}p{6.4cm}|}
+
+\caption{Testing strategy}
+\label{tab:testing-strategy} \\
+
+\hline
+Testing Level & Purpose & Main focus \\
+\hline
+\endfirsthead
+
+\hline
+Testing Level/Purpose & \textbf{Main Focus} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{r}{\textit{Continued on next page} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+\textbf{Unit Testing}
+&
+Test separately.Test locally for every component.
+&
+The correctness of the preprocessing, detection, density estimation, scene analysis and fusion operations.
+\\
+\hline
+
+\textbf{Integration Testing}
+&
+Check communication and exchange of data within components.
+&
+Data consistency and consistency with data sent from one processing step to the next.
+\\
+\hline
+
+\textbf{System Testing}
+&
+Assess full passenger counting process.
+&
+Multi-source end-to-end processing of image and video inputs with various crowd densities and environments.
+\\
+\hline
+
+\textbf{User Acceptance Testing}
+&
+Discuss the practical use and output interpretation.
+&
+Input handling, result presentation, system usability and suitability for passenger counting analysis.
+\\
+\hline
+
+\end{longtable}
+
+
+% ============================================================
+\subsection{Debugging Approaches}
+
+Throughout development and testing, debugging was done. There are several main methodologies that can be used to locate and correct errors, which are summarized in Table~\ref{tab:debugging-approaches}.
+
+% ============================================================
+% Debugging Approaches Table
+% ============================================================
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.3cm}|>{\raggedright\arraybackslash}p{4.8cm}|>{\raggedright\arraybackslash}p{5.9cm}|}
+
+\caption{Debugging approaches}
+\label{tab:debugging-approaches} \\
+
+\hline
+\textbf{Approach} & \textbf{Purpose} & \textbf{Application} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Approach} & \textbf{Purpose} & \textbf{Application} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{l}{\textit{Continued on next page} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+\textbf{Execution Monitoring}
+&
+Determine the stage of processing that caused an error.
+&
+Progress/Execution Status/Abnormal Behaviour Monitoring.
+\\
+\hline
+
+\textbf{Stage Isolation}
+&
+Identify mistakes in particular processing steps.
+&
+Testing one stage in isolation if an unexpected result is obtained.
+\\
+\hline
+
+\textbf{Intermediate Result Analysis}
+&
+Recognize and correct numerical and visual results.
+&
+Display of density maps, corrected density estimates and filtered detection results.
+\\
+\hline
+
+\textbf{Visual Inspection}
+&
+Identify errors in spatial and detection related information.
+&
+Analysis of missed detections, false detections, incorrect locations and density-estimation patterns.
+\\
+\hline
+
+\textbf{Input Variation}
+&
+Identify system behaviour under different conditions.
+&
+Experiments using different densities, lighting, occlusions and image quality.
+\\
+\hline
+
+\end{longtable}
+
+Multi level testing, systematic debugging gave a systematic approach to identifying errors, validating individual components and quality assurance of the entire passenger counting system.
+
+Version Control and Configuration Management
+
+\subsection{Version Control}
+
+The project uses version control to manage the source code, with Git and GitHub used for the version control system. Changes can be tracked, project history can be stored and different versions of the code can be handled by using Git.
+
+A \texttt{.gitignore} file is also included in the repository to prevent extra generated files from being committed. In particular, the directories \texttt{\_\_\allowbreak pycache\_\_} and \texttt{output/} will not be included in the version control. This is fitting since these files are created when the program is running and are not required to be kept as source code.
+
+\subsection{Configuration Management}
+
+The primary element of configuration management found in the repository.
+\texttt{requirements\allowbreak.txt}. It includes the project's Python requirements
+with certain versions, it is possible to reproduce the development environment more.
+consistently.
+
+The project outlines, for instance:
+
+\begin{itemize}
+    \item NumPy 2.5.1
+    \item OpenCV 4.10.0.84
+    \item PyTorch 2.13.0
+    \item TorchVision 0.28.0
+    \item Ultralytics 8.4.99
+    \item Matplotlib 3.11.0
+\end{itemize}
+
+The requirements file is pinned with 36 requirements. It is helpful to specify package versions since they can yield vastly different results, especially in the realm of machine-learning and computer vision.

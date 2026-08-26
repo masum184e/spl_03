@@ -1,0 +1,267 @@
+\chapterpage{Literature Review}
+\mychapter{Literature Review}
+
+\section{Preliminaries}
+
+Automatic Passenger Counting (APC) will help to improve efficiency and facilitate decision making by dynamically monitoring the number of people on a vehicle or platform in real or near-real time, as they board and alight. APC is strongly related to other computer vision problems such as crowd counting, but it also has specific constraints related to transit operations: passengers are navigating through tight doorways, with a high degree of occlusion; lighting conditions can change drastically in short time periods; hardware must be scalable across entire fleets while remaining cost-effective ~\cite{kuchar2023passenger}. 
+
+According to the recent literature, APC system design has been divided into three dimensions:
+
+\subsection{Sensing Strategy}
+
+\begin{itemize}
+    \item \textbf{Invasive Sensing:} Instruments are carried across the transfer points directly with the help of door-mounted overhead cameras or proximity sensors, known as \textbf{Invasive Sensing}~\cite{kuchar2023passenger}. Although simple, accurate sensor configurations (such as ambient light sensors) may have negative effect of compounded estimation errors over a route because of the lack of self-correcting feedback loops ~\cite{Aleksander2024}.
+
+    \item \textbf{Noninvasive Sensing:} Estimates occupancy indirectly based on the environmental signals in the surrounding, including the mobile Wi-Fi/WLAN probe requests in the surrounding area~\cite{chang2023online}. The performance depends on the ability of filtering out external non-passenger devices and establishing safe ratios to map detected devices to the number of humans ~\cite{algomaiah2022utilizing}.
+\end{itemize}
+
+\subsection{Computational \& Vision Paradigms}
+
+\begin{itemize}
+    \item \textbf{Detection and Tracking (Line-of-Interest):} Detects a person, usually based on head detection, in subsequent video frames and increments the detected person counter if the detected person crosses a virtual line at a designated entry point~\cite{kim2022development, calle2022automatic}.
+
+    \item \textbf{Density Based (Region-of-Interest):} Regression of total occupancy based on visual scene density, without individual detection, for high occupancy regions ~\cite{gouiaa2021advances}.
+\end{itemize}
+
+\section{Relevant Theories and Concepts}
+\label{sec:relevant-theories}
+
+The automatic passenger counting system proposed here is focused on concepts from computer vision, deep-learning, object detection, and crowd counting. The concepts serve as the theoretical basis for detecting the passenger heads, dealing with the crowded scenes, and estimating the numbers of passengers based on video information.
+
+\subsection{Convolutional Neural Networks (CNN)}
+
+Convolutional Neural Networks (CNNs) are deep neural networks that are specialized to learning spatial representations from image data. CNNs are employed to learn hierarchical features from an input image using convolutional operations. Lower level layers tend to represent local patterns (like edges and textures) and higher level layers represent more semantic representations.
+
+CNNs have emerged as the backbone of state-of-the-art object detection and crowd counting systems because of their capacity of learning discriminative visual features directly from training data. In recent years, CNN based models have been widely employed for crowd counting, including density map regression models and detection based models \cite{fan2022survey}.
+
+In the context of passenger head detection, CNN based feature extraction enables the system to acquire visual features of human head from the environment of the bus. This is very helpful when head appearance changes due to illumination, viewing angle, scale or partial occlusion.
+
+\subsection{Object Detection}
+
+Object detection involves recognizing objects that belong to a given class and specifying their position in the image from a given image. For each object detected by a conventional object detector, it generates a class label and a bounding box.
+
+The performance of object detection has been significantly improved by deep learning, which improves the ability to detect objects by learning visual features instead of manually designing them. There are mostly two types of modern object detectors: the one-stage detector and two-stage detector. In one stage detectors, object location and class are directly predicted from the input image, while, in two stage detectors, candidate regions are firstly generated and then classified and refined to predict the location and class of the object in the input image \cite{zhao2022object}.
+
+Object detection offers a direct approach to localizing each passenger's head for passenger counting. Valid heads can be counted after they are detected and thus the amount of valid heads can be used as an estimate of the number of passengers in a frame.
+
+\subsection{One Stage Real Time Object Detection}
+
+In one stage object detectors, the object localization and classification are done in a single detection process. This type of design typically offers a good speed/accuracy tradeoff, and one-stage detectors can be used in real-time video.
+
+The one stage detector family includes detectors that use YOLO. YOLO style architectures predict the locations of the objects and the probability of the classes on top of the network rather than going through a separate proposal stage. According to recent survey in the journal on object detection one stage detectors are an important family of real time detection architectures and their benefits in terms of computational efficiency is discussed in \cite{arkin2023survey}.
+
+This property is suitable for passenger counting applications that require low latency for the detection process over consecutive video frames, as is the case in YOLO based detection.
+
+\subsection{Crowd Density}
+
+The density of crowds in a scene is referred to as crowd density. If the individuals are separated from each other in a scene, it can be classified as sparse, while if the individuals within the scene are packed closely, it can be classified as dense.
+
+Since the number of passengers is important, density plays a role in passenger counting, with the difficulty of detecting individual objects increasing as the density of the passengers increases. The detection of individual heads typically has rather low ambiguity in sparse scenes. Overlapping heads and heavy occlusion may make it more difficult to detect individual heads in dense scenes.
+
+Recent crowd counting literature has highlighted the density variation as one of the key issues in visual crowd counting and classified the crowd counting methods into detection-based and density-based methods \cite{fan2022survey,verma2023revisiting}.
+
+\subsection{Crowd Density Estimation}
+
+Crowd density estimation is estimating the spatial distribution of people in an image without a clear identification of each person. A density estimation model produces a density map that has the accumulated density as the number of people estimated.
+
+Define $D(x,y)$ to be the estimated value of the density at pixel location $(x,y)$. The estimated number of people can be written as
+
+\begin{equation}
+C = \sum_{x}\sum_{y}D(x,y).
+\end{equation}
+
+As such, the density map also presents spatial data on the distribution of people and an overall estimate of the number of people.
+
+In crowded scenes where it can be difficult to separate individual objects reliably, density estimation can be helpful. Density-map-based methods are among the most prominent techniques in contemporary crowd counting, and recent works categorize them as one of the fundamental methods for solving a problem of the high density and occlusion of crowds \cite{sindagi2022survey}.
+
+\section{Review of Related Research and Projects}
+
+\subsection{Crowd Counting Using Deep Learning}
+
+Among the earliest and most influential works is the Multi-Column Convolutional Neural Network (MCNN) ~\cite{Zhang2016} that introduced the ShanghaiTech ~\cite{Zhu2020} dataset, and used multiple convolutional columns to cope with the variations in crowd scale. MCNN showed that the deep neural network could accurately predict crowd density in crowded scenes.
+
+Future research focused on making counting even more accurate, with more complex architectures. To enlarge the receptive field size while maintaining spatial resolution, CSRNet used dilated convolutions instead of multi-column networks to get state of the art results on multiple benchmark datasets \cite{li2018csrnet} . Subsequent studies, including DM-Count and Transformer-based crowd counting models, further enhanced the performance with the use of advanced loss functions, attention mechanisms and long-range feature modeling ~\cite{wang2020dmcount}.
+
+While these methods are promising for public crowd counting datasets, it is unclear how well they will perform in the bus environment due to the distinct characteristics of bus interiors, such as severe occlusion, limited viewpoints and small object sizes.
+
+\subsection{Vision Based Passenger Counting}
+
+All vision-based passenger counting methods can be classified into two categories: detection-based and density estimation-based. The detection-based approaches detect individual body parts or passengers by using object detectors and estimate the number of passengers by counting the instances. The first approaches used handmade features and conventional machine learning techniques. Recent advances in deep learning, however, have greatly enhanced detection accuracy using Convolutional Neural Networks (CNNs) and Transformer-based architectures ~\cite{Hsu2020}.
+
+The approaches based on density estimation, however, produce a density map that indicates the spatial distribution of people in an image. The total count is determined by integrating the density map over the whole image area. These methods show improved performance in the case of high-density scenes where the detection of individual items is challenging ~\cite{Zhang2016}.
+
+Although they are successful, density estimation techniques do not specifically identify individuals and are therefore less promising to be applied to video-based applications that require temporal consistency.
+
+\subsection{Automatic Passenger Counting Systems}
+
+The implementation of automatic passenger counting systems is crucial for public transport systems, providing valuable insights into passenger flow and enhancing operational efficiency and decision-making. These technologies are extensively deployed in buses, trains and metro services for real-time occupancy estimation. In the past, passenger numbers have been counted by man or ticketing systems, which may be inaccurate, labor intensive and real-time. Because of this, the study on automatic passenger counting systems has been on the rise.
+
+In order to overcome these challenges, some of the sensor based and vision based approaches have been explored. The sensor-based counting systems are usually installed to track the passengers' movements by using infrared sensors, radio-frequency identification, or pressure-sensitive mats, ~\cite{Aleksander2024}. These methods are simple, but have a number of drawbacks, including the high cost of installation and maintenance, sensitivity to environmental conditions (such as the vibrations of the buses on the road blurring the data in the camera), and loss of accuracy in dense traffic settings ~\cite{Irene2019}. Thus, vision-based methods have been growing in popularity.
+
+The Vision-based passenger counting system uses the cameras to monitor and count the passengers. They are employed to identify and monitor human subjects and to count them when they are getting on or off a bus ~\cite{Saddam2020}. Vision-based systems are more flexible and informative than sensor-based systems but suffer from problems like occlusion, lighting, and densely populated environments which can impact counting accuracy ~\cite{Chris2024}. With the development of artificial intelligence technology, vision-based systems that have added in deep learning and hybrid approaches are becoming popular. The use of deep learning models, such as convolutional neural networks and real-time object detection algorithms such as YOLO, enhance the detection of passengers ~\cite{Hsu2020}. Furthermore, vision-based approaches can be combined with other sensor information to enhance the accuracy. But such systems can be complex and may not be able to deliver real-time performance within the confines of limited computing. 
+
+Person detection-based techniques attempt to identify a person by detecting the entire body, whereas face detection techniques attempt to identify a person by recognising facial features. Other methods are popular are density estimation: estimating people by their density on the pixel. While these approaches have achieved good performance, they can be less accurate in densely populated scenes as a result of occlusion and overlapping people and viewpoints ~\cite{Hsu2020}. To overcome these problems, another alternative occurs and that is the head counting method, particularly in areas where it is crowded. The use of head detection requires detection of the top portion of the body, which is less likely to be occluded than other parts of the body. This is because it provides a more accurate count of passengers in overcrowded public transport vehicles. Several methods, such as deep learning detectors and density-based methods, have been proposed to enhance head detection ~\cite{Claire2021}. 
+
+\subsection{Existing Passenger Counting Approaches}
+
+From the reviewed studies, it was evident that different sensing and deep learning methods are being used to approach the problem of passenger counting. The existing methods have good counting accuracy, but they can be influenced by occlusion, lighting conditions, camera view position, computational complexity and environmental changes. Especially in bus situations, when several people can be seated side by side, with only their heads or upper bodies visible. Table~\ref{tab:literature_review} presents a comparison of the selected studies in terms of their objectives, contributions and findings.
+
+\begin{longtable}{|
+		>{\raggedright\arraybackslash}p{2.0cm}|
+		>{\raggedright\arraybackslash}p{3.5cm}|
+		>{\raggedright\arraybackslash}p{4.0cm}|
+		>{\raggedright\arraybackslash}p{4.0cm}|}
+
+	\caption{Literature Summary on Passenger Counting}
+	\label{tab:literature_review} \\
+
+	\hline
+	\textbf{Reference} &
+	\textbf{Objective} &
+	\textbf{Contribution} &
+	\textbf{Findings}
+	% \textbf{Results / Limitations}
+	\\
+	\hline
+	\endfirsthead
+
+	\multicolumn{4}{c}%
+	The name of the table\ \thetable{} -- continued on previous page.
+	\hline
+	\textbf{Reference} &
+	\textbf{Objective} &
+	\textbf{Contribution} &
+	\textbf{Findings}
+	% \textbf{Results / Limitations}
+	\\
+	\hline
+	\endhead
+
+	\hline
+	\multicolumn{4}{r}{{Continued on next page}} \\
+	\endfoot
+
+	\hline
+	\endlastfoot
+
+	Based on data from McCarthy et al. 2021~ \cite{mccarthy2021field}
+	&
+	Test passenger counting technologies in realistic operating conditions.
+	&
+	Presented a trial methodology for comparing APC solutions and offered practical tips for transport authorities.
+	&
+	The accuracy was greater than 70\% and highest accuracy was between 89--100\%. The installation problems of the sensors, sensitivity to vibration, mass boarding and blockage of the Wi-Fi, however, influenced the performance.
+	\\
+	\hline
+
+	Pronello et al. (2025) ~\cite{pronello2025lowcost}
+	&
+	Use wireless devices to estimate the number of people waiting for buses at bus stops.
+	&
+	Gathered wi-fi probe requests, and used time-window packet analysis.
+	&
+	The best counting performance was with CRNN. The limitations of the counting radius, environmental noise and MAC randomization influenced accuracy.
+	\\
+	\hline
+
+	Alsad et al. (2022)~\cite{alsad2022social}
+	&
+	Estimate interpersonal distance and density of crowd.
+	&
+	Designed an approach for monitoring using pose estimation.
+	&
+	The localization strategy performed better than baseline strategies. With that being said, OpenPose has high computational requirements.
+	\\
+	\hline
+
+	Kulkarni et al. (2023)~\cite{kulkarni2023advances}
+	&
+	Examine CNN-Based methods of crowd counting.
+	&
+	Introduced CNN approach categories and described the available datasets.
+	&
+	Achieved an overall accuracy of 95\%. Slowly changes lighting conditions: performance declines.
+	\\
+	\hline
+
+	Xu et al. (2024)~\cite{xu2024label}
+	&
+	Enhancing crowd counting using noisy labels.
+	&
+	Probed spatial and quantity noise impact.
+	&
+	The DMCC accuracy was improved by $\theta = 0.9$. The method is hyperparameter dependent, and more expensive due to the increased number of computations required.
+	\\
+	\hline
+
+	Mansouri et al. (2025)
+	&
+	Enhance the management of crowd monitoring in smart cities.
+	&
+	Adopted the following architectures: Used ConvLSTM for the temporal patterns, and DenseNet with SE blocks for feature extraction.
+	&
+	Reached an accuracy of 98.40\%. Under extreme conditions of occlusion however, performance drops.
+	\\
+	\hline
+
+	Nitti et al. (2020)~\cite{nitti2020iabacus}
+	&
+	Monitor the number of people in a vehicle without compromising their privacy.
+	&
+	Used anonymous passenger tracking and handled MAC randomization.
+	&
+	Successfully performed at 100% accuracy in the indoor test and almost 94% accuracy in the real-world test. Common errors include those at bus stops and with Wi-Fi inactivity.
+	\\
+	\hline
+
+	Seidel et al. (2022)~\cite{seidel2022napc}
+	&
+	Send live Vehicle load data.
+	&
+	Converted the low-resolution 3D LiDAR dataset and added a dataset that included 13,000 annotated sequences.
+	&
+	In approximately 96% of cases obtained the actual number. Involves large amount of annotation, and leaves out children.
+	\\
+	\hline
+
+	Chris et al. (2024)~\cite{Chris2024}
+	&
+	Compare video APC systems for bus.
+	&
+	Appraised low cost deployment of video APC and environmental impact.
+	&
+	The accuracy of the off-bus was 88.9\%, and the accuracy of the on-bus was 75\%. Occlusion, errors, weather and the sun affected performance.
+	\\
+	\hline
+
+	Hsu et al. (2020)~\cite{Hsu2020}
+	&
+	Use deep learning to estimate the number of passengers on a bus.
+	&
+	Density Estimation of Passengers using a Proprietary Passenger Image Data Set.
+	&
+	Its reduced MAE from 4.93 to 1.98 and its performance was satisfactory under various light conditions. Passengers sitting in the corner seats may be missed.
+	\\
+	\hline
+
+\end{longtable}
+
+In summary, the literature demonstrates that although video-counting solutions are adaptable and scalable, they are dependent on conditions, camera angles and density ~\cite{Chris2023}. Current head counting methods still have problems for computational efficiency, different lighting conditions, and real-world application. Thus, the aim of this study is to overcome these challenges by proposing a reliable head-based passenger counting system, which will enhance the accuracy, scalability and practicality of the system.
+
+\section{Identification of Gaps in Existing Solutions}
+
+The literature shows several research gaps in the vision-based passenger counting. Second, most crowd counting studies are conducted on outdoor crowd datasets like ShanghaiTech ~\cite{Zhu2020}, UCF-QNRFQNRF ~\cite{ucf_qnrf_dataset} and NWPU-Crowd ~\cite{wang2020nwpu} that are not representative of the bus interior environment. Second, while head detection has been successful under crowded conditions, there is limited work in comparing various head detection architectures for detecting small heads of passengers in buses. Thirdly, the use of object tracking along with head detection for stable passenger counting has not been explored enough.
+
+In this research, the focus is to alleviate these deficiencies by examining the performance of head detection in the interior of buses for counting human passengers, comparing the performance of several head detection models for small head detection, and investigating the potential of using object tracking to increase the stability of counting and avoid double counting across video frames.
+
+\subsection{Research Question}
+
+Based on the aforementioned, the following research questions are proposed to guide the investigation and evaluation of the proposed passenger head-counting system:
+
+\begin{itemize}
+    \item Can the number of passengers be accurately counted in the interior of the bus with head detection?
+    \item What impact do camera angles have in the accuracy of head-counting in a bus with a high level of occupancy?
+    \item What is the best detection model for the small-head detection of real bus scenes?
+    % \item Does tracking help with stability of counting across frames and help prevent double counting?
+    \item How stable is the system in low light, occlusion and with motion blur?
+\end{itemize}
