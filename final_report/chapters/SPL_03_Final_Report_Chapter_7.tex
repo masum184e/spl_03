@@ -1,3 +1,232 @@
+\chapterpage{Results Analysis and Discussion}
+\mychapter{Results Analysis and Discussion}
+\label{chap:results}
+
+% This chapter presents and analyses the empirical evidence produced by the implemented components of the proposed adaptive hybrid crowd-counting framework: a pretrained classic person detector, a head detector fine-tuned on the SCUT-Head dataset, a custom four-column multi-column density regression network (Four Column MDNN), a CSRNet style dilated convolution density network, and a classical detection assisted density estimation procedure.
+
+\section{Data Collection and Analysis}
+
+Three annotated datasets underpin the techniques investigated in this research, playing two distinct roles. SCUT-HEAD and ShanghaiTech, Part~B are used to train, fine-tune, and validate the individual learned techniques (the fine-tuned sparse detector and the two dense density-map estimators, respectively). The Public Transport Crowd Counting Dataset (PTCCD) plays a different role: it is not used to train or fine-tune any individual technique, but is instead used to evaluate the performance of the proposed, fully assembled passenger-counting framework under realistic transportation conditions. The two non-learned techniques (the cascade classifier detector and the classical density estimator) rely on pre-existing, general purpose classifiers or on no learned parameters at all, and therefore do not draw on any task specific training or evaluation dataset. Table~\ref{tab:datasets} summarises the three datasets used and the role each plays, and Table~\ref{tab:dataset-stats} reports their detailed size, split, and annotation density statistics as documented by their original sources.
+
+\begin{longtable}{|
+    >{\raggedright\arraybackslash}p{0.24\textwidth}|
+    >{\raggedright\arraybackslash}p{0.21\textwidth}|
+    >{\raggedright\arraybackslash}p{0.15\textwidth}|
+    >{\raggedright\arraybackslash}p{0.24\textwidth}|
+}
+\caption{Datasets used to train and/or evaluate the techniques investigated in this study.}
+\label{tab:datasets}\\
+\hline
+\textbf{Dataset} &
+\textbf{Annotation type} &
+\textbf{Used by} &
+\textbf{Role} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Dataset} &
+\textbf{Annotation type} &
+\textbf{Used by} &
+\textbf{Role} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+SCUT-HEAD~\cite{peng2018scuthead} &
+Head bounding boxes (YOLO text format) &
+Fine-tuned sparse detector &
+Fine tuning and validation (detection metrics) \\
+\hline
+
+ShanghaiTech, Part B~\cite{Zhu2020} &
+Head point locations (\texttt{.mat} files) &
+Both learned dense branch estimators &
+Training and validation (density-map / count metrics) \\
+\hline
+
+Public Transport Crowd Counting Dataset (PTCCD) &
+Passenger/head bounding boxes (YOLO text format) &
+Proposed passenger-counting framework (full pipeline) &
+Held-out evaluation only; not used for training or fine-tuning any individual technique \\
+\hline
+
+\end{longtable}
+
+\begin{longtable}{|
+		>{\raggedright\arraybackslash}p{0.18\textwidth}|
+		>{\raggedright\arraybackslash}p{0.09\textwidth}|
+		>{\raggedright\arraybackslash}p{0.18\textwidth}|
+		>{\raggedright\arraybackslash}p{0.15\textwidth}|
+		>{\raggedright\arraybackslash}p{0.24\textwidth}|}
+	
+	\caption{Detailed dataset statistics}
+	\label{tab:dataset-stats}\\
+	
+	\hline
+	\textbf{Dataset} &
+	\textbf{Images} &
+	\textbf{Train / Test / Val} &
+	\textbf{Annotated instances} &
+	\textbf{Notes} \\
+	\hline
+	\endfirsthead
+	
+	\multicolumn{5}{c}%
+	{{\tablename\ \thetable{} -- continued from previous page}} \\
+	\hline
+	\textbf{Dataset} &
+	\textbf{Images} &
+	\textbf{Train / Test / Val} &
+	\textbf{Annotated instances} &
+	\textbf{Notes} \\
+	\hline
+	\endhead
+	
+	\hline
+	\multicolumn{5}{r}{{Continued on next page}} \\
+	\endfoot
+	
+	\hline
+	\endlastfoot
+	
+	SCUT-HEAD, Part~A~\cite{peng2018scuthead}
+	&
+	2{,}000
+	&
+	1{,}100 / 500 / 400
+	&
+	67{,}318 heads
+	&
+	Classroom surveillance imagery; low inter-image variance by design
+	\\
+	\hline
+	
+	SCUT-HEAD, Part~B~\cite{peng2018scuthead}
+	&
+	2{,}329
+	&
+	1{,}630 / 233 / 466
+	&
+	41{,}749 heads
+	&
+	Internet-crawled imagery; higher visual variability
+	\\
+	\hline
+	
+	SCUT-HEAD, combined
+	&
+	4{,}329
+	&
+	2{,}730 / 733 / 866
+	&
+	109{,}067 heads
+	&
+	Union of Part~A and Part~B, as used for fine-tuning in this study
+	\\
+	\hline
+	
+	ShanghaiTech, Part~B~\cite{Zhu2020}
+	&
+	716
+	&
+	400 / 316
+	&
+	88{,}272 heads (point-annotated)
+	&
+	Fixed resolution $768{\times}1024$; approximately 9--578 people per image, mean $\approx 123.6$
+	\\
+	\hline
+
+	Public Transport Crowd Counting Dataset (PTCCD)
+	&
+	285
+	&
+	--
+	&
+	Approx. 8{,}311 passengers/heads (bounding-box annotated)\footnotemark
+	&
+	Variable resolution; 2--60 annotated objects per image, mean $\approx 29.16$, median 29; used for framework-level evaluation only, not split into train/test
+	\\
+	\hline
+	
+\end{longtable}
+
+\subsubsection{SCUT HEAD Dataset}
+The fine tuned sparse detector is trained on SCUT-HEAD, a head detection dataset comprising 4{,}329 images with 109{,}067 annotated head bounding boxes~\cite{peng2018scuthead}. The dataset is collected in two parts that differ in imaging condition and scene variability:
+
+\begin{itemize}
+	\item \textbf{Part A:} 2{,}000 images sampled from classroom surveillance video within a single university, with 67{,}318 heads annotated; because classroom scenes recur with limited pose variation, the constituent images were deliberately selected to maximise representative variance. As distributed, Part~A is pre-split into 1{,}100 training, 400 validation, and 500 testing images.
+	\item \textbf{Part B:} 2{,}329 images crawled from the internet, with 41{,}749 heads annotated, offering greater visual diversity than Part~A. As distributed, Part~B is pre-split into 1{,}630 training, 466 validation, and 233 testing images.
+\end{itemize}
+
+Every annotated head is bounded by an axis aligned box $(x_{\min}, y_{\min}, x_{\max}, y_{\max})$ covering the full head extent, including occluded portions, without extraneous background, following the Pascal VOC annotation convention. In the implementation examined for this study, Part~A and Part~B are pooled into a single combined dataset of 4{,}329 images (2{,}730 for training, 733 for testing) while each image's original split membership is preserved, and a single object class (head) is declared, since the study task is class agnostic head localisation rather than the finer classroom versus internet distinction that motivated the dataset's original two part structure.
+
+\subsubsection{ShanghaiTech Dataset, Part B}
+Both learned density estimation techniques are trained and evaluated on Part~B of the ShanghaiTech crowd counting dataset, introduced alongside the multi column convolutional architecture on which one of the two density estimators is based~\cite{Zhu2020}. ShanghaiTech as a whole comprises 1{,}198 images with 329{,}547 annotated head points, split into a dense, internet sourced Part~A (482 images) and a sparser, street-level Part~B (716 images); this study uses Part~B only. Part~B images are all captured at a fixed resolution of $768{\times}1024$ pixels on busy Shanghai streets, officially divided into 400 training and 316 testing images, with per-image counts ranging from approximately 9 to 578 people and a mean of approximately 123.6 people per image, substantially sparser than Part~A (mean $\approx$501 people per image), which was not used in this study. Annotations are provided as a single $(x,y)$ pixel coordinate per head, stored per image in a MATLAB \texttt{.mat} file, rather than as bounding boxes. Both density estimation techniques uses only the official 400-image training subset: a fixed, seeded 90/10 split is drawn from it, giving 360 images for training and holding out the remaining 40 for validation during training; this same 40-image held-out set is subsequently reused as the evaluation set for reported test metrics, so the official 316-image test subset is not used by this technique. During training, this technique additionally applies random-crop augmentation, so the network is fed fixed-size image and density-map crops rather than full frames, whereas the held-out validation/test images are processed at their full $768{\times}1024$ resolution; in both cases the target density map is downsampled by a factor of 8 relative to the input. The other technique uses the official test subset directly as its validation set during training, without a further internal split. Point annotations are not used directly as supervision; both techniques convert them into smoothed density maps prior to training, as described in Section~\ref{sec:dense}.
+
+
+\subsubsection{Public Transport Crowd Counting Dataset}
+\label{sec:ptccd}
+
+Unlike SCUT-HEAD and ShanghaiTech, Part~B, the Public Transport Crowd Counting Dataset (PTCCD) is not used to train or fine-tune any individual technique in this study. Instead, it is used to evaluate the performance of the proposed passenger-counting framework as a whole, in realistic transportation environments. The dataset contains a total of 285 images and 285 corresponding annotation files, resulting in a one-to-one correspondence between images and labels. The images represent different passenger configurations and crowd densities, making the dataset suitable for evaluating both sparse and relatively dense passenger-counting conditions.
+
+The number of annotated objects in each image was calculated from the corresponding label file. For every annotation file, the number of non-empty annotation lines was counted. The resulting statistics are shown in Table~\ref{tab:object_statistics}.
+\begin{table}[htbp]
+\centering
+\caption{Statistics of Annotated Objects per Image}
+\label{tab:object_statistics}
+\begin{tabular}{lc}
+\hline
+\textbf{Statistic} & \textbf{Number of Objects} \\
+\hline
+Minimum & 2 \\
+Maximum & 60 \\
+Mean & 29.16 \\
+Median & 29.00 \\
+\hline
+\end{tabular}
+\end{table}
+
+The dataset contains an average of 29.16 annotated objects per image,
+with a median of 29 objects and a range of 2 to 60 objects. This
+variation represents different passenger-density conditions and helps
+evaluate the model's robustness across varying crowd sizes.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.90\textwidth]
+    {figures/ptccd_image_distribution.png}
+    \caption{Distribution of annotated objects per image in the Public
+    Transport Crowd Counting Dataset.}
+    \label{fig:object_distribution}
+\end{figure}
+
+The object-count distribution illustrates the variation in the number
+of annotated passengers across the dataset. It provides an overview of
+the typical crowd size and the spread of passenger counts among the
+images.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.90\textwidth]
+    {figures/ptccd_range_distribution.png}
+    \caption{Range-wise distribution of images based on the number of
+    annotated objects.}
+    \label{fig:range_crowd_distribution}
+\end{figure}
+
+The range-wise grouping provides a simple way to examine whether the
+dataset is concentrated around a particular crowd-density level or
+contains a broad range of passenger counts. The resulting distribution
+is shown in Figure~\ref{fig:range_crowd_distribution}.
+
+\section{Interpretation of Results}
 
 \subsection{Classic YOLO: Pretrained Detector, Qualitative Demonstration}
 \label{sec:classic_yolo}
@@ -300,7 +529,6 @@ GT Range & $n$ & MAE & RMSE & Mean \% Error & Mean Acc. (\%) & Mean Bias & Mean 
 \end{longtable}
 
 These results presented in Table~\ref{tab:yolo_range_breakdown} and Figure~\ref{fig:yolo_range_metrics} show that counting performance depends on crowd density. Counting accuracy is highest in sparse and moderate-density scenes but decreases in high-density scenes, where detection performance also declines. Compared with the pretrained detector, the fine-tuned model has a more predictable failure pattern, but high-density scenes remain challenging. This indicates that detection-based counting has limitations that cannot be fully solved through additional training alone.
-
 
 \subsection{FourColumn MDNN: Density-Regression Network}
 \label{sec:mdnn}
@@ -663,539 +891,3 @@ Figure~\ref{fig:csrnet_range_metrics} shows a clear dependence of CSRNet perform
 The comparison with MDNN in Table~\ref{tab:range_breakdown} shows that CSRNet's overall advantage is concentrated mainly in the moderate-density ranges. In the 11--20 range, CSRNet reduces MAE from 16.2676 to 11.7854 and RMSE from 21.2526 to 16.0560. Similar improvements are observed in the 31--40 and 41--50 ranges. In the 21--30 range, the two networks perform comparatively similarly, with MDNN achieving a slightly lower MAE of 7.0901 compared with CSRNet's 7.5173.
 
 The density-stratified results therefore show that CSRNet improves upon MDNN primarily when a moderate density signal is present. At low counts, neither density-regression architecture provides the reliability achieved by the detection-based methods. This supports the density-adaptive interpretation developed in Section~\ref{sec:mdnn}: detection-based counting is better suited to sparse scenes, while density-based methods become more competitive as crowd density increases and individual localisation becomes more difficult.
-
-% This chapter presents and analyses the empirical evidence produced by the implemented components of the proposed adaptive hybrid crowd-counting framework: a pretrained classic person detector, a head detector fine-tuned on the SCUT-Head dataset, a custom four-column multi-column density regression network (Four Column MDNN), a CSRNet style dilated convolution density network, and a classical detection assisted density estimation procedure.
-
-% \section{Data Collection and Analysis}
-
-% To train and rigorously evaluate the proposed crowd-counting model in the
-% context of public transportation, a custom dataset, referred to as the
-% \textit{Public Transport Crowd Count Dataset (PTCCD)}, was constructed by
-% collecting publicly available images and video sequences from Internet-based
-% sources. The collected data comprise two complementary modalities---static
-% images and video sequences, depicting public buses under varying conditions
-% of occupancy, illumination, viewpoint, and crowd density. The collected data
-% were manually inspected, filtered, and annotated by the author to generate
-% the corresponding ground-truth labels. This dual-modality design enables the
-% proposed model to be evaluated both on isolated still frames and on
-% temporally continuous sequences, reflecting realistic deployment scenarios
-% such as onboard CCTV monitoring.
-
-% \subsection{Data Acquisition}
-
-% The data were collected from publicly available Internet-based sources
-% containing images and video sequences of passengers inside public buses.
-% Rather than recording the data directly onboard buses, relevant
-% public-transportation images and videos were identified and downloaded from
-% publicly accessible online sources. The collected data represent a variety
-% of bus environments and operating conditions, providing diversity in
-% occupancy, illumination, viewpoint, occlusion, and passenger appearance.
-% Following data collection, the samples were manually inspected and filtered
-% by the author to remove irrelevant, duplicated, or unsuitable content. The
-% selected images and video sequences were subsequently used for manual
-% annotation and construction of the \textit{Public Transport Crowd Count
-% Dataset (PTCCD)}.
-
-% Data diversity was maintained across the following conditions:
-
-% \begin{itemize}
-%     \item \textbf{Occupancy levels:} the dataset includes scenes ranging
-%     from relatively empty buses to highly crowded and overcrowded
-%     conditions, covering a broad variation in the number of visible
-%     individuals per frame.
-
-%     \item \textbf{Illumination:} the collected data include daylight,
-%     overcast, and artificial interior lighting conditions, with variations
-%     in brightness and illumination caused by different recording
-%     environments and source videos.
-
-%     \item \textbf{Viewpoint and occlusion:} the images and video sequences
-%     contain different camera viewpoints, including elevated and
-%     forward-facing perspectives, resulting in varying degrees of partial
-%     occlusion caused by seats, handrails, vehicle structures, and passenger
-%     overlap.
-
-%     \item \textbf{Passenger heterogeneity:} the dataset captures
-%     variations in passenger pose, including standing and seated
-%     individuals, as well as differences in clothing, body appearance, and
-%     carried objects such as bags and luggage.
-% \end{itemize}
-
-% Since the data were obtained from publicly available Internet sources,
-% no direct interaction with passengers or transport operators was involved
-% in the data-collection process. The collected samples were manually
-% reviewed, and only data suitable for research and annotation purposes were
-% retained. Where necessary, personally identifiable information was excluded
-% or anonymized before the data were incorporated into the dataset. The
-% dataset annotations were created manually by the author, and no personally
-% identifiable information is included in the released annotations or
-% associated metadata.
-
-% \subsubsection{Image Subset}
-
-% The static-image subset consists of \textbf{30 images}, totaling
-% \textbf{66.70~MB}. Images were selected to be non-redundant, each representing a visually distinct
-% occupancy scenario, and were sampled to cover the full spectrum of crowd
-% densities described above. Table~\ref{tab:image_subset} summarizes the
-% image subset.
-
-% \begin{longtable}{|l|l|}
-% \caption{Composition of the image subset of PTCCD}
-% \label{tab:image_subset} \\
-% \hline
-% \textbf{Attribute} & \textbf{Value} \\
-% \hline
-% \endfirsthead
-
-% \hline
-% \textbf{Attribute} & \textbf{Value} \\
-% \hline
-% \endhead
-
-% Total images & 30 \\
-% \hline
-% Total size & 66.70 MB \\
-% \hline
-% % Resolution & [FILL] \\
-% % \hline
-% % Crowd-count range (min--max) & [FILL]--[FILL] \\
-% % \hline
-% % Mean count per image & [FILL] $\pm$ [FILL] \\
-% % \hline
-% Annotation format & YOLO (normalized \texttt{.txt}) \\
-% \hline
-% Number of label files & 30 \\
-% \hline
-% % Ground-truth reference file & \texttt{ground\_truth\_images.json} \\
-% % \hline
-
-% \end{longtable}
-
-
-% % In addition to per-instance bounding-box annotations, a consolidated
-% % \texttt{ground\_truth\_images.json} file was generated, storing the total
-% % reference passenger count for each image. This file serves as the ground
-% % truth for the counting (regression) task, independent of the detection
-% % labels, and was used to validate consistency between the number of
-% % annotated bounding boxes and the manually verified passenger count for
-% % each image.
-
-% \subsubsection{Video Subset}
-
-% The video subset consists of \textbf{10 video sequences} in \texttt{.mp4}
-% format, with a combined size of \textbf{32.00~MB}. Videos were included to evaluate the
-% temporal robustness of the proposed model and to support future extensions
-% toward video-based (rather than purely frame-based) crowd counting.
-
-% \paragraph{Frame extraction and annotation:} Rather than annotating every
-% frame -- which would be prohibitively expensive and highly redundant given
-% the low inter-frame variability of onboard footage -- frames were sampled
-% at one frame per seconds. This procedure yielded 101 annotated
-% frames across the 10 videos, each paired with a corresponding YOLO-format
-% label file (101 label files in total). The number of annotated frames
-% extracted per video is detailed in Table~\ref{tab:video_subset}.
-
-% \begin{longtable}{|l|l|l|c|c|}
-% \caption{Per-video composition of the video subset of PTCCD}
-% \label{tab:video_subset} \\
-% \hline
-% \textbf{Video ID} & \textbf{Raw Size} & \textbf{Annotated Frames} & \textbf{Labels} \\
-% % \textbf{Video ID} & \textbf{Duration} & \textbf{Raw Size} & \textbf{Annotated Frames} & \textbf{Labels} \\
-% \hline
-% \endfirsthead
-
-% \hline
-% \textbf{Video ID} & \textbf{Raw Size} & \textbf{Annotated Frames} & \textbf{Labels} \\
-% % \textbf{Video ID} & \textbf{Duration} & \textbf{Raw Size} & \textbf{Annotated Frames} & \textbf{Labels} \\
-% \hline
-% \endhead
-
-% % bus\_1  & [FILL] & 1.09 MB  & 10 & 10 \\
-% bus\_1  & 1.09 MB  & 10 & 10 \\
-% \hline
-% % bus\_2  & [FILL] & 2.41 MB  & 9  & 9  \\
-% bus\_2  & 2.41 MB  & 9  & 9  \\
-% \hline
-% % bus\_3  & [FILL] & 1.26 MB  & 11 & 11 \\
-% bus\_3  & 1.26 MB  & 11 & 11 \\
-% \hline
-% % bus\_4  & [FILL] & 0.82 MB  & 10 & 10 \\
-% bus\_4  & 0.82 MB  & 10 & 10 \\
-% \hline
-% % bus\_5  & [FILL] & 0.74 MB  & 11 & 11 \\
-% bus\_5  & 0.74 MB  & 11 & 11 \\
-% \hline
-% % bus\_6  & [FILL] & 0.77 MB  & 6  & 6  \\
-% bus\_6  & 0.77 MB  & 6  & 6  \\
-% \hline
-% % bus\_7  & [FILL] & 0.60 MB  & 9  & 9  \\
-% bus\_7  & 0.60 MB  & 9  & 9  \\
-% \hline
-% % bus\_8  & [FILL] & 6.78 MB  & 10 & 10 \\
-% bus\_8  & 6.78 MB  & 10 & 10 \\
-% \hline
-% % bus\_9  & [FILL] & 0.78 MB  & 5  & 5  \\
-% bus\_9  & 0.78 MB  & 5  & 5  \\
-% \hline
-% % bus\_10 & [FILL] & 16.83 MB & 20 & 20 \\
-% bus\_10 & 16.83 MB & 20 & 20 \\
-% \hline
-% \textbf{Total} & \textbf{33.65 MB} & \textbf{101} & \textbf{101} \\
-% \hline
-
-% \end{longtable}
-
-
-% Extracted frames were stored per video under a
-% \texttt{frames/}\,\,\texttt{labels/} directory pair
-% (Section~\ref{sec:dataset_structure}), preserving traceability between each
-% annotated frame and its source video and frame index, which allows the
-% temporal ordering to be reconstructed for sequence-level evaluation if
-% required.
-
-% \subsubsection{Annotation Protocol}
-
-% All annotations (for both the image and video-frame subsets) were produced
-% manually using Roboflow, following the YOLO bounding-box convention, where each object instance is
-% represented as a normalized
-% $\langle \text{class}, x_{\text{center}}, y_{\text{center}}, w, h \rangle$
-% tuple. A single object class, \texttt{head}, was annotated instead of full-body
-% bounding boxes, to mitigate the effects of severe inter-person occlusion
-% in crowded scenes.
-
-% % [FILL: or, if head-only annotation was used for dense-crowd counting, state: a single class, \texttt{head}, was annotated instead of full-body bounding boxes, to mitigate the effects of severe inter-person occlusion in crowded scenes.
-
-% % To ensure annotation quality:
-% % \begin{itemize}
-% %     \item Annotations were produced by [FILL: number] annotator(s) and independently verified by [FILL: number] reviewer(s) against the source image/frame.
-% %     \item [FILL: describe any inter-annotator agreement metric used, e.g.,
-% %     a random 10\% subset was cross-annotated and compared, yielding a
-% %     mean Intersection-over-Union (IoU) agreement of [FILL]\%].
-% %     \item Bounding boxes with an IoU below [FILL] against a consensus
-% %     annotation were flagged and manually corrected.
-% %     \item Frames with ambiguous occlusion (e.g., partially visible
-% %     passengers at the frame boundary) were annotated using
-% %     [FILL: convention adopted, e.g., only individuals with $>$50\% of
-% %     their body visible within the frame were labeled].
-% % \end{itemize}
-
-% \subsubsection{Dataset Structure}
-% \label{sec:dataset_structure}
-
-% The dataset directory is organized as follows:
-
-% \begin{verbatim}
-% public_transport_crowd_count_dataset/
-% |-- images/                     (30 raw images: .jpg)
-% |-- videos/                     (10 raw videos: .mp4)
-% |-- annonated_data_images/      (30 YOLO-format .txt labels for images)
-% |-- annonated_data_videos/
-%     |-- bus_1/
-%     |   |-- frames/             (10 extracted frames, .jpg)
-%     |   `-- labels/             (10 YOLO-format .txt labels)
-%     |-- bus_2/  ... bus_10/     (analogous frames/labels pairs)
-% \end{verbatim}
-% % `-- ground_truth_images.json    (reference crowd counts for images)
-
-% \subsubsection{Dataset Statistics Summary}
-
-% Table~\ref{tab:dataset_summary} consolidates the overall composition of
-% PTCCD across both modalities.
-
-% \begin{longtable}{|l|c|l|l|}
-% \caption{Summary statistics of the Public Transport Crowd Count Dataset}
-% \label{tab:dataset_summary} \\
-% \hline
-% \textbf{Component} & \textbf{Count} & \textbf{Format} & \textbf{Size} \\
-% \hline
-% \endfirsthead
-
-% \hline
-% \textbf{Component} & \textbf{Count} & \textbf{Format} & \textbf{Size} \\
-% \hline
-% \endhead
-
-% Raw images & 30 & \texttt{.jpg}, \texttt{.png} & 66.70 MB \\
-% \hline
-% Raw videos & 10 & \texttt{.mp4} & 32.00 MB \\
-% \hline
-% Annotated image labels & 30 & YOLO \texttt{.txt} & -- \\
-% \hline
-% Extracted video frames & 101 & \texttt{.jpg} & 4.17 MB \\
-% \hline
-% Video-frame labels & 101 & YOLO \texttt{.txt} & -- \\
-% \hline
-% \textbf{Total annotated instances (images + frames)} & \textbf{131} & -- & -- \\
-% \hline
-
-% \end{longtable}
-
-% % \subsubsection{Data Split}
-
-% % For model development and evaluation, the annotated dataset (29 images +
-% % 101 video frames = 130 annotated samples) was partitioned into training,
-% % validation, and test sets in a [FILL: e.g., 70/15/15] ratio, stratified by
-% % [FILL: e.g., crowd-density bin, to ensure a comparable distribution of
-% % occupancy levels across splits]. To avoid data leakage, frames extracted
-% % from the same source video were assigned exclusively to a single split
-% % (i.e., no video contributed frames to more than one of the train,
-% % validation, and test sets).
-
-% \subsubsection{Limitations}
-
-% We note the following limitations of PTCCD, which we discuss further in
-% Section 8.2.1: (i) the dataset is relatively small in scale compared to
-% benchmark crowd-counting datasets such as ShanghaiTech or JHU-CROWD++,
-% reflecting its domain-specific construction from publicly available
-% Internet sources; (ii) the collected data originate from different publicly
-% available sources and therefore may vary in terms of vehicle types, camera
-% placements, image quality, geographic contexts, and recording conditions,
-% which may limit direct generalization to unseen transportation environments;
-% and (iii) frame sampling from the collected video sequences was performed at
-% a fixed interval rather than exhaustively, which may omit rapid occupancy
-% transitions (e.g., sudden boarding/alighting events). In addition, the
-% quality and consistency of the source material may vary because the data
-% were collected from heterogeneous Internet-based sources.
-
-
-% % \subsection{Overview of Available Experimental Materials}
-
-% % Table~\ref{tab:evidence_map} summarises the experimental evidence actually available across the six implemented counting approaches, prior to any analysis.
-
-% % \small
-% % \begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{1.5cm}|>{\raggedright\arraybackslash}p{1.7cm}|>{\raggedright\arraybackslash}p{1.7cm}|>{\raggedright\arraybackslash}p{2.2cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{2cm}|}
-% % 	\caption{Evidence availability by method and result category}
-% % 	\label{tab:evidence_map}\\
-% % 	\hline
-% % 	\textbf{Category} & \textbf{Haar Cascade} & \textbf{Classic YOLO} & \textbf{SCUT-Head YOLO} & \textbf{Four-Column MDNN} & \textbf{CSRNet} & \textbf{Classical method} \\
-% % 	\hline
-% % 	\endfirsthead
-% % 	\hline
-% % 	\textbf{Category} & \textbf{Haar Cascade} & \textbf{Classic YOLO} & \textbf{SCUT-Head YOLO} & \textbf{Four-Column MDNN} & \textbf{CSRNet} & \textbf{Classical method} \\
-% % 	\hline
-% % 	\endhead
-% % 	\hline
-% % 	\endfoot
-% % 	\hline
-% % 	\endlastfoot
-% % 	Training performed & N/A (not learned) & No (pretrained) & Yes (45/50 ep.) & Yes (200/200 ep.) & Yes (200/200 ep.) & N/A (not learned) \\
-% % 	\hline
-% % 	Internal val. metrics & N/A & N/A & Yes & Yes & Yes  & N/A \\
-% % 	\hline
-% % 	% Held-out test-set metrics & Not tested & N/A & No & No (loader unused) & No & No \\
-% % 	% \hline
-% % 	% External image test & Not tested & 1 image, qualitative & No & No & No & No \\
-% % 	% \hline
-% % 	% External image test (quantitative, at scale) & Not tested & Yes, via pipeline (30 img.) & No & No & No & No \\
-% % 	% \hline
-% % 	% External video test & Not tested & No & No & No & No & No \\
-% % 	% \hline
-% % 	% Inference speed recorded & Not tested & No & Yes & No & No (train-step time only) & No \\
-% % 	% \hline
-% % \end{longtable}
-% % \normalsize
-
-% % Two consequences follow directly from Table~\ref{tab:evidence_map} and govern the scope of the rest of this chapter. First, no experiment in the available materials executes the complete adaptive pipeline end-to-end — that is, frame input through density-decision, branch selection, and fusion, with a resulting accuracy figure. Section~\ref{sec:hybrid_results} therefore reports this directly rather than estimating a hybrid accuracy figure. Second, quantitative external-image evaluation at scale (i.e. against manually verified ground truth over a meaningful sample size) exists only for the sparse, detection-based branch, obtained by running the deployed pipeline's YOLO-based detector — functionally the same pretrained detector demonstrated in the classic-YOLO notebook — over a 30-image external dataset. The three density-estimation approaches (Four-Column MDNN, CSRNet, and the classical method) were not evaluated against any external image or video dataset in the provided materials; their available evidence is limited to training/validation behaviour on their respective source datasets.
-
-% % % ============================================================
-% % \section{Evaluation Metrics and Criteria}
-
-% % This section defines every metric that appears with an actual reported value later in this chapter. Metrics are grouped by the type of task they evaluate, since detection metrics and count-based metrics answer different questions and are not treated as interchangeable.
-
-% % \subsection{Object-Detection Metrics}
-
-% % The SCUT-Head-trained detector is evaluated with standard object-detection metrics, computed by the Ultralytics evaluation routine against ground-truth bounding-box annotations.
-
-% % \textbf{Precision} is the proportion of predicted head boxes that correspond to a true head:
-% % \begin{equation}
-% 	% \text{Precision} = \frac{TP}{TP + FP}
-% 	% \end{equation}
-% % where $TP$ (true positives) is the number of predicted boxes that sufficiently overlap a ground-truth head, and $FP$ (false positives) is the number that do not. Higher precision indicates fewer spurious detections.
-
-% % \textbf{Recall} is the proportion of true heads that were successfully detected:
-% % \begin{equation}
-% 	% \text{Recall} = \frac{TP}{TP + FN}
-% 	% \end{equation}
-% % where $FN$ (false negatives) is the number of ground-truth heads with no corresponding prediction. Higher recall indicates fewer missed heads.
-
-% % \textbf{Mean Average Precision (mAP)} summarises precision across the full range of confidence thresholds and, for \textbf{mAP@50}, at a single Intersection-over-Union (IoU) threshold of 0.5:
-% % \begin{equation}
-% 	% \text{IoU}(A,B) = \frac{|A \cap B|}{|A \cup B|}, \qquad
-% 	% \text{AP} = \int_0^1 p(r)\,dr
-% 	% \end{equation}
-% % where $p(r)$ is precision as a function of recall $r$. \textbf{mAP@50--95} averages this AP across ten IoU thresholds from 0.5 to 0.95 in steps of 0.05, and is consequently a stricter, localisation-sensitive measure than mAP@50. For all three metrics, higher values indicate better detection performance.
-
-% % \subsection{Density-Estimation Training Metrics}
-
-% % Both density-regression networks are trained against a per-pixel loss on the predicted density map. The Four-Column MDNN notebook uses a combined loss,
-% % \begin{equation}
-% 	% \mathcal{L}_{\text{combined}} = 0.9 \times \text{MSE}(\hat{D}, D) + 0.1 \times \text{MAE}\!\left(\textstyle\sum \hat{D}, \sum D\right)
-% 	% \end{equation}
-% % where $\hat D$ and $D$ are the predicted and ground-truth density maps respectively, so that the loss jointly penalises per-pixel density error and whole-image count error. CSRNet is trained with a standard pixel-wise Mean Squared Error loss between predicted and ground-truth density maps. Both notebooks additionally report a \textbf{Mean Absolute Error (MAE)} metric during training; for Four-Column MDNN this is computed against the spatially downsampled ground-truth density map (i.e.\ a per-pixel density MAE, not directly a people-count MAE, notwithstanding its naming in the notebook), and for CSRNet an auxiliary \texttt{count\_mae} metric additionally compares the \emph{summed} (whole-image count) prediction against the summed ground truth:
-% % \begin{equation}
-% 	% \text{count\_MAE} = \frac{1}{N}\sum_{i=1}^{N}\left| \textstyle\sum \hat{D}_i - \sum D_i \right|
-% 	% \end{equation}
-% % Lower values indicate better performance for all loss and MAE metrics reported in this section.
-
-% % \subsection{Count-Based Evaluation Metrics}
-
-% % For the sparse-branch external evaluation (Section~\ref{sec:sparse_external}), the following whole-image count metrics are used, with $\hat c_i$ the predicted count and $c_i$ the ground-truth count for image $i$ of $M$ evaluated images:
-% % \begin{equation}
-% 	% \text{MAE} = \frac{1}{M}\sum_{i=1}^{M} \left| \hat{c}_i - c_i \right|, \qquad
-% 	% \text{RMSE} = \sqrt{ \frac{1}{M}\sum_{i=1}^{M} \left( \hat{c}_i - c_i \right)^2 }
-% 	% \end{equation}
-% % \begin{equation}
-% 	% \text{MAPE} = \frac{1}{M}\sum_{i=1}^{M} \frac{\left| \hat{c}_i - c_i \right|}{c_i} \times 100\%, \qquad
-% 	% \text{Bias} = \frac{1}{M}\sum_{i=1}^{M} \left( \hat{c}_i - c_i \right)
-% 	% \end{equation}
-% % RMSE penalises large individual errors more heavily than MAE, so a wide MAE/RMSE gap indicates that error is concentrated in a minority of images rather than spread evenly. Bias indicates systematic direction: a negative value indicates the model under-counts on average. All four metrics are lower-is-better; bias is exceptional in that its \emph{sign}, not only its magnitude, is informative.
-
-% % \subsection{Computational Metrics}
-
-% % Where inference timing is available, it is reported as milliseconds per image, decomposed (where the underlying tool reports it) into pre-processing, model inference, and post-processing stages, following the Ultralytics validation routine's own reporting convention. Frames-per-second (FPS) figures quoted in this chapter are derived arithmetically from these measured per-image times ($\text{FPS} = 1000 / \text{total ms per image}$) and are not independently measured throughput benchmarks; no sustained-throughput or batched-inference test was performed for any method.
-
-% % ============================================================
-% \section{Comparison with Related Work}
-% \label{sec:related_work}
-
-% % \subsection{Fair-Comparison Basis}
-
-% % Before any numerical comparison is drawn, Table~\ref{tab:fair_comparison} states explicitly, for each comparison made in this section, whether the evaluation conditions are considered directly comparable, partially comparable, or contextual only, following the dataset, split, resolution, and protocol differences identified during evidence collection.
-
-% % \begin{longtable}{|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.9cm}|}
-% % 	\caption{Comparability assessment for each related-work comparison}
-% % 	\label{tab:fair_comparison}\\
-% % 	\hline
-% % 	\textbf{Comparison} & \textbf{My data/split} & \textbf{Published data/split} & \textbf{Comparability} \\
-% % 	\hline
-% % 	\endfirsthead
-	
-% % 	\hline
-% % 	\textbf{Comparison} & \textbf{My data/split} & \textbf{Published data/split} & \textbf{Comparability} \\
-% % 	\hline
-% % 	\endhead
-	
-% % 	SCUT-Head detector vs.\ original SCUT-Head paper &
-% % 	2,730 / 866 subset &
-% % 	Full Part A+B, 4,405 images &
-% % 	Partially comparable (subset, not full official split) \\
-% % 	\hline
-	
-% % 	Four-Column MDNN vs.\ published MCNN &
-% % 	ShanghaiTech Part B, val.\ split, 40 img. &
-% % 	ShanghaiTech Part B, official 316-img.\ test set &
-% % 	Not directly comparable \\
-% % 	\hline
-	
-% % 	CSRNet (this work) vs.\ published CSRNet &
-% % 	Part B &
-% % 	Part B, fully converged &
-% % 	Not comparable (training incomplete) \\
-% % 	\hline
-	
-% % \end{longtable}
-
-% %
-% %\begin{longtable}{|p{3.4cm}|p{3.0cm}|p{3.0cm}|p{3.9cm}|}
-% %	\caption{Comparability assessment for each related-work comparison}
-% %	\label{tab:fair_comparison}\\
-% %	\hline
-% %	\textbf{Comparison} & \textbf{My data/split} & \textbf{Published data/split} & \textbf{Comparability} \\
-% %	\hline
-% %	\endfirsthead
-% %	
-% %	\hline
-% %	\textbf{Comparison} & \textbf{My data/split} & \textbf{Published data/split} & \textbf{Comparability} \\
-% %	\hline
-% %	\endhead
-% %	
-% %	SCUT-Head detector vs.\ original SCUT-Head paper &
-% %	2,730 / 866 subset &
-% %	Full Part A+B, 4,405 images &
-% %	Partially comparable (subset, not full official split) \\
-% %	\hline
-% %	
-% %	Four-Column MDNN vs.\ published MCNN &
-% %	ShanghaiTech Part B, val.\ split, 40 img. &
-% %	ShanghaiTech Part B, official 316-img.\ test set &
-% %	Not directly comparable
-% %	\hline
-% %	
-% %	% (different eval.
-% %	
-% %	% \ split; my figure is per-pixel val.\ MAE, not test-set count MAE) \\
-% %	\hline
-% %	
-% %	CSRNet (this work) vs.\ published CSRNet &
-% %	Part B &
-% %	Part B, fully converged &
-% %	Not comparable (training incomplete) \\
-% %	\hline
-% %	
-% %\end{longtable}
-
-% \subsection{Detection-Based Head Counting}
-
-% The SCUT-Head dataset was introduced by Peng et al.~\cite{peng2018scuthead} together with a Feature Refine Net and cascaded multi-scale detection architecture specifically designed for small, densely-packed head instances; the original publication does not report results in the precision/recall/mAP@50 format used by the Ultralytics YOLO framework employed here, precluding a direct numerical comparison of detection metrics on identical terms. The general finding of that work, that head detection in dense, small-instance conditions benefits from architectural provisions for small-object and multi-scale detection is broadly consistent with the resolution sensitivity directly observed in Section~\ref{sec:scut_yolo} (a 7.6-point mAP@50 drop when inference resolution was halved), though this study did not test an architecture specifically designed for small-head detection and cannot claim to have reproduced or extended that paper's specific findings.
-
-% \subsection{Density-Map Estimation on ShanghaiTech}
-
-% The Multi-Column CNN (MCNN) architecture that the Four-Column MDNN implementation extends was introduced by Zhang et al.~\cite{Zhang2016}, reporting a whole-image count MAE of 26.4 on the official ShanghaiTech Part~B \emph{test} set (316 images). CSRNet~\cite{li2018csrnet} later reported a substantially lower MAE of 10.6 on the same official Part~B test set. As Table~\ref{tab:fair_comparison} states, neither published figure is directly comparable to the results in Sections~\ref{sec:mdnn}--\ref{sec:csrnet}: both published figures are whole-image count MAE on the official 316-image \emph{test} split, whereas this work's Four-Column MDNN figure (15.20, best epoch) is a per-pixel density MAE on a 40-image internal \emph{validation} split that was never applied to the official test set
-
-% % , and this work's CSRNet figure reflects only 4 of 200 planned training epochs.
-
-% % \textbf{No like-for-like MAE comparison against either published benchmark can therefore be responsibly reported for either network in this study.} 
-
-% The qualitative pattern that both published works report, substantially lower error on Part~B than on the denser Part~A split, is consistent with, and reinforces, the general density-dependent degradation pattern directly observed for the sparse detection branch in Section~\ref{sec:sparse_external}, even though the specific architectures differ.
-
-% \subsection{YOLO-Family Detection}
-
-% Both the classic and SCUT-Head-fine-tuned detectors in this study build on the YOLOv8 architecture released by Ultralytics~\cite{yolov8_ultralytics}, itself a successor in the single-shot detection lineage established by Redmon et al.~\cite{redmon2016yolo}. As with the SCUT-Head comparison above, Ultralytics' YOLOv8 release documentation reports benchmark figures on the COCO dataset under COCO's own evaluation protocol, which is not the task, dataset, or metric evaluated in this chapter (head-specific detection on SCUT-Head, or person detection on public-transport imagery); no numerical comparison against COCO benchmark figures is therefore drawn.
-
-% % ============================================================
-% \section{Discussion of Findings}
-% \label{sec:discussion}
-
-% \subsection{Finding 1: Sparse-Scene Counting}
-
-% % , and matched ground truth exactly on the one image directly cross-checked in Section~\ref{sec:reproducibility_case}
-
-% The evidence gathered across Sections~\ref{sec:classic_yolo}, \ref{sec:scut_yolo}, and \ref{sec:sparse_external} indicates that detection-based counting performs well under sparse-to-moderate crowding: the deployed pipeline's sparse branch achieved an overall MAE of 1.83 across 30 external images, falling to 0.89 within the sparse-only stratum. The SCUT-Head-fine-tuned detector, evaluated separately on its own held-out split, achieved a substantially higher recall (0.96 at default thresholds) than would be expected from a generic person detector applied to small, dense head instances, though this cannot be directly compared to the pretrained detector's performance because the two were never evaluated on the same data.
-
-% \subsection{Finding 2: Dense-Scene Counting}
-
-% The three approaches intended for dense-scene conditions are, on the available evidence, at markedly different stages of readiness. The Four-Column MDNN completed its full training schedule and shows plausible, if noisy, convergence behaviour (Section~\ref{sec:mdnn}), but has no test-set or external evaluation at all. 
-
-% % CSRNet's training was interrupted at 2\% completion, and its own auxiliary count-error metric shows a likely scale anomaly (Section~\ref{sec:csrnet}); 
-
-% % its four-epoch trajectory permits no defensible statement about eventual accuracy. 
-
-% % (Section~\ref{sec:classical}) 
-
-% The classical method is, by construction, bounded to within 15\% of the underlying detector's own count and was not independently evaluated. None of the three dense-scene approaches can currently be said, on this evidence, to out- or under-perform the sparse branch's dense-stratum accuracy (MAE 3.45) reported in Section~\ref{sec:sparse_external}, because no equivalent external evaluation exists for any of them.
-
-% % \subsection{Finding 3: Adaptive Methodology}
-
-% % As stated in Section~\ref{sec:hybrid_results}, no experiment evaluates the adaptive, fused framework end-to-end. The sparse-branch evidence in Section~\ref{sec:sparse_external} — specifically, the roughly fourfold increase in MAE and bias magnitude between sparse and dense strata — constitutes a clear empirical motivation for why an adaptive, density-aware strategy \emph{could} be beneficial, since it demonstrates that a single fixed strategy's accuracy is not uniform across crowd-density conditions. However, motivation is not validation: whether switching to, or fusing with, a density-based estimate actually improves on the sparse branch's dense-stratum performance is an open, untested question on the evidence available, and this chapter does not claim otherwise.
-
-% \subsection{Finding 3: External Generalisation}
-
-% Generalisation to unseen, externally-sourced imagery was tested only for the sparse branch (Section~\ref{sec:sparse_external}), where accuracy degraded with increasing crowd density — a domain-shift-adjacent finding in the sense that the external images span viewpoints, lighting conditions, and vehicle types not present in the detector's original COCO pretraining data, yet performance remained strong in the majority (sparse) stratum. 
-
-% % No generalisation evidence exists for the SCUT-Head detector, Four-Column MDNN, or CSRNet, each of which has been evaluated only on data drawn from the same distribution as its own training/validation split.
-
-% % \subsection{Finding 5: Accuracy vs.\ Computational Cost}
-
-% % The only directly observed accuracy/speed trade-off in this study is the SCUT-Head detector's resolution sensitivity (Section~\ref{sec:computational}): a 40\% reduction in inference time accompanied a 7.6-point reduction in mAP@50. This single data point is consistent with the generally expected trade-off between input resolution and detection accuracy in convolutional detectors, but constitutes one paired observation rather than a systematically swept accuracy/speed curve, and should be weighted accordingly.
-
-% % \subsection{Finding 6: Practical Limitations}
-
-% % The experimental evidence directly supports the following limitations: (i) detection-based counting accuracy degrades substantially under occlusion/high density (Section~\ref{sec:sparse_external}); (ii) nominally identical detector configurations can yield materially different counts depending on post-processing (NMS) settings (Section~\ref{sec:reproducibility_case}); (iii) neither density-regression network has been validated against a held-out test set or external data, so their real-world reliability is currently unverified rather than merely unmeasured precisely; (iv) CSRNet training was left in a state that is not representative of the architecture's achievable performance; and (v) inference-resolution choice materially affects both accuracy and speed for at least one evaluated model, with no equivalent data available for the others.
-
-% % \subsection{Finding 7: Research Contribution}
-
-% % On the evidence available, this body of work demonstrates a working, independently-trained or fine-tuned instance of each of the four candidate models intended for the adaptive framework's sparse and dense branches, and provides a genuine, at-scale, externally-validated characterisation of one of them (the sparse detection branch) that directly substantiates the density-dependent accuracy degradation motivating an adaptive design. It does not yet demonstrate — and this chapter does not claim — that the adaptive framework as a whole outperforms, or even matches, a well-configured single-branch approach, since that specific, decisive comparison has not yet been executed. The most accurate characterisation of the current evidence is that the sparse branch is validated and its limitations are quantified, the dense branches are implemented but not yet comparably validated, and the fusion/adaptation mechanism that would unify them remains empirically untested.
-
-% % \subsection{Final Analytical Synthesis}
-
-% % Of the ten synthesis questions posed for this chapter, the available evidence supports a direct answer to four: the best-performing method for sparse scenes, on the evidence available, is the deployed pipeline's sparse branch (MAE 0.89 in the sparse stratum); no method can be identified as best for dense scenes, since no two dense-scene approaches were evaluated on comparable data and none was evaluated on external data at all; the sparse branch is the only method shown to generalise to external images, having been evaluated on none; and the major directly-evidenced sources of error are occlusion-driven under-counting (Section~\ref{sec:sparse_external}) and NMS-configuration sensitivity (Section~\ref{sec:reproducibility_case}). The remaining six questions — generalisation to external video, computational efficiency ranking across all methods, experimental justification for the adaptive framework specifically, the full extent of remaining limitations, practical implications for deployment, and a defensible quantitative comparison with established published research — cannot be answered from the materials analysed in this chapter and are not answered here; each is identified above, at the point in the chapter most relevant to it, as a specific gap rather than left implicit.
