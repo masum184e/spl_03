@@ -302,6 +302,368 @@ GT Range & $n$ & MAE & RMSE & Mean \% Error & Mean Acc. (\%) & Mean Bias & Mean 
 These results presented in Table~\ref{tab:yolo_range_breakdown} and Figure~\ref{fig:yolo_range_metrics} show that counting performance depends on crowd density. Counting accuracy is highest in sparse and moderate-density scenes but decreases in high-density scenes, where detection performance also declines. Compared with the pretrained detector, the fine-tuned model has a more predictable failure pattern, but high-density scenes remain challenging. This indicates that detection-based counting has limitations that cannot be fully solved through additional training alone.
 
 
+\subsection{FourColumn MDNN: Density-Regression Network}
+\label{sec:mdnn}
+
+This section reports the experimental results obtained from training and evaluating the proposed MDNN density-estimation model for crowd head counting. The model was trained to learn the relationship between input images and their corresponding density representations, with training and validation performance monitored using loss and mean absolute error (MAE) over 100 epochs. The best-performing checkpoint was selected based on validation performance to provide the most reliable estimate of the model's generalisation capability. The results presented below examine the model's training behaviour, validation performance, and final evaluation results, providing an assessment of its effectiveness for density-based crowd estimation.
+
+\subsubsection{Training Performance and Convergence}
+
+The training history covers 100 epochs and tracks training and validation loss and MAE, along with the best-performing checkpoint. Both training and validation metrics show substantial improvement during training, while training loss and MAE reach their lowest values at the final epoch. In contrast to the detection experiment in Section~\ref{sec:scut_yolo}, the MDNN does not employ a task-specific pretrained backbone, requiring it to learn relevant features directly from the training data. The resulting progression of training and validation performance is presented in Figure~\ref{fig:training_loss}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1.0\linewidth]{figures/mdnn_training_validation_loss_mae_curves.png}
+\caption{Training and validation loss (left) and MAE (right) across 100 training epochs.}
+\label{fig:training_loss}
+\end{figure}
+
+The model achieves its best validation performance at epoch 80, with a validation loss of 2.2710 and MAE of 22.6987, as reported in Table~\ref{tab:training_summary}. Although training loss and MAE continue to decrease through epoch 100, the corresponding validation metrics increase to 2.7081 and 27.0703, respectively. This indicates that the model reaches its optimal generalisation performance around epoch 80, after which further training improves the fit to the training data without improving validation performance.
+
+\begin{longtable}{@{\extracolsep{\fill}}lcccc@{}}
+\caption{Training progression summary at key epochs.}
+\label{tab:training_summary} \\
+
+\hline
+\textbf{Epoch} & \textbf{Train Loss} & \textbf{Val Loss} & 
+\textbf{Train MAE} & \textbf{Val MAE} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Epoch} & \textbf{Train Loss} & \textbf{Val Loss} & 
+\textbf{Train MAE} & \textbf{Val MAE} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+1 (initial) 
+& 6.6454 
+& 9.5432 
+& 66.4447 
+& 95.4262 \\
+
+80 (best validation) 
+& 1.5183 
+& \textbf{2.2710} 
+& 15.1695 
+& \textbf{22.6987} \\
+
+100 (final) 
+& \textbf{0.9805} 
+& 2.7081 
+& \textbf{9.7914} 
+& 27.0703 \\
+
+\end{longtable}
+
+
+Following the best epoch, training loss and training MAE continue to decrease monotonically toward their final values, whereas validation loss and validation MAE fluctuate within a bounded range without falling below their earlier minimum, as evident from Figure~\ref{fig:training_loss} and the key-epoch values reported in Table~\ref{tab:training_summary}. This pattern indicates that the model continues to reduce error on the training set beyond the point of optimal generalisation, without a corresponding improvement on unseen validation data. Consequently, the checkpoint at epoch 80, corresponding to the minimum validation loss and MAE, represents the point of optimal generalisation identified from the recorded training history.
+
+
+\subsubsection{Quantitative Performance Evaluation}
+
+The aggregate results in Table~\ref{tab:mdnn_summary} are weaker than those of the YOLO-based methods, reflecting the different error characteristics of density-based estimation compared with object detection. The MDNN predicts continuous density maps rather than discrete objects, resulting in only moderate correlation between predicted and ground-truth counts and a negative coefficient of determination. These results suggest limited overall predictive reliability and are examined further through the density-stratified analysis in the following subsection.
+
+\begin{longtable}{@{\extracolsep{\fill}}lc@{}}
+\caption{Aggregate MDNN performance on the 285-image test set.}
+\label{tab:mdnn_summary} \\
+
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{2}{r}{\textit{Continued on next page}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+Images & 285 \\
+Total Ground Truth & 8{,}310 \\
+Total Predicted & 9{,}659.3860 \\
+Mean Ground Truth Count & 29.1579 \\
+Mean Predicted Count & 33.8926 \\
+Mean Absolute Error (MAE) & 12.9423 \\
+Root Mean Squared Error (RMSE) & 18.2807 \\
+Mean Absolute Percentage Error (MAPE) & 110.3318\% \\
+Pearson Correlation (GT vs.\ Predicted) & 0.5250 \\
+
+\end{longtable}
+
+The MDNN shows a systematic tendency toward overestimation, with the largest percentage errors occurring mainly in images with low ground-truth counts. This pattern is evident in the per-image error distribution shown in Figure~\ref{fig:actual_predicted}, while the aggregate statistics in Table~\ref{tab:mdnn_summary} show a mean predicted count of 33.8926 compared with a mean ground-truth count of 29.1579. This behaviour can be attributed to the model's reliance on local texture and contextual cues rather than explicit object representations, which may cause background patterns or clutter to be interpreted as additional density. Such errors have a greater relative impact in sparse scenes than in densely populated ones, consistent with the largest absolute errors observed in the test set.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1.0\linewidth]{figures/mdnn_per_image_error_and_gt_vs_predicted.png}
+\caption{Per-image counting error (left) and ground-truth versus predicted count (right) across the 285 test images.}
+\label{fig:actual_predicted}
+\end{figure}
+
+A notable proportion of test images have absolute errors equal to or greater than their ground-truth counts, representing errors comparable to predicting zero. The per-image error plot in Figure~\ref{fig:actual_predicted} illustrates the substantial variation in prediction error across the test set, while the aggregate error statistics in Table~\ref{tab:mdnn_summary} further quantify this variability. This finding supports the identified limitation in sparse scenes, where relatively small amounts of incorrectly attributed background density can produce errors exceeding the actual number of individuals.
+
+\subsubsection{MDNN Performance by Ground-Truth Count Range}
+
+The density-range results in Table~\ref{tab:range_breakdown} and Figure~\ref{fig:range_metrics} clarify the aggregate findings and reveal a pattern opposite to that of the detection-based methods. While detection performance is strongest in sparse scenes and declines with increasing density, MDNN performs poorly at very low counts but improves substantially at moderate densities and remains relatively stable thereafter. This behaviour is consistent with density regression, as stronger crowd-density signals provide more reliable texture and contextual cues, whereas sparse scenes make background-related noise more significant relative to the true count.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1.0\linewidth]{figures/mdnn_performance_by_gt_range.png}
+\caption{MAE, MSE, mean percentage error, and mean counting accuracy of the MDNN across ground-truth count ranges.}
+\label{fig:range_metrics}
+\end{figure}
+
+The bias also varies with crowd density, supporting the above interpretation. It is strongly positive in the sparsest scenes, indicating overestimation likely caused by background and textural noise, but becomes mildly negative for counts above approximately 20, suggesting moderate underestimation as crowd density increases. This may result from overlapping and closely spaced individuals producing compressed density representations that are more difficult for the network to distinguish accurately.
+
+\begin{longtable}{@{\extracolsep{\fill}}lccccc c@{}}
+\caption{MDNN prediction performance by ground-truth count range (bin width = 10).}
+\label{tab:range_breakdown} \\
+\hline
+GT Range & $n$ & MAE & RMSE & Mean \% Error & Mean Accuracy (\%) & Mean Bias \\
+\hline
+\endfirsthead
+
+\hline
+GT Range & $n$ & MAE & RMSE & Mean \% Error & Mean Accuracy (\%) & Mean Bias \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+1--10  & 61 & 18.4675 & 26.8621 & 345.3091 & 15.4442 & 17.9646 \\
+11--20 & 48 & 16.2676 & 21.2526 & 123.7618 & 36.2343 & 14.7079 \\
+21--30 & 40 & \textbf{7.0901} & \textbf{8.7197} & \textbf{26.9140} & 73.0860 & \textbf{$-0.8633$} \\
+31--40 & 42 & 10.7568 & 13.0606 & 30.3733 & 69.6267 & $-3.5655$ \\
+41--50 & 49 & 11.5492 & 14.1557 & 25.1219 & 74.8893 & $-2.0146$ \\
+51--60 & 45 & 10.6642 & 14.5467 & 19.0432 & \textbf{81.068} & $-3.7653$ \\
+
+\end{longtable}
+
+Taken together with the range-based results of the two detection-based methods, these findings provide strong empirical support for combining detection- and density-based counting in a single adaptive framework. MDNN performs least reliably in sparse scenes, where detection-based methods are strongest, while its performance becomes more stable at higher densities, where detection methods are increasingly affected by occlusion. Thus, the two approaches exhibit complementary strengths across different crowd-density conditions rather than differing solely in overall accuracy.
+
+\subsection{CSRNet: VGG-16-Based Density-Regression Network}
+\label{sec:csrnet}
+
+This section reports the experimental results obtained from training and evaluating CSRNet for crowd head counting on the same 285-image test set used throughout this chapter. Similar to the proposed MDNN described in Section~\ref{sec:mdnn}, CSRNet estimates a continuous density map and derives the final crowd count by integrating the predicted density rather than explicitly localising individual heads. The two networks therefore represent alternative implementations of the density-based counting paradigm and can be compared directly in terms of their training behaviour, aggregate counting accuracy, and performance across different crowd-density ranges.
+
+\subsubsection{Training Performance and Convergence}
+
+The CSRNet training history covers 100 epochs and records training and validation loss and MAE under a step-decayed learning-rate schedule. The learning rate is initially set to $1\times10^{-4}$ and is reduced by an order of magnitude at epochs 87, 92, and 97, reaching a final value of $1\times10^{-7}$. As illustrated in Figure~\ref{fig:csrnet_training_curves}, both training and validation loss decrease rapidly during the early stages of training and then converge gradually as training progresses. The learning-rate reductions near the end of the schedule produce only small additional changes in the validation metrics, indicating that the model has largely stabilised before the final epoch.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1.0\linewidth]{figures/csrnet_training_validation_loss_mae_curves.png}
+\caption{CSRNet training and validation loss (left) and MAE (right) across 100 training epochs.}
+\label{fig:csrnet_training_curves}
+\end{figure}
+
+Figure~\ref{fig:csrnet_training_curves} shows that CSRNet converges substantially during the early epochs, followed by a gradual reduction in both training and validation error. Unlike the MDNN, for which the validation performance reaches its best point at epoch 80 and subsequently deteriorates despite continued improvement in the training metrics, CSRNet maintains a close correspondence between its training and validation curves during the later stages of training. The key training values are summarised in Table~\ref{tab:csrnet_training_summary}.
+
+\begin{longtable}{@{\extracolsep{\fill}}lcccc@{}}
+\caption{CSRNet training progression at key epochs.}
+\label{tab:csrnet_training_summary} \
+
+\hline
+\textbf{Epoch} & \textbf{Train Loss} & \textbf{Val Loss} &
+\textbf{Train MAE} & \textbf{Val MAE} \
+\hline
+\endfirsthead
+
+\hline
+\textbf{Epoch} & \textbf{Train Loss} & \textbf{Val Loss} &
+\textbf{Train MAE} & \textbf{Val MAE} \
+\hline
+\endhead
+
+\hline
+\multicolumn{5}{r}{\textit{Continued on next page}} \
+\endfoot
+
+\hline
+\endlastfoot
+
+1 (initial)
+& 576.6667
+& 19.6584
+& 8.9699
+& 3.3617 \
+
+99 (best validation)
+& 0.0015
+& \textbf{0.0035}
+& 0.0139
+& \textbf{0.0173} \
+
+100 (final)
+& \textbf{0.0014}
+& 0.0035
+& \textbf{0.0140}
+& 0.0172 \
+
+\end{longtable}
+
+The final training and validation metrics remain closely aligned, with the train--validation MAE difference remaining below approximately 0.003 during the last 20 epochs, as indicated by Figure~\ref{fig:csrnet_training_curves}. This behaviour suggests that CSRNet does not exhibit the same degree of post-optimal training divergence observed for MDNN. Instead, the model reaches a stable solution in which further reductions in training error produce little change in validation performance. The substantially smaller loss and MAE values compared with the count-level errors reported in Table~\ref{csrnet_training_summary} also indicate that the training metrics are associated with normalised or rescaled density targets and should therefore be interpreted primarily as indicators of optimisation behaviour rather than as direct measures of image-level counting error.
+
+Compared with MDNN, CSRNet therefore demonstrates a more stable training trajectory. MDNN continues to reduce its training error after its best validation checkpoint at epoch 80, whereas CSRNet's training and validation metrics remain closely coupled toward the end of training. This indicates that CSRNet achieves a comparatively stable convergence pattern, although the stability of the training process does not by itself imply high counting accuracy on unseen test images.
+
+\subsubsection{Quantitative Performance Evaluation}
+
+The aggregate CSRNet results are presented in Table~\ref{csrnet_training_summary}. Compared with the MDNN results in Table~\ref{tab:mdnn_summary}, CSRNet achieves lower MAE, RMSE, and MAPE, together with a slightly higher Pearson correlation and a positive coefficient of determination. These results indicate that CSRNet provides a modest overall improvement in count prediction relative to MDNN. However, the correlation remains weak and the overall errors remain substantial, showing that the improvement does not translate into consistently accurate predictions across the complete test set.
+
+\begin{longtable}{@{\extracolsep{\fill}}lc@{}}
+\caption{Aggregate CSRNet performance on the 285-image test set.}
+\label{csrnet_training_summary} \\
+
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{2}{r}{\textit{Continued on next page}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+Images & 285 \\
+Total Ground Truth & 8{,}310 \\
+Total Predicted & 9{,}216.0216 \\
+Mean Ground Truth Count & 29.1579 \\
+Mean Predicted Count & 32.3369 \\
+Mean Absolute Error (MAE) & 10.6559 \\
+Root Mean Squared Error (RMSE) & 17.7773 \\
+Mean Absolute Percentage Error (MAPE) & 93.6675\% \\
+Pearson Correlation (GT vs.\ Predicted) & 0.5539 \\
+Coefficient of Determination ($R^2$) & 0.0354 \\
+
+\end{longtable}
+
+The per-image prediction behaviour is illustrated in Figure~\ref{fig:csrnet_actual_predicted}, which shows the counting error for individual test images together with the relationship between ground-truth and predicted counts. The figure demonstrates that, despite the improvement in aggregate metrics, substantial variation remains between individual predictions.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1.0\linewidth]{figures/csrnet_per_image_error_and_gt_vs_predicted.png}
+\caption{Per-image counting error (left) and ground-truth versus predicted count (right) across the 285 CSRNet test images.}
+\label{fig:csrnet_actual_predicted}
+\end{figure}
+
+As shown in Figure~\ref{fig:csrnet_actual_predicted}, CSRNet exhibits a systematic tendency toward overestimation, with the mean predicted count of 32.3369 exceeding the mean ground-truth count of 29.1579 by approximately 3.18 individuals, as reported in Table~\ref{csrnet_training_summary}. The most extreme error is also associated with a sparse scene: the model overestimates a ground-truth count of 4 by 127.18 individuals. Furthermore, 62 of the 285 test images (21.8\%) have an absolute error at least as large as the corresponding ground-truth count. This indicates that, despite its improved aggregate performance over MDNN, CSRNet retains a substantial vulnerability to large counting errors in sparse scenes.
+
+The comparison with MDNN is therefore mixed. CSRNet improves the aggregate MAE from 12.9423 to 10.6559 and the Pearson correlation from 0.5250 to 0.5539, while also changing the coefficient of determination from the negative value obtained by MDNN to a slightly positive $R^2$ of 0.0354. However, both networks exhibit the same general tendency toward overestimation in sparse scenes. The results therefore suggest that CSRNet improves the overall density estimation process without eliminating the principal failure mode identified for MDNN.
+
+\subsubsection{CSRNet Performance by Ground-Truth Count Range}
+
+To examine whether the aggregate improvement of CSRNet is consistent across different crowd densities, its performance is evaluated using the same ground-truth count ranges applied to MDNN and the two YOLO-based methods. Table~\ref{tab:csrnet_range_breakdown} and Figure~\ref{fig:csrnet_range_metrics} show the resulting density-stratified performance.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1.0\linewidth]{figures/csrnet_range_metrics.png}
+\caption{CSRNet performance across ground-truth count ranges, showing MAE, RMSE, mean percentage error, mean accuracy, and mean bias.}
+\label{fig:csrnet_range_metrics}
+\end{figure}
+
+Figure~\ref{fig:csrnet_range_metrics} shows a clear dependence of CSRNet performance on ground-truth crowd density. The largest errors occur in the sparsest range of 1--10 individuals, while the error decreases substantially in the moderate-density ranges. Performance then remains comparatively stable at higher counts. This pattern is broadly consistent with the behaviour observed for MDNN in Figure~\ref{fig:range_metrics}, although CSRNet generally achieves lower errors in the moderate-density regime.
+
+\begin{longtable}{@{\extracolsep{\fill}}lcccccc@{}}
+\caption{CSRNet prediction performance by ground-truth count range (bin width = 10).}
+\label{tab:csrnet_range_breakdown} \\
+
+\hline
+\textbf{GT Range} & \textbf{$n$} & \textbf{MAE} & \textbf{RMSE} &
+\textbf{Mean \% Error} & \textbf{Mean Accuracy (\%)} & \textbf{Mean Bias} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{GT Range} & \textbf{$n$} & \textbf{MAE} & \textbf{RMSE} &
+\textbf{Mean \% Error} & \textbf{Mean Accuracy (\%)} & \textbf{Mean Bias} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{7}{r}{\textit{Continued on next page}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+1--10
+& 61
+& 15.1607
+& 29.7167
+& 302.3687
+& 20.1351
+& 14.9335 \\
+
+11--20
+& 48
+& \textbf{11.7854}
+& \textbf{16.0560}
+& \textbf{90.5073}
+& 32.2793
+& 10.5074 \\
+
+21--30
+& 40
+& 7.5173
+& 9.6618
+& 29.0258
+& 71.0124
+& $-0.6292$ \\
+
+31--40
+& 42
+& 7.4371
+& 10.7183
+& 21.0074
+& 79.0589
+& $-3.1704$ \\
+
+41--50
+& 49
+& 9.8036
+& 13.3726
+& 21.3963
+& 78.9686
+& $-1.0126$ \\
+
+51--60
+& 45
+& 10.0668
+& 12.0234
+& 18.1028
+& \textbf{81.8972}
+& $-6.6964$ \\
+
+\end{longtable}
+
+The comparison with MDNN in Table~\ref{tab:range_breakdown} shows that CSRNet's overall advantage is concentrated mainly in the moderate-density ranges. In the 11--20 range, CSRNet reduces MAE from 16.2676 to 11.7854 and RMSE from 21.2526 to 16.0560. Similar improvements are observed in the 31--40 and 41--50 ranges. In the 21--30 range, the two networks perform comparatively similarly, with MDNN achieving a slightly lower MAE of 7.0901 compared with CSRNet's 7.5173.
+
+The density-stratified results therefore show that CSRNet improves upon MDNN primarily when a moderate density signal is present. At low counts, neither density-regression architecture provides the reliability achieved by the detection-based methods. This supports the density-adaptive interpretation developed in Section~\ref{sec:mdnn}: detection-based counting is better suited to sparse scenes, while density-based methods become more competitive as crowd density increases and individual localisation becomes more difficult.
+
 % This chapter presents and analyses the empirical evidence produced by the implemented components of the proposed adaptive hybrid crowd-counting framework: a pretrained classic person detector, a head detector fine-tuned on the SCUT-Head dataset, a custom four-column multi-column density regression network (Four Column MDNN), a CSRNet style dilated convolution density network, and a classical detection assisted density estimation procedure.
 
 % \section{Data Collection and Analysis}
