@@ -143,6 +143,7 @@
 % ==================================================
 \renewcommand{\contentsname}{Table of Contents}
 \tableofcontents
+\thispagestyle{fancy}
 \clearpage
 
 % ==================================================
@@ -150,24 +151,26 @@
 % ==================================================
 \listoffigures
 % \addcontentsline{toc}{chapter}{List of Figures}
+\thispagestyle{fancy}
 \clearpage
 
 % ==================================================
 % List of Tables
 % ==================================================
 \listoftables
+\thispagestyle{fancy}
 % \addcontentsline{toc}{chapter}{List of Tables}
 \clearpage
 
 \include{chapters/acknowledgement}
 \include{chapters/abstract}
 
-% % ==================================================
-% % CHAPTER 1
-% % ==================================================
-% \pagenumbering{arabic}
-% \setcounter{page}{1}
-% \include{chapters/SPL_03_Final_Report_Chapter_1}	
+% ==================================================
+% CHAPTER 1
+% ==================================================
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\include{chapters/SPL_03_Final_Report_Chapter_1}	
 
 % % ==================================================
 % % CHAPTER 2
