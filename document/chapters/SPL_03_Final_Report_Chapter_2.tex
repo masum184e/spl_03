@@ -107,143 +107,139 @@ Person detection-based techniques attempt to identify a person by detecting the 
 From the reviewed studies, it was evident that different sensing and deep learning methods are being used to approach the problem of passenger counting. The existing methods have good counting accuracy, but they can be influenced by occlusion, lighting conditions, camera view position, computational complexity and environmental changes. Especially in bus situations, when several people can be seated side by side, with only their heads or upper bodies visible. Table~\ref{tab:literature_review} presents a comparison of the selected studies in terms of their objectives, contributions and findings.
 
 \begin{longtable}{|
-		>{\raggedright\arraybackslash}p{2.0cm}|
-		>{\raggedright\arraybackslash}p{3.5cm}|
+		>{\raggedright\arraybackslash}p{2.2cm}|
+		>{\raggedright\arraybackslash}p{3.2cm}|
 		>{\raggedright\arraybackslash}p{4.0cm}|
-		>{\raggedright\arraybackslash}p{4.0cm}|}
-
+		>{\raggedright\arraybackslash}p{4.0cm}|
+	}
 	\caption{Literature Summary on Passenger Counting}
 	\label{tab:literature_review} \\
-
+	
 	\hline
 	\textbf{Reference} &
 	\textbf{Objective} &
 	\textbf{Contribution} &
-	\textbf{Findings}
-	% \textbf{Results / Limitations}
-	\\
+	\textbf{Findings} \\
 	\hline
 	\endfirsthead
-
-	\multicolumn{4}{c}%
-	The name of the table\ \thetable{} -- continued on previous page.
+	
+	\multicolumn{4}{c}{%
+		\textit{Table \thetable\ continued from previous page}} \\
 	\hline
 	\textbf{Reference} &
 	\textbf{Objective} &
 	\textbf{Contribution} &
-	\textbf{Findings}
-	% \textbf{Results / Limitations}
-	\\
+	\textbf{Findings} \\
 	\hline
 	\endhead
-
+	
 	\hline
-	\multicolumn{4}{r}{{Continued on next page}} \\
+	\multicolumn{4}{r}{\textit{Continued on next page}} \\
 	\endfoot
-
+	
 	\hline
 	\endlastfoot
-
-	Based on data from McCarthy et al. 2021~ \cite{mccarthy2021field}
+	
+	McCarthy et al. (2021)~\cite{mccarthy2021field}
 	&
 	Test passenger counting technologies in realistic operating conditions.
 	&
-	Presented a trial methodology for comparing APC solutions and offered practical tips for transport authorities.
+	Presented a trial methodology for comparing APC solutions and provided practical recommendations for transport authorities.
 	&
-	The accuracy was greater than 70\% and highest accuracy was between 89--100\%. The installation problems of the sensors, sensitivity to vibration, mass boarding and blockage of the Wi-Fi, however, influenced the performance.
+	Accuracy exceeded 70\%, with the highest accuracy ranging from 89--100\%. Sensor installation issues, vibration, mass boarding, and Wi-Fi blockage affected performance.
 	\\
 	\hline
-
-	Pronello et al. (2025) ~\cite{pronello2025lowcost}
+	
+	Pronello et al. (2025)~\cite{pronello2025lowcost}
 	&
-	Use wireless devices to estimate the number of people waiting for buses at bus stops.
+	Estimate the number of people waiting for buses using wireless devices.
 	&
-	Gathered wi-fi probe requests, and used time-window packet analysis.
+	Collected Wi-Fi probe requests and analysed packets within time windows.
 	&
-	The best counting performance was with CRNN. The limitations of the counting radius, environmental noise and MAC randomization influenced accuracy.
+	CRNN achieved the best counting performance. Counting radius, environmental noise, and MAC randomisation affected accuracy.
 	\\
 	\hline
-
+	
 	Alsad et al. (2022)~\cite{alsad2022social}
 	&
-	Estimate interpersonal distance and density of crowd.
+	Estimate interpersonal distance and crowd density.
 	&
-	Designed an approach for monitoring using pose estimation.
+	Developed a crowd-monitoring approach using pose estimation.
 	&
-	The localization strategy performed better than baseline strategies. With that being said, OpenPose has high computational requirements.
+	The localisation strategy outperformed baseline methods; however, OpenPose has high computational requirements.
 	\\
 	\hline
-
+	
 	Kulkarni et al. (2023)~\cite{kulkarni2023advances}
 	&
-	Examine CNN-Based methods of crowd counting.
+	Examine CNN-based methods for crowd counting.
 	&
-	Introduced CNN approach categories and described the available datasets.
+	Categorised CNN approaches and reviewed commonly used datasets.
 	&
-	Achieved an overall accuracy of 95\%. Slowly changes lighting conditions: performance declines.
+	Reported an overall accuracy of 95\%; performance declined under gradual lighting changes.
 	\\
 	\hline
-
+	
 	Xu et al. (2024)~\cite{xu2024label}
 	&
-	Enhancing crowd counting using noisy labels.
+	Improve crowd counting under noisy labels.
 	&
-	Probed spatial and quantity noise impact.
+	Investigated the effects of spatial and quantity noise.
 	&
-	The DMCC accuracy was improved by $\theta = 0.9$. The method is hyperparameter dependent, and more expensive due to the increased number of computations required.
+	DMCC accuracy improved with $\theta=0.9$. The method is hyperparameter-dependent and computationally more expensive.
 	\\
 	\hline
-
+	
 	Mansouri et al. (2025)
 	&
-	Enhance the management of crowd monitoring in smart cities.
+	Improve crowd monitoring in smart cities.
 	&
-	Adopted the following architectures: Used ConvLSTM for the temporal patterns, and DenseNet with SE blocks for feature extraction.
+	Used ConvLSTM for temporal modelling and DenseNet with SE blocks for feature extraction.
 	&
-	Reached an accuracy of 98.40\%. Under extreme conditions of occlusion however, performance drops.
+	Achieved 98.40\% accuracy, but performance declined under severe occlusion.
 	\\
 	\hline
-
+	
 	Nitti et al. (2020)~\cite{nitti2020iabacus}
 	&
-	Monitor the number of people in a vehicle without compromising their privacy.
+	Monitor passenger numbers while preserving privacy.
 	&
-	Used anonymous passenger tracking and handled MAC randomization.
+	Used anonymous passenger tracking and addressed MAC randomisation.
 	&
-	Successfully performed at 100% accuracy in the indoor test and almost 94% accuracy in the real-world test. Common errors include those at bus stops and with Wi-Fi inactivity.
+	Achieved 100\% accuracy indoors and approximately 94\% in real-world tests. Errors occurred mainly at bus stops and during Wi-Fi inactivity.
 	\\
 	\hline
-
+	
 	Seidel et al. (2022)~\cite{seidel2022napc}
 	&
-	Send live Vehicle load data.
+	Provide live vehicle-load data.
 	&
-	Converted the low-resolution 3D LiDAR dataset and added a dataset that included 13,000 annotated sequences.
+	Converted a low-resolution 3D LiDAR dataset and added 13,000 annotated sequences.
 	&
-	In approximately 96% of cases obtained the actual number. Involves large amount of annotation, and leaves out children.
+	Obtained the actual passenger count in approximately 96\% of cases. The approach requires extensive annotation and excludes children.
 	\\
 	\hline
-
+	
 	Chris et al. (2024)~\cite{Chris2024}
 	&
-	Compare video APC systems for bus.
+	Compare video-based APC systems for buses.
 	&
-	Appraised low cost deployment of video APC and environmental impact.
+	Evaluated low-cost video APC deployment and environmental effects.
 	&
-	The accuracy of the off-bus was 88.9\%, and the accuracy of the on-bus was 75\%. Occlusion, errors, weather and the sun affected performance.
+	Accuracy was 88.9\% off-bus and 75\% on-bus. Occlusion, errors, weather, and sunlight affected performance.
 	\\
 	\hline
-
+	
 	Hsu et al. (2020)~\cite{Hsu2020}
 	&
-	Use deep learning to estimate the number of passengers on a bus.
+	Estimate the number of passengers on a bus using deep learning.
 	&
-	Density Estimation of Passengers using a Proprietary Passenger Image Data Set.
+	Used density estimation with a proprietary passenger image dataset.
 	&
-	Its reduced MAE from 4.93 to 1.98 and its performance was satisfactory under various light conditions. Passengers sitting in the corner seats may be missed.
+	Reduced MAE from 4.93 to 1.98 and performed well under varying lighting conditions. Passengers in corner seats could be missed.
 	\\
 	\hline
-
+	
 \end{longtable}
 
 In summary, the literature demonstrates that although video-counting solutions are adaptable and scalable, they are dependent on conditions, camera angles and density ~\cite{Chris2023}. Current head counting methods still have problems for computational efficiency, different lighting conditions, and real-world application. Thus, the aim of this study is to overcome these challenges by proposing a reliable head-based passenger counting system, which will enhance the accuracy, scalability and practicality of the system.

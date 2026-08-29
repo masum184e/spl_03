@@ -7,43 +7,59 @@ Programming Languages and Technologies Used:
 
 The system has been developed in full using the programming language of \textit{Python 3.12.8} because it is a mature computer vision and deep learning language with a high rate of iteration and excellent support for numerical and array processing libraries used in the pipeline. In the proposed system, the technology stack employed and their respective roles in the entire system are summarized in Table~\ref{tab:techstack}.
 
-\begin{longtable}{|>{\raggedright\arraybackslash}p{2.8cm}|>{\raggedright\arraybackslash}p{2.4cm}|>{\raggedright\arraybackslash}p{8.9cm}|}
-Caption: Technology stack and function of each component.
-\label{tab:techstack}\\
-\hline
-Technology & Category & Role in the System \\
-\hline
-\endfirsthead
 
-\hline
-1. Heating & Cooling System Technology: Temperature regulator sensor & controller.1. Heating & Cooling System: Technology: Temperature regulator sensor & controller.
-\hline
-\endhead
-
-Primary implementation language for the entire pipeline & Python 3.12.8 & Language & Primary implementation language for the entire pipeline \\
-\hline
-OpenCV (\texttt{opencv-}\allowbreak\texttt{python}) &
-Computer Vision &
-and Canny edge detection are applied to the image.The image is then subjected to image/video I/O procedures, Gaussian blur, CLAHE and Canny edge detection.
-Combining Haar-cascade detection, NMS and drawing/annotation.
-\hline
-PyTorch \& (\texttt{torchvision}) & Deep Learning & Tensor operations and inference engine for the Four-Column MDNN density-regression network \\
-\hline
-Ultralytics (\texttt{ultralytics}) & Deep Learning & YOLOv8-nano person/head detector (sparse branch) \\
-\hline
-NumPy & Numerical Computing & Array manipulation - density maps, bounding boxes, image tensors
-\hline
-Multi-object tracking: SciPy & Scientific Computing & \texttt{scipy.\allowbreak optimize.\allowbreak linear\_\allowbreak sum\_\allowbreak assignment} (Hungarian algorithm) \\
-\hline
-Matplotlib & Visualization & Diagnostic plotting of density maps and count trends.
-\hline
-% Polars & Data Processing & Lightweight tabular aggregation of per-frame statistics for video runs \\
-% \hline
-% Python logging & Diagnostics & Centralised, rotating-per-run logging and step-level latency profiling (\texttt{logger.py}) \\
-% \hline
-% \texttt{dataclasses} (stdlib) & Configuration Management & Type-safe, centralized hyper-parameter definitions (\texttt{config.py}) \\
-% \hline
-
+\begin{longtable}{|
+		>{\raggedright\arraybackslash}p{2.8cm}|
+		>{\raggedright\arraybackslash}p{2.8cm}|
+		>{\raggedright\arraybackslash}p{7.6cm}|
+	}
+	\caption{Technology stack and function of each component.}
+	\label{tab:techstack} \\
+	\hline
+	\textbf{Technology} & \textbf{Category} & \textbf{Role in the System} \\
+	\hline
+	\endfirsthead
+	
+	\hline
+	\textbf{Technology} & \textbf{Category} & \textbf{Role in the System} \\
+	\hline
+	\endhead
+	
+	Python 3.12.8 &
+	Programming Language &
+	Primary implementation language for the entire pipeline. \\
+	\hline
+	
+	OpenCV (\texttt{opencv-python}) &
+	Computer Vision &
+	Provides image and video I/O, Gaussian blur, CLAHE, Canny edge detection, Haar-cascade detection, NMS, and image annotation. \\
+	\hline
+	
+	PyTorch (\texttt{torchvision}) &
+	Deep Learning &
+	Provides tensor operations and the inference engine for the Four-Column MDNN density-regression network. \\
+	\hline
+	
+	Ultralytics (\texttt{ultralytics}) &
+	Deep Learning &
+	Provides the YOLOv8-nano person/head detector for the sparse branch. \\
+	\hline
+	
+	NumPy &
+	Numerical Computing &
+	Supports array manipulation for density maps, bounding boxes, and image tensors. \\
+	\hline
+	
+	SciPy &
+	Scientific Computing &
+	Provides \texttt{scipy.optimize.linear\_sum\_assignment} for multi-object tracking using the Hungarian algorithm. \\
+	\hline
+	
+	Matplotlib &
+	Visualization &
+	Provides diagnostic plots of density maps and counting trends. \\
+	\hline
+	
 \end{longtable}
 
 PyTorch + Ultralytics were selected as the two parts of the hybrid architecture, one a general purpose pretrained object detector (YOLOv8), and the other a custom trained network for the dense branch of the architecture. The choice of OpenCV as common substrate for all classical image processing operations (colour space conversion, filtering, edge detection, drawing etc.) was determined by the fact that it provides a single API consistently optimized in C++ and easily accessible from Python with minimal overhead, the latter being important because of the system's per-frame latency budget.
@@ -136,7 +152,7 @@ Testing Level/Purpose & \textbf{Main Focus} \\
 \endhead
 
 \hline
-\multicolumn{3}{r}{\textit{Continued on next page} \\
+\multicolumn{3}{r}{\textit{Continued on next page}} \\
 \endfoot
 
 \hline
@@ -202,7 +218,7 @@ Throughout development and testing, debugging was done. There are several main m
 \endhead
 
 \hline
-\multicolumn{3}{l}{\textit{Continued on next page} \\
+\multicolumn{3}{l}{\textit{Continued on next page}} \\
 \endfoot
 
 \hline

@@ -1,3 +1,7 @@
+\chapterpage{System Design and Architecture}
+\mychapter{System Design and Architecture}
+\label{chap:sysdesign}
+
 The system design and architecture is addressed in this chapter.This chapter deals with the system design and architecture.
 This chapter discusses the system design and architecture.The system design and architecture are discussed in this chapter.
 \label{chap:sysdesign}
@@ -37,48 +41,59 @@ The coupling between the levels is low and testability is high, e.g. the Process
 The system can be viewed from a high level perspective as one logical entity, which receives an image or video from an external source, and outputs an annotated image or video and a numerical annotation. The context diagram/dfd level 0 for this system can be seen in figure ~\ref{fig:dfd}(a) and the same system decomposed into his 6 high level processes is a level 1 dfd shown in figure ~\ref{fig:dfd}(b).
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.92\textwidth]{figures/dfd_diagram.png}
-    Context Diagram & Data Flow Diagram
-    \label{fig:dfd}
+	\centering
+	\includegraphics[width=0.92\textwidth]{figures/dfd_diagram.png}
+	\caption{Context Diagram and Data Flow Diagram}
+	\label{fig:dfd}
 \end{figure}
 
 The high level design was intentionally made to separate two conflicting counting strategies, sparse estimation (Process 3.0) and dense estimation (Process 4.0), into concurrent (parallel) processes where both processes read-in the same pre-processed frame and write out into a shared decision/fusion-stage (Process 5.0). The hybrid behaviour of this system is coded during the definition of it, and it can be used, replaced or extended without changing the structure of the rest of the flow, since both strategies have the same abstract contract (a frame in a people count out).
 
 Table~\ref{tab:hld-processes} lists the responsibility of the high level processes listed in the level-1 diagram.
+
+
+
 \begin{longtable}{|
 		>{\raggedright\arraybackslash}p{1.6cm}|
 		>{\raggedright\arraybackslash}p{3.2cm}|
-		>{\raggedright\arraybackslash}p{9.7cm}|
+		>{\raggedright\arraybackslash}p{9.0cm}|
 	}
-    High level process responsibilities (L1 DFD).
-    \label{tab:hld-processes} \\
-    \hline
-    \textbf{Process} & \textbf{Name} & \textbf{Responsibility} \\
-    \hline
-    \endfirsthead
-    \hline
-    \textbf{Process} & \textbf{Name} & \textbf{Responsibility} \\
-    \hline
-    \endhead
-    1 & Input Acquisition &
-    Reads a still image from a video source or samples frames from a video source at a defined rate \\
-    \hline
-    2 & Pre-processing &
-    Increases the contrast and noise rejection prior to estimation \\
-    \hline
-    3 & Sparse Estimation &
-    Locates and recognizes individual persons/heads in a frame, eliminates duplicate/overlapping detections and outputs the location and number of detected persons/heads
-    \hline
-    4 & Dense Estimation &
-    Estimates the continuous density map for the frame and sums it up to a count
-    \hline
-    5 & Decision + Fusion &
-    Classifies as sparse/dense, and fuses two counts into a single count.
-    \hline
-    6 & Output Rendering &
-    Creates the annotated image/video and the numeric summary \\
-    \hline
+	\caption{High-level process responsibilities (L1 DFD).}
+	\label{tab:hld-processes} \\
+	\hline
+	\textbf{Process} & \textbf{Name} & \textbf{Responsibility} \\
+	\hline
+	\endfirsthead
+	
+	\hline
+	\textbf{Process} & \textbf{Name} & \textbf{Responsibility} \\
+	\hline
+	\endhead
+	
+	1 & Input Acquisition &
+	Reads a still image from a video source or samples frames from a video source at a defined rate. \\
+	\hline
+	
+	2 & Pre-processing &
+	Increases contrast and reduces noise prior to estimation. \\
+	\hline
+	
+	3 & Sparse Estimation &
+	Locates and recognises individual persons/heads in a frame, eliminates duplicate or overlapping detections, and outputs the location and number of detected persons/heads. \\
+	\hline
+	
+	4 & Dense Estimation &
+	Estimates the continuous density map for the frame and sums it to obtain a count. \\
+	\hline
+	
+	5 & Decision + Fusion &
+	Classifies the scene as sparse or dense and fuses the two counts into a single count. \\
+	\hline
+	
+	6 & Output Rendering &
+	Creates the annotated image/video and the numerical summary. \\
+	\hline
+	
 \end{longtable}
 
 
