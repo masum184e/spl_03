@@ -98,152 +98,7 @@ This study follows the five stage sequence set out above and summarised for a si
 	
 \end{longtable}
 
-\section{Data Collection Methods}
-
-Two annotated datasets underpin the learned techniques investigated in this research; the two non-learned techniques (the cascade classifier detector and the classical density estimator) rely on pre-existing, general purpose classifiers or on no learned parameters at all, and therefore do not draw on a task specific training or evaluation dataset. Table~\ref{tab:datasets} summarises the two datasets used, and Table~\ref{tab:dataset-stats} reports their detailed size, split, and annotation density statistics as documented by their original sources.
-
-\begin{longtable}{|
-    >{\raggedright\arraybackslash}p{0.24\textwidth}|
-    >{\raggedright\arraybackslash}p{0.21\textwidth}|
-    >{\raggedright\arraybackslash}p{0.15\textwidth}|
-    >{\raggedright\arraybackslash}p{0.24\textwidth}|
-}
-\caption{Datasets used to train and/or evaluate the learned techniques.}
-\label{tab:datasets}\\
-\hline
-\textbf{Dataset} &
-\textbf{Annotation type} &
-\textbf{Used by} &
-\textbf{Role} \\
-\hline
-\endfirsthead
-
-\hline
-\textbf{Dataset} &
-\textbf{Annotation type} &
-\textbf{Used by} &
-\textbf{Role} \\
-\hline
-\endhead
-
-\hline
-\endfoot
-
-\hline
-\endlastfoot
-
-SCUT-HEAD~\cite{peng2018scuthead} &
-Head bounding boxes (YOLO text format) &
-Fine-tuned sparse detector &
-Fine tuning and validation (detection metrics) \\
-\hline
-
-ShanghaiTech, Part B~\cite{Zhu2020} &
-Head point locations (\texttt{.mat} files) &
-Both learned dense branch estimators &
-Training and validation (density-map / count metrics) \\
-\hline
-
-\end{longtable}
-
-\begin{longtable}{|
-		>{\raggedright\arraybackslash}p{0.18\textwidth}|
-		>{\raggedright\arraybackslash}p{0.09\textwidth}|
-		>{\raggedright\arraybackslash}p{0.18\textwidth}|
-		>{\raggedright\arraybackslash}p{0.15\textwidth}|
-		>{\raggedright\arraybackslash}p{0.24\textwidth}|}
-	
-	\caption{Detailed dataset statistics}
-	\label{tab:dataset-stats}\\
-	
-	\hline
-	\textbf{Dataset} &
-	\textbf{Images} &
-	\textbf{Train / Test / Val} &
-	\textbf{Annotated instances} &
-	\textbf{Notes} \\
-	\hline
-	\endfirsthead
-	
-	\multicolumn{5}{c}%
-	{{\tablename\ \thetable{} -- continued from previous page}} \\
-	\hline
-	\textbf{Dataset} &
-	\textbf{Images} &
-	\textbf{Train / Test / Val} &
-	\textbf{Annotated instances} &
-	\textbf{Notes} \\
-	\hline
-	\endhead
-	
-	\hline
-	\multicolumn{5}{r}{{Continued on next page}} \\
-	\endfoot
-	
-	\hline
-	\endlastfoot
-	
-	SCUT-HEAD, Part~A~\cite{peng2018scuthead}
-	&
-	2{,}000
-	&
-	1{,}100 / 500 / 400
-	&
-	67{,}318 heads
-	&
-	Classroom surveillance imagery; low inter-image variance by design
-	\\
-	\hline
-	
-	SCUT-HEAD, Part~B~\cite{peng2018scuthead}
-	&
-	2{,}329
-	&
-	1{,}630 / 233 / 466
-	&
-	41{,}749 heads
-	&
-	Internet-crawled imagery; higher visual variability
-	\\
-	\hline
-	
-	SCUT-HEAD, combined
-	&
-	4{,}329
-	&
-	2{,}730 / 733 / 866
-	&
-	109{,}067 heads
-	&
-	Union of Part~A and Part~B, as used for fine-tuning in this study
-	\\
-	\hline
-	
-	ShanghaiTech, Part~B~\cite{Zhu2020}
-	&
-	716
-	&
-	400 / 316
-	&
-	88{,}272 heads (point-annotated)
-	&
-	Fixed resolution $768{\times}1024$; approximately 9--578 people per image, mean $\approx 123.6$
-	\\
-	\hline
-	
-\end{longtable}
-
-\subsection{SCUT HEAD Dataset}
-The fine tuned sparse detector is trained on SCUT-HEAD, a head detection dataset comprising 4{,}329 images with 109{,}067 annotated head bounding boxes~\cite{peng2018scuthead}. The dataset is collected in two parts that differ in imaging condition and scene variability:
-
-\begin{itemize}
-	\item \textbf{Part A:} 2{,}000 images sampled from classroom surveillance video within a single university, with 67{,}318 heads annotated; because classroom scenes recur with limited pose variation, the constituent images were deliberately selected to maximise representative variance. Part~A is pre-split into 1{,}100 training and 500 testing images.
-	\item \textbf{Part B:} 2{,}329 images crawled from the internet, with 41{,}749 heads annotated, offering greater visual diversity than Part~A. Part~B is pre-split into 1{,}630 training and 233 testing images.
-\end{itemize}
-Every annotated head is bounded by an axis aligned box $(x_{\min}, y_{\min}, x_{\max}, y_{\max})$ covering the full head extent, including occluded portions, without extraneous background, following the Pascal VOC annotation convention. In the implementation examined for this study, Part~A and Part~B are pooled into a single combined dataset of 4{,}329 images (2{,}730 for training, 733 for testing) while each image's original split membership is preserved, and a single object class (head) is declared, since the study task is class agnostic head localisation rather than the finer classroom versus internet distinction that motivated the dataset's original two part structure.
-
-\subsection{ShanghaiTech Dataset, Part B}
-Both learned density estimation techniques are trained and evaluated on Part~B of the ShanghaiTech crowd counting dataset, introduced alongside the multi column convolutional architecture on which one of the two density estimators is based~\cite{Zhu2020}. ShanghaiTech as a whole comprises 1{,}198 images with 329{,}547 annotated head points, split into a dense, internet sourced Part~A (482 images) and a sparser, street-level Part~B (716 images); this study uses Part~B only. Part~B images are all captured at a fixed resolution of $768{\times}1024$ pixels on busy Shanghai streets, officially divided into 400 training and 316 testing images, with per-image counts ranging from approximately 9 to 578 people and a mean of approximately 123.6 people per image, substantially sparser than Part~A (mean $\approx$501 people per image), which was not used in this study. Annotations are provided as a single $(x,y)$ pixel coordinate per head, stored per image in a MATLAB \texttt{.mat} file, rather than as bounding boxes. One of the two density estimation techniques uses the official training subset for training and a held out fraction of it for validation, with the official test subset reserved separately; the other uses the official test subset directly as its validation set during training, without a further internal split. Point annotations are not used directly as supervision; both techniques convert them into smoothed density maps prior to training, as described in Section~\ref{sec:dense}.
+% \section{Data Collection Methods}
 
 \section{Data Analysis Techniques}
 \label{sec:analysis-techniques}
@@ -748,6 +603,7 @@ Not applicable
 
 \subsection{Fusion and Final Crowd Count}
 \label{sec:fusion}
+
 The fusion component reconciles the sparse branch count $C_{\text{sparse}}$ and the dense branch count $C_{\text{dense}}$, both of which are computed for every frame regardless of the scene label $s$ assigned by the density decision component, into a single final count for that frame. The scene label determines which of the two branch counts is treated as primary and which as secondary:
 \begin{equation}
 	(P,S) =
@@ -801,8 +657,8 @@ This design means the fusion component only blends the two branches when they ar
 		% \end{algorithmic}
 	% \end{algorithm}
 
-\subsection{Comparison of the Techniques}
-Table~\ref{tab:sparse-compare} and Table~\ref{tab:dense-compare} compare the sparse and dense branch techniques respectively along methodological axes (underlying method, training requirement, dependence on other components, and evaluation approach). Across the two branches, detection based techniques output a discrete, countable set of localisations, while density based techniques output a continuous map integrated to a count; the classical density technique occupies an intermediate position, since its base density map is itself built from externally supplied detection centroids, with only its correction term computed from the image directly. 
+% \subsection{Comparison of the Techniques}
+% Table~\ref{tab:sparse-compare} and Table~\ref{tab:dense-compare} compare the sparse and dense branch techniques respectively along methodological axes (underlying method, training requirement, dependence on other components, and evaluation approach). Across the two branches, detection based techniques output a discrete, countable set of localisations, while density based techniques output a continuous map integrated to a count; the classical density technique occupies an intermediate position, since its base density map is itself built from externally supplied detection centroids, with only its correction term computed from the image directly. 
 
 % No experimental results comparing all six techniques against one another on a common test set were available for this chapter, and no claim of relative superiority among the techniques is made here; the comparison is limited to the methodological and implementation level differences established above.
 
@@ -904,15 +760,50 @@ The evaluation strategy uses metrics appropriate to each component of the propos
 	
 \end{longtable}
 
+\subsection{Count-Based Evaluation Metrics}
+
+For the sparse-branch external evaluation (Section~\ref{sec:sparse_external}), the following whole-image count metrics are used, with $\hat c_i$ the predicted count and $c_i$ the ground-truth count for image $i$ of $M$ evaluated images:
+
+\begin{equation}
+	\text{MAE} = \frac{1}{M}\sum_{i=1}^{M} \left| \hat{c}_i - c_i \right|, \qquad
+	\text{RMSE} = \sqrt{ \frac{1}{M}\sum_{i=1}^{M} \left( \hat{c}_i - c_i \right)^2 }
+	\end{equation}
+\begin{equation}
+	\text{MAPE} = \frac{1}{M}\sum_{i=1}^{M} \frac{\left| \hat{c}_i - c_i \right|}{c_i} \times 100\%, \qquad
+	\text{Bias} = \frac{1}{M}\sum_{i=1}^{M} \left( \hat{c}_i - c_i \right)
+	\end{equation}
+RMSE penalises large individual errors more heavily than MAE, so a wide MAE/RMSE gap indicates that error is concentrated in a minority of images rather than spread evenly. Bias indicates systematic direction: a negative value indicates the model under-counts on average. All four metrics are lower-is-better; bias is exceptional in that its \emph{sign}, not only its magnitude, is informative.
+
 \subsubsection{Detection Metrics (Fine Tuned Sparse Detector)}
 
-Detection quality is quantified using precision ($P$), recall ($R$), and mean Average Precision (mAP) computed from matched predicted and ground truth bounding boxes at a configured confidence threshold and Intersection-over-Union (IoU) threshold, following the object detection evaluation protocol formalised for the PASCAL Visual Object Classes challenge~\cite{everingham2010voc}:
-\begin{equation}
-	P = \frac{TP}{TP+FP}, \qquad R = \frac{TP}{TP+FN},
-\end{equation}
-where $TP$, $FP$, and $FN$ denote true positive, false positive, and false negative detections respectively, determined by matching predicted boxes to ground truth boxes whose IoU exceeds the evaluation threshold. mAP@50 is the mean Average Precision at an IoU threshold of 0.50, and mAP@50:95 is the mean Average Precision averaged over ten IoU thresholds between 0.50 and 0.95. The evaluation reported in this study uses a confidence threshold of 0.15, an IoU threshold of 0.4, and a maximum of 500 detections per image, applied to the best checkpoint obtained during fine tuning.
+Detection quality is evaluated using precision ($P$), recall ($R$), and mean Average Precision (mAP), computed from matched predicted and ground-truth bounding boxes. The evaluation follows the object-detection protocol formalised for the PASCAL Visual Object Classes challenge~\cite{everingham2010voc}. In this study, detection performance is evaluated using a confidence threshold of 0.15, an Intersection-over-Union (IoU) threshold of 0.4, and a maximum of 500 detections per image. These settings are applied to the best checkpoint obtained during fine tuning.
 
-\subsubsection{Density Map and Count Metrics (Learned Dense Branch Estimators)}
+\textbf{Precision} measures the proportion of predicted head boxes that correspond to ground-truth heads. It is defined as:
+\begin{equation}
+P = \frac{TP}{TP + FP},
+\end{equation}
+where $TP$ (true positives) represents the number of predicted boxes that sufficiently overlap with a ground-truth head, while $FP$ (false positives) represents predictions that do not correspond to a ground-truth head. Higher precision indicates fewer spurious detections.
+
+\textbf{Recall} measures the proportion of ground-truth heads that are successfully detected. It is defined as:
+\begin{equation}
+R = \frac{TP}{TP + FN},
+\end{equation}
+where $FN$ (false negatives) represents the number of ground-truth heads for which no corresponding prediction is obtained. Higher recall indicates fewer missed heads.
+
+\textbf{Mean Average Precision (mAP)} provides a comprehensive measure of detection performance by summarising precision across the range of confidence thresholds. For \textbf{mAP@50}, Average Precision (AP) is calculated at a single IoU threshold of 0.50. The IoU between a predicted bounding box $A$ and a ground-truth bounding box $B$ is defined as:
+\begin{equation}
+\text{IoU}(A,B) = \frac{|A \cap B|}{|A \cup B|},
+\end{equation}
+while Average Precision is expressed as:
+\begin{equation}
+\text{AP} = \int_0^1 p(r),dr,
+\end{equation}
+where $p(r)$ represents precision as a function of recall $r$.
+
+The \textbf{mAP@50} metric therefore measures Average Precision at an IoU threshold of 0.50. In contrast, \textbf{mAP@50:95} averages AP across ten IoU thresholds from 0.50 to 0.95 in steps of 0.05. Consequently, mAP@50:95 provides a stricter and more localisation-sensitive assessment of detection performance than mAP@50. For all three metrics, higher values indicate better detection performance.
+
+\subsection{Density-Estimation Training Metrics (Learned Dense Branch Estimators)}
+
 Both learned density estimation techniques are trained with a pixel wise error term between the predicted density map $\hat D$ and the ground truth density map $D$,
 
 \begin{equation}
@@ -937,3 +828,44 @@ For any density estimation technique, learned or classical, the predicted crowd 
 \end{equation}
 
 This relationship holds for the two learned estimators (where it is used directly in computing the count level MAE metric above) and, in a closed form variant, for the classical estimator (~\cref{sec:classical-density}, Equation~\ref{eq:classical-count}).
+
+
+
+% % \subsection{Overview of Available Experimental Materials}
+
+% % Table~\ref{tab:evidence_map} summarises the experimental evidence actually available across the six implemented counting approaches, prior to any analysis.
+
+% % \small
+% % \begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{1.5cm}|>{\raggedright\arraybackslash}p{1.7cm}|>{\raggedright\arraybackslash}p{1.7cm}|>{\raggedright\arraybackslash}p{2.2cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{2cm}|}
+% % 	\caption{Evidence availability by method and result category}
+% % 	\label{tab:evidence_map}\\
+% % 	\hline
+% % 	\textbf{Category} & \textbf{Haar Cascade} & \textbf{Classic YOLO} & \textbf{SCUT-Head YOLO} & \textbf{Four-Column MDNN} & \textbf{CSRNet} & \textbf{Classical method} \\
+% % 	\hline
+% % 	\endfirsthead
+% % 	\hline
+% % 	\textbf{Category} & \textbf{Haar Cascade} & \textbf{Classic YOLO} & \textbf{SCUT-Head YOLO} & \textbf{Four-Column MDNN} & \textbf{CSRNet} & \textbf{Classical method} \\
+% % 	\hline
+% % 	\endhead
+% % 	\hline
+% % 	\endfoot
+% % 	\hline
+% % 	\endlastfoot
+% % 	Training performed & N/A (not learned) & No (pretrained) & Yes (45/50 ep.) & Yes (200/200 ep.) & Yes (200/200 ep.) & N/A (not learned) \\
+% % 	\hline
+% % 	Internal val. metrics & N/A & N/A & Yes & Yes & Yes  & N/A \\
+% % 	\hline
+% % 	% Held-out test-set metrics & Not tested & N/A & No & No (loader unused) & No & No \\
+% % 	% \hline
+% % 	% External image test & Not tested & 1 image, qualitative & No & No & No & No \\
+% % 	% \hline
+% % 	% External image test (quantitative, at scale) & Not tested & Yes, via pipeline (30 img.) & No & No & No & No \\
+% % 	% \hline
+% % 	% External video test & Not tested & No & No & No & No & No \\
+% % 	% \hline
+% % 	% Inference speed recorded & Not tested & No & Yes & No & No (train-step time only) & No \\
+% % 	% \hline
+% % \end{longtable}
+% % \normalsize
+
+% % Two consequences follow directly from Table~\ref{tab:evidence_map} and govern the scope of the rest of this chapter. First, no experiment in the available materials executes the complete adaptive pipeline end-to-end — that is, frame input through density-decision, branch selection, and fusion, with a resulting accuracy figure. Section~\ref{sec:hybrid_results} therefore reports this directly rather than estimating a hybrid accuracy figure. Second, quantitative external-image evaluation at scale (i.e. against manually verified ground truth over a meaningful sample size) exists only for the sparse, detection-based branch, obtained by running the deployed pipeline's YOLO-based detector — functionally the same pretrained detector demonstrated in the classic-YOLO notebook — over a 30-image external dataset. The three density-estimation approaches (Four-Column MDNN, CSRNet, and the classical method) were not evaluated against any external image or video dataset in the provided materials; their available evidence is limited to training/validation behaviour on their respective source datasets.
