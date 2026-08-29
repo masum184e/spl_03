@@ -2,11 +2,11 @@
 \mychapter{Results Analysis and Discussion}
 \label{chap:results}
 
-% This chapter presents and analyses the empirical evidence produced by the implemented components of the proposed adaptive hybrid crowd-counting framework: a pretrained classic person detector, a head detector fine-tuned on the SCUT-Head dataset, a custom four-column multi-column density regression network (Four Column MDNN), a CSRNet style dilated convolution density network, and a classical detection assisted density estimation procedure.
+This chapter presents and analyses the empirical evidence produced by the implemented components of the proposed adaptive hybrid crowd-counting framework: a pretrained classic person detector, a head detector fine-tuned on the SCUT-Head dataset, a custom four-column multi-column density regression network (Four Column MDNN), a CSRNet style dilated convolution density network, and a classical detection assisted density estimation procedure.
 
 \section{Data Collection and Analysis}
 
-Three annotated datasets underpin the techniques investigated in this research, playing two distinct roles. SCUT-HEAD and ShanghaiTech, Part~B are used to train, fine-tune, and validate the individual learned techniques (the fine-tuned sparse detector and the two dense density-map estimators, respectively). The Public Transport Crowd Counting Dataset (PTCCD) plays a different role: it is not used to train or fine-tune any individual technique, but is instead used to evaluate the performance of the proposed, fully assembled passenger-counting framework under realistic transportation conditions. The two non-learned techniques (the cascade classifier detector and the classical density estimator) rely on pre-existing, general purpose classifiers or on no learned parameters at all, and therefore do not draw on any task specific training or evaluation dataset. Table~\ref{tab:datasets} summarises the three datasets used and the role each plays, and Table~\ref{tab:dataset-stats} reports their detailed size, split, and annotation density statistics as documented by their original sources.
+Three annotated datasets underpin the techniques investigated in this study, playing two distinct roles. SCUT-HEAD and ShanghaiTech, Part~B are used to train, fine-tune, and validate the individual learned techniques (the fine-tuned sparse detector and the two dense density-map estimators, respectively). The Public Transport Crowd Counting Dataset (PTCCD) plays a different role: it is not used to train or fine-tune any individual technique, but is instead used to evaluate the performance of the proposed, fully assembled passenger-counting framework under realistic transportation conditions. The two non-learned techniques (the cascade classifier detector and the classical density estimator) rely on pre-existing, general purpose classifiers or on no learned parameters at all, and therefore do not draw on any task specific training or evaluation dataset. Table~\ref{tab:datasets} summarises the three datasets used and the role each plays, and Table~\ref{tab:dataset-stats} reports their detailed size, split, and annotation density statistics as documented by their original sources.
 
 \begin{longtable}{|
     >{\raggedright\arraybackslash}p{0.24\textwidth}|
@@ -14,7 +14,7 @@ Three annotated datasets underpin the techniques investigated in this research, 
     >{\raggedright\arraybackslash}p{0.15\textwidth}|
     >{\raggedright\arraybackslash}p{0.24\textwidth}|
 }
-\caption{Datasets used to train and/or evaluate the techniques investigated in this study.}
+\caption{Datasets used for training and evaluation.}
 \label{tab:datasets}\\
 \hline
 \textbf{Dataset} &
@@ -177,33 +177,48 @@ Both learned density estimation techniques are trained and evaluated on Part~B o
 Unlike SCUT-HEAD and ShanghaiTech, Part~B, the Public Transport Crowd Counting Dataset (PTCCD) is not used to train or fine-tune any individual technique in this study. Instead, it is used to evaluate the performance of the proposed passenger-counting framework as a whole, in realistic transportation environments. The dataset contains a total of 285 images and 285 corresponding annotation files, resulting in a one-to-one correspondence between images and labels. The images represent different passenger configurations and crowd densities, making the dataset suitable for evaluating both sparse and relatively dense passenger-counting conditions.
 
 The number of annotated objects in each image was calculated from the corresponding label file. For every annotation file, the number of non-empty annotation lines was counted. The resulting statistics are shown in Table~\ref{tab:object_statistics}.
-\begin{table}[htbp]
-\centering
+
+\begin{longtable}{|l|c|}
 \caption{Statistics of Annotated Objects per Image}
-\label{tab:object_statistics}
-\begin{tabular}{lc}
+\label{tab:object_statistics} \\
 \hline
 \textbf{Statistic} & \textbf{Number of Objects} \\
 \hline
+\endfirsthead
+
+\multicolumn{2}{|c|}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+\textbf{Statistic} & \textbf{Number of Objects} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{2}{|r|}{{Continued on next page}} \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
 Minimum & 2 \\
+\hline
 Maximum & 60 \\
+\hline
 Mean & 29.16 \\
+\hline
 Median & 29.00 \\
 \hline
-\end{tabular}
-\end{table}
 
-The dataset contains an average of 29.16 annotated objects per image,
-with a median of 29 objects and a range of 2 to 60 objects. This
-variation represents different passenger-density conditions and helps
-evaluate the model's robustness across varying crowd sizes.
+\end{longtable}
+
+The dataset contains an average of 29.16 annotated objects per image, with a median of 29 objects and a range of 2 to 60 objects. This variation represents different passenger-density conditions and helps evaluate the model's robustness across varying crowd sizes.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.90\textwidth]
     {figures/ptccd_image_distribution.png}
-    \caption{Distribution of annotated objects per image in the Public
-    Transport Crowd Counting Dataset.}
+	\caption{Annotated objects per image}
     \label{fig:object_distribution}
 \end{figure}
 
@@ -216,8 +231,7 @@ images.
     \centering
     \includegraphics[width=0.90\textwidth]
     {figures/ptccd_range_distribution.png}
-    \caption{Range-wise distribution of images based on the number of
-    annotated objects.}
+	\caption{Image distribution by annotated object count.}
     \label{fig:range_crowd_distribution}
 \end{figure}
 
@@ -237,44 +251,61 @@ This section reports the experimental results obtained from applying a pretraine
 
 Table~\ref{tab:pretrained_yolo_summary} presents the overall detection performance of the pretrained YOLO detector on the 285-image test set. The very low precision, recall, and F1-score at IoU = 0.50 do not necessarily mean that the detector fails to identify people. The main issue is the difference between the annotations and the detector output: the ground truth contains small head-only boxes, while the pretrained model produces boxes covering the full person. As a result, a correct person detection may have very little overlap with the corresponding head annotation and therefore be counted as a false positive. The low number of true positives is therefore mainly due to this mismatch between the evaluation annotations and the detector's output format.
 
-\begin{longtable}{lc}
+\begin{longtable}{|l|c|}
 \caption{Pretrained YOLO person-detector performance.}
 \label{tab:pretrained_yolo_summary} \\
 \hline
-Metric & Value \\
+\textbf{Metric} & \textbf{Value} \\
 \hline
 \endfirsthead
 
-\multicolumn{2}{c}%
+\multicolumn{2}{|c|}%
 {{\tablename\ \thetable{} -- continued from previous page}} \\
 \hline
-Metric & Value \\
+\textbf{Metric} & \textbf{Value} \\
 \hline
 \endhead
 
 \hline
-\multicolumn{2}{r}{{Continued on next page}} \\
+\multicolumn{2}{|c|}{{Continued on next page}} \\
+\hline
 \endfoot
 
 \hline
 \endlastfoot
 
 Images & 285 \\
+\hline
 Total Ground Truth & 8{,}310 \\
+\hline
 Total Predictions & 7{,}140 \\
+\hline
 True Positives (IoU 0.50) & 125 \\
+\hline
 False Positives (IoU 0.50) & 7{,}015 \\
+\hline
 False Negatives (IoU 0.50) & 8{,}185 \\
+\hline
 Precision @ IoU 0.50 & 0.0175 \\
+\hline
 Recall @ IoU 0.50 & 0.0150 \\
+\hline
 F1-score @ IoU 0.50 & 0.0162 \\
+\hline
 Mean Ground Truth Count & 29.1579 \\
+\hline
 Mean Predicted Count & 25.0526 \\
+\hline
 Mean Absolute Error (MAE) & 7.2351 \\
+\hline
 Root Mean Squared Error (RMSE) & 9.9359 \\
+\hline
 Mean Absolute Percentage Error (MAPE) & 27.8446\% \\
+\hline
 Pearson Correlation (GT vs.\ Predicted Count) & 0.8704 \\
+\hline
 Coefficient of Determination ($R^2$) & 0.6987 \\
+\hline
 
 \end{longtable}
 
@@ -283,7 +314,7 @@ The count-level results in Table~\ref{tab:pretrained_yolo_summary} and Figure~\r
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1.0\linewidth]{figures/yolo_pretrained_per_image_error_and_gt_vs_predicted.png}
-\caption{Per-image counting error (left) and ground-truth vs. predicted counts (right) for the pretrained YOLO detector.}
+\caption{YOLO counting error and predictions.}
 \label{fig:pretrained_yolo_actual_predicted}
 \end{figure}
 
@@ -296,34 +327,45 @@ These results show that fine-tuning should focus on adapting the detector to the
 The results across the six ground-truth count ranges in Table~\ref{tab:pretrained_yolo_range_breakdown} and Figure~\ref{fig:pretrained_yolo_range_metrics} show that absolute counting error generally increases as the crowd becomes larger. However, percentage error is highest in images with fewer people because even a small counting mistake has a larger effect when the ground-truth count is low. Counting accuracy is highest in the moderately populated ranges, where the crowd is large enough to reduce the effect of individual errors but not so dense that occlusion causes major detection problems.
 
 \setlength{\LTcapwidth}{\textwidth}
-\begin{longtable}{lccccccc}
-\caption{Pretrained YOLO person-detector counting performance by ground-truth count range.}
+\begin{longtable}{|l|c|c|c|c|c|c|c|}
+\caption{Pretrained YOLO counting performance by ground-truth count range.}
 \label{tab:pretrained_yolo_range_breakdown} \\
 \hline
-GT Range & $n$ & MAE & RMSE & Mean \% Error & Mean Acc. (\%) & Mean Bias & Mean F1 \\
+\textbf{GT Range} & $\boldsymbol{n}$ & \textbf{MAE} & \textbf{RMSE} &
+\textbf{Mean \% Error} & \textbf{Mean Acc. (\%)} &
+\textbf{Mean Bias} & \textbf{Mean F1} \\
 \hline
 \endfirsthead
 
-\multicolumn{8}{c}%
+\multicolumn{8}{|c|}%
 {{\tablename\ \thetable{} -- continued from previous page}} \\
 \hline
-GT Range & $n$ & MAE & RMSE & Mean \% Error & Mean Acc. (\%) & Mean Bias & Mean F1 \\
+\textbf{GT Range} & $\boldsymbol{n}$ & \textbf{MAE} & \textbf{RMSE} &
+\textbf{Mean \% Error} & \textbf{Mean Acc. (\%)} &
+\textbf{Mean Bias} & \textbf{Mean F1} \\
 \hline
 \endhead
 
 \hline
-\multicolumn{8}{r}{{Continued on next page}} \\
+\multicolumn{8}{|c|}{{Continued on next page}} \\
+\hline
 \endfoot
 
 \hline
 \endlastfoot
 
 1--10  & 61 & \textbf{2.1475} & \textbf{2.9113} & 34.9811 & 65.0189 & $-0.3115$ & 0.0903 \\
+\hline
 11--20 & 48 & 5.9583 & 6.9132 & 43.5578 & 57.0672 & 0.6250 & \textbf{0.1312} \\
+\hline
 21--30 & 40 & 4.3250 & 5.7031 & 16.6860 & 83.3140 & 3.2250 & 0.0000 \\
+\hline
 31--40 & 42 & 5.4524 & 7.5325 & \textbf{15.1393} & \textbf{84.8607} & $-2.2143$ & 0.0060 \\
+\hline
 41--50 & 49 & 10.1429 & 12.5966 & 21.9924 & 78.0076 & $-9.6122$ & 0.0008 \\
+\hline
 51--60 & 45 & 16.5778 & 17.5537 & 29.5595 & 70.4405 & $-16.5778$ & 0.0024 \\
+\hline
 
 \end{longtable}
 
@@ -352,71 +394,87 @@ Detection performance is already relatively high at the first training epoch bec
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1.0\linewidth]{figures/yolo_scuthead_training_curves.png}
-\caption{YOLO training and validation losses and detection metrics (precision, recall, mAP@50, mAP@50--95) across 45 training epochs on the SCUT-Head dataset.}
+\caption{YOLO training losses and detection metrics}
 \label{fig:yolo_training_curves}
 \end{figure}
 
 Figure~\ref{fig:yolo_training_curves} shows the training and validation losses together with the main detection metrics across the 45 training epochs. All three training losses decrease consistently throughout the 45-epoch schedule, whereas the corresponding validation losses each reach a minimum earlier in training and subsequently fluctuate within a narrow band without further sustained improvement. This indicates that the model achieves most of its generalisation performance before the end of training, with later training mainly improving the fit to the training data.
 
-\begin{longtable}{p{3.9cm} p{1.4cm} p{1.4cm} p{1.4cm} p{1.4cm} p{1.4cm} p{1.8cm}}
-\caption{YOLO training progression on SCUT-Head at key epochs.}
-\label{tab:yolo_training_summary} \\
-
-\hline
-\centering Epoch &
-\centering Train Box &
-\centering Val Box &
-\centering Precision &
-\centering Recall &
-\centering mAP@50 &
-\centering mAP@50--95 \\
-\hline
-\endfirsthead
-
-\multicolumn{7}{c}%
-{\tablename\ \thetable{} -- continued from previous page} \\
-\hline
-\centering Epoch &
-\centering Train Box &
-\centering Val Box &
-\centering Precision &
-\centering Recall &
-\centering mAP@50 &
-\centering mAP@50--95 \\
-\hline
-\endhead
-
-\hline
-\multicolumn{7}{r}{Continued on next page} \\
-\endfoot
-
-\hline
-\endlastfoot
-
-1 (initial)
-& 1.8430
-& 1.7736
-& 0.8840
-& 0.8707
-& 0.9055
-& 0.4227 \\
-
-35 (best mAP@50--95)
-& 1.5158
-& \textbf{1.5945}
-& 0.9290
-& 0.9349
-& 1.097
-& \textbf{0.5057} \\
-
-45 (final)
-& \textbf{1.4408}
-& 1.6314
-& 0.9339
-& 0.9335
-& 0.9613
-& 0.4983 \\
-
+\begin{longtable}{|p{3.9cm}|p{4.6cm}|p{4.6cm}|}
+	\caption{Evaluation approach by component.}
+	\label{tab:metrics} \\
+	
+	\hline
+	\multicolumn{1}{|c|}{\textbf{Component}} &
+	\multicolumn{1}{c|}{\textbf{Quantitative Evaluation Implemented}} &
+	\multicolumn{1}{c|}{\textbf{Notes}} \\
+	\hline
+	\endfirsthead
+	
+	\multicolumn{3}{|c|}{\tablename\ \thetable{} -- continued from previous page} \\
+	\hline
+	\multicolumn{1}{|c|}{\textbf{Component}} &
+	\multicolumn{1}{c|}{\textbf{Quantitative Evaluation Implemented}} &
+	\multicolumn{1}{c|}{\textbf{Notes}} \\
+	\hline
+	\endhead
+	
+	\hline
+	\multicolumn{3}{|c|}{Continued on next page} \\
+	\hline
+	\endfoot
+	
+	\hline
+	\endlastfoot
+	
+	Pretrained sparse detector
+	&
+	Precision, recall, mAP@50, mAP@50--95
+	&
+	Single-image, qualitative demonstration only
+	\\
+	\hline
+	
+	Fine-tuned sparse detector
+	&
+	Precision, recall, mAP@50, mAP@50--95
+	&
+	Standard detection metrics at a fixed confidence/IoU operating point
+	\\
+	\hline
+	
+	Cascade classifier detector
+	&
+	None observed
+	&
+	Confidence fixed at 1.0 for all detections; the classifier does not output a graded score
+	\\
+	\hline
+	
+	Dilated CNN density estimator
+	&
+	Pixel-wise MSE (training loss), pixel-wise MAE, and custom count-level MAE
+	&
+	Count-level MAE compares summed predicted and ground-truth density maps per batch
+	\\
+	\hline
+	
+	Multi-column density estimator
+	&
+	Combined pixel-wise MSE $+$ count-level MAE (training loss); count-level MAE tracked separately
+	&
+	Weighted combination, with weights fixed in the implementation
+	\\
+	\hline
+	
+	Classical density estimator
+	&
+	None (a single diagnostic log of detection count, detection mass, and final density sum)
+	&
+	No learned parameters; hence, no loss or training metric
+	\\
+	\hline
+	
 \end{longtable}
 
 As shown in Figure~\ref{fig:yolo_training_curves} and Table~\ref{tab:yolo_training_summary}, the detection metrics reach their best values within a narrow range of epochs, indicating stable convergence. After approximately epoch 35, validation performance shows little further improvement, while training loss continues to decrease. The final epoch remains close to the best performance, suggesting that the additional training was mainly computationally redundant rather than harmful.
@@ -425,53 +483,71 @@ As shown in Figure~\ref{fig:yolo_training_curves} and Table~\ref{tab:yolo_traini
 
 The fine-tuned YOLO detector shows a substantial improvement in precision, recall, and F1-score on the same 285-image test set, as reported in Table~\ref{tab:yolo_summary}. This improvement results from adapting the model to the head-level annotations, resolving the geometric mismatch identified in Section~\ref{sec:classic_yolo}. The detection metrics remain moderate because head bounding boxes are small, meaning even a small error in box position or size can cause a prediction to fall below the IoU 0.50 threshold. Thus, some remaining errors are related to localisation accuracy rather than complete detection failures.
 
-\begin{longtable}{lc}
+\begin{longtable}{|l|c|}
 \caption{YOLO counting performance on the SCUT-Head test set.}
 \label{tab:yolo_summary} \\
 \hline
-Metric & Value \\
+\textbf{Metric} & \textbf{Value} \\
 \hline
 \endfirsthead
 
-\multicolumn{2}{c}%
+\multicolumn{2}{|c|}%
 {{\tablename\ \thetable{} -- continued from previous page}} \\
 \hline
-Metric & Value \\
+\textbf{Metric} & \textbf{Value} \\
 \hline
 \endhead
 
 \hline
-\multicolumn{2}{r}{{Continued on next page}} \\
+\multicolumn{2}{|c|}{{Continued on next page}} \\
+\hline
 \endfoot
 
 \hline
 \endlastfoot
 
 Images & 285 \\
+\hline
 Total Ground Truth & 8{,}310 \\
+\hline
 Total Predictions & 7{,}613 \\
+\hline
 True Positives (IoU 0.50) & 3{,}457 \\
+\hline
 False Positives (IoU 0.50) & 4{,}156 \\
+\hline
 False Negatives (IoU 0.50) & 4{,}853 \\
+\hline
 Precision @ IoU 0.50 & 0.4541 \\
+\hline
 Recall @ IoU 0.50 & 0.4160 \\
+\hline
 F1-score @ IoU 0.50 & 0.4342 \\
+\hline
 Mean Ground Truth Count & 29.1579 \\
+\hline
 Mean Predicted Count & 26.7123 \\
+\hline
 Mean Absolute Error (MAE) & 3.3579 \\
+\hline
 Root Mean Squared Error (RMSE) & 4.8778 \\
+\hline
 Mean Absolute Percentage Error (MAPE) & 16.3719\% \\
+\hline
 Pearson Correlation (GT vs.\ Predicted Count) & 0.9725 \\
+\hline
 Coefficient of Determination ($R^2$) & 0.9274 \\
+\hline
 
 \end{longtable}
+
 
 The count-level results in Table~\ref{tab:yolo_summary} show that the fine-tuned detector provides more accurate and reliable counting than the pretrained model, with stronger correlation and lower counting errors. The remaining negative counting bias indicates some undercounting, but its reduced magnitude suggests that head-specific training has partially reduced the occlusion-related detection problem. However, performance can still decrease in very dense scenes where heads are heavily occluded.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1.0\linewidth]{figures/yolo_scuthead_per_image_error_and_gt_vs_predicted.png}
-\caption{Per-image counting error (left) and predicted vs ground-truth counts (right).}
+\caption{Per-image counting error and predicted and ground-truth counts.}
 \label{fig:yolo_actual_predicted}
 \end{figure}
 
@@ -491,42 +567,110 @@ The results in Table~\ref{tab:yolo_range_breakdown} and Figure~\ref{fig:yolo_ran
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1.0\linewidth]{figures/yolo_scuthead_performance_by_gt_range.png}
-\caption{MAE, mean percentage error, mean counting accuracy, and mean detection metrics (precision, recall, F1) of the YOLO detector across ground-truth count ranges.}
+\caption{YOLO counting and detection metrics across ground-truth count ranges.}
 \label{fig:yolo_range_metrics}
 \end{figure}
 
 The counting bias remains negative across all density ranges and becomes larger as crowd density increases, as shown in Table~\ref{tab:yolo_range_breakdown}. This shows that fine-tuning reduces but does not remove the undercounting caused by occlusion. Figure~\ref{fig:yolo_range_metrics} further illustrates the decline in detection metrics as density increases. When heads are heavily occluded, there is less visible information for the detector to identify them reliably.
 
-\begin{longtable}{lccccccc}
+\begin{longtable}{|p{1.25cm}|p{0.8cm}|p{1.0cm}|p{1.1cm}|p{1.45cm}|p{1.45cm}|p{1.2cm}|p{1.0cm}|}
 \caption{YOLO head-detector counting performance by ground-truth count range.}
 \label{tab:yolo_range_breakdown}\\
 \hline
-GT Range & $n$ & MAE & RMSE & Mean \% Error & Mean Acc. (\%) & Mean Bias & Mean F1 \\
+\textbf{GT Range} &
+\textbf{$n$} &
+\textbf{MAE} &
+\textbf{RMSE} &
+\textbf{Mean \% Error} &
+\textbf{Mean Acc. (\%)} &
+\textbf{Mean Bias} &
+\textbf{Mean F1} \\
 \hline
 \endfirsthead
 
-\multicolumn{8}{c}%
-{{\tablename\ \thetable{} -- continued from previous page}} \\
 \hline
-GT Range & $n$ & MAE & RMSE & Mean \% Error & Mean Acc. (\%) & Mean Bias & Mean F1 \\
+\textbf{GT Range} &
+\textbf{$n$} &
+\textbf{MAE} &
+\textbf{RMSE} &
+\textbf{Mean \% Error} &
+\textbf{Mean Acc. (\%)} &
+\textbf{Mean Bias} &
+\textbf{Mean F1} \\
 \hline
 \endhead
 
 \hline
-\multicolumn{8}{r}{{Continued on next page}} \\
+\textit{Continued on next page} &
+& & & & & & \\
+\hline
 \endfoot
 
 \hline
 \endlastfoot
 
-1--10  & 61 & \textbf{1.7377} & \textbf{2.5543} & 29.2330 & 70.7670 & $-1.2131$ & \textbf{0.5334} \\
-11--20 & 48 & 3.4167 & 4.2032 & 26.2192 & 73.7808 & $-2.3750$ & 0.4571 \\
-21--30 & 40 & 2.4000 & 3.4496 & \textbf{8.9977} & 91.0023 & $-1.2000$ & 0.4520 \\
-31--40 & 42 & 3.3810 & 4.9377 & 9.3644 & 90.6356 & $-2.3810$ & 0.4547 \\
-41--50 & 49 & 3.5306 & 4.7316 & 7.6930 & \textbf{92.3070} & $-2.6327$ & 0.4218 \\
-51--60 & 45 & 6.1333 & 8.0802 & 10.9798 & 89.0202 & $-5.1556$ & 0.3971 \\
+1--10
+& 61
+& \textbf{1.7377}
+& \textbf{2.5543}
+& 29.2330
+& 70.7670
+& $-1.2131$
+& \textbf{0.5334} \\
+\hline
+
+11--20
+& 48
+& 3.4167
+& 4.2032
+& 26.2192
+& 73.7808
+& $-2.3750$
+& 0.4571 \\
+\hline
+
+21--30
+& 40
+& 2.4000
+& 3.4496
+& \textbf{8.9977}
+& 91.0023
+& $-1.2000$
+& 0.4520 \\
+\hline
+
+31--40
+& 42
+& 3.3810
+& 4.9377
+& 9.3644
+& 90.6356
+& $-2.3810$
+& 0.4547 \\
+\hline
+
+41--50
+& 49
+& 3.5306
+& 4.7316
+& 7.6930
+& \textbf{92.3070}
+& $-2.6327$
+& 0.4218 \\
+\hline
+
+51--60
+& 45
+& 6.1333
+& 8.0802
+& 10.9798
+& 89.0202
+& $-5.1556$
+& 0.3971 \\
+\hline
 
 \end{longtable}
+
 
 These results presented in Table~\ref{tab:yolo_range_breakdown} and Figure~\ref{fig:yolo_range_metrics} show that counting performance depends on crowd density. Counting accuracy is highest in sparse and moderate-density scenes but decreases in high-density scenes, where detection performance also declines. Compared with the pretrained detector, the fine-tuned model has a more predictable failure pattern, but high-density scenes remain challenging. This indicates that detection-based counting has limitations that cannot be fully solved through additional training alone.
 
@@ -548,46 +692,53 @@ The training history covers 100 epochs and tracks training and validation loss a
 
 The model achieves its best validation performance at epoch 80, with a validation loss of 2.2710 and MAE of 22.6987, as reported in Table~\ref{tab:training_summary}. Although training loss and MAE continue to decrease through epoch 100, the corresponding validation metrics increase to 2.7081 and 27.0703, respectively. This indicates that the model reaches its optimal generalisation performance around epoch 80, after which further training improves the fit to the training data without improving validation performance.
 
-\begin{longtable}{@{\extracolsep{\fill}}lcccc@{}}
+
+\begin{longtable}{|l|c|c|c|c|}
 \caption{Training progression summary at key epochs.}
 \label{tab:training_summary} \\
 
 \hline
-\textbf{Epoch} & \textbf{Train Loss} & \textbf{Val Loss} & 
+\textbf{Epoch} & \textbf{Train Loss} & \textbf{Val Loss} &
 \textbf{Train MAE} & \textbf{Val MAE} \\
 \hline
 \endfirsthead
 
+\multicolumn{5}{|c|}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
 \hline
-\textbf{Epoch} & \textbf{Train Loss} & \textbf{Val Loss} & 
+\textbf{Epoch} & \textbf{Train Loss} & \textbf{Val Loss} &
 \textbf{Train MAE} & \textbf{Val MAE} \\
 \hline
 \endhead
 
 \hline
-\multicolumn{5}{r}{\textit{Continued on next page}} \\
+\multicolumn{5}{|c|}{\textit{Continued on next page}} \\
+\hline
 \endfoot
 
 \hline
 \endlastfoot
 
-1 (initial) 
-& 6.6454 
-& 9.5432 
-& 66.4447 
+1 (initial)
+& 6.6454
+& 9.5432
+& 66.4447
 & 95.4262 \\
+\hline
 
-80 (best validation) 
-& 1.5183 
-& \textbf{2.2710} 
-& 15.1695 
+80 (best validation)
+& 1.5183
+& \textbf{2.2710}
+& 15.1695
 & \textbf{22.6987} \\
+\hline
 
-100 (final) 
-& \textbf{0.9805} 
-& 2.7081 
-& \textbf{9.7914} 
+100 (final)
+& \textbf{0.9805}
+& 2.7081
+& \textbf{9.7914}
 & 27.0703 \\
+\hline
 
 \end{longtable}
 
@@ -599,7 +750,7 @@ Following the best epoch, training loss and training MAE continue to decrease mo
 
 The aggregate results in Table~\ref{tab:mdnn_summary} are weaker than those of the YOLO-based methods, reflecting the different error characteristics of density-based estimation compared with object detection. The MDNN predicts continuous density maps rather than discrete objects, resulting in only moderate correlation between predicted and ground-truth counts and a negative coefficient of determination. These results suggest limited overall predictive reliability and are examined further through the density-stratified analysis in the following subsection.
 
-\begin{longtable}{@{\extracolsep{\fill}}lc@{}}
+\begin{longtable}{|l|c|}
 \caption{Aggregate MDNN performance on the 285-image test set.}
 \label{tab:mdnn_summary} \\
 
@@ -608,36 +759,49 @@ The aggregate results in Table~\ref{tab:mdnn_summary} are weaker than those of t
 \hline
 \endfirsthead
 
+\multicolumn{2}{|c|}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
 \hline
 \textbf{Metric} & \textbf{Value} \\
 \hline
 \endhead
 
 \hline
-\multicolumn{2}{r}{\textit{Continued on next page}} \\
+\multicolumn{2}{|c|}{\textit{Continued on next page}} \\
+\hline
 \endfoot
 
 \hline
 \endlastfoot
 
 Images & 285 \\
+\hline
 Total Ground Truth & 8{,}310 \\
+\hline
 Total Predicted & 9{,}659.3860 \\
+\hline
 Mean Ground Truth Count & 29.1579 \\
+\hline
 Mean Predicted Count & 33.8926 \\
+\hline
 Mean Absolute Error (MAE) & 12.9423 \\
+\hline
 Root Mean Squared Error (RMSE) & 18.2807 \\
+\hline
 Mean Absolute Percentage Error (MAPE) & 110.3318\% \\
+\hline
 Pearson Correlation (GT vs.\ Predicted) & 0.5250 \\
+\hline
 
 \end{longtable}
+
 
 The MDNN shows a systematic tendency toward overestimation, with the largest percentage errors occurring mainly in images with low ground-truth counts. This pattern is evident in the per-image error distribution shown in Figure~\ref{fig:actual_predicted}, while the aggregate statistics in Table~\ref{tab:mdnn_summary} show a mean predicted count of 33.8926 compared with a mean ground-truth count of 29.1579. This behaviour can be attributed to the model's reliance on local texture and contextual cues rather than explicit object representations, which may cause background patterns or clutter to be interpreted as additional density. Such errors have a greater relative impact in sparse scenes than in densely populated ones, consistent with the largest absolute errors observed in the test set.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1.0\linewidth]{figures/mdnn_per_image_error_and_gt_vs_predicted.png}
-\caption{Per-image counting error (left) and ground-truth versus predicted count (right) across the 285 test images.}
+\caption{Counting error and predicted vs. ground-truth counts.}
 \label{fig:actual_predicted}
 \end{figure}
 
@@ -650,14 +814,14 @@ The density-range results in Table~\ref{tab:range_breakdown} and Figure~\ref{fig
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1.0\linewidth]{figures/mdnn_performance_by_gt_range.png}
-\caption{MAE, MSE, mean percentage error, and mean counting accuracy of the MDNN across ground-truth count ranges.}
+\caption{MDNN counting metrics across ground-truth count ranges.}
 \label{fig:range_metrics}
 \end{figure}
 
 The bias also varies with crowd density, supporting the above interpretation. It is strongly positive in the sparsest scenes, indicating overestimation likely caused by background and textural noise, but becomes mildly negative for counts above approximately 20, suggesting moderate underestimation as crowd density increases. This may result from overlapping and closely spaced individuals producing compressed density representations that are more difficult for the network to distinguish accurately.
 
 \begin{longtable}{@{\extracolsep{\fill}}lccccc c@{}}
-\caption{MDNN prediction performance by ground-truth count range (bin width = 10).}
+\caption{MDNN performance across count ranges}
 \label{tab:range_breakdown} \\
 \hline
 GT Range & $n$ & MAE & RMSE & Mean \% Error & Mean Accuracy (\%) & Mean Bias \\
@@ -698,53 +862,59 @@ The CSRNet training history covers 100 epochs and records training and validatio
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1.0\linewidth]{figures/csrnet_training_validation_loss_mae_curves.png}
-\caption{CSRNet training and validation loss (left) and MAE (right) across 100 training epochs.}
+\caption{CSRNet training/validation loss and MAE}
 \label{fig:csrnet_training_curves}
 \end{figure}
 
 Figure~\ref{fig:csrnet_training_curves} shows that CSRNet converges substantially during the early epochs, followed by a gradual reduction in both training and validation error. Unlike the MDNN, for which the validation performance reaches its best point at epoch 80 and subsequently deteriorates despite continued improvement in the training metrics, CSRNet maintains a close correspondence between its training and validation curves during the later stages of training. The key training values are summarised in Table~\ref{tab:csrnet_training_summary}.
 
 \begin{longtable}{@{\extracolsep{\fill}}lcccc@{}}
-\caption{CSRNet training progression at key epochs.}
-\label{tab:csrnet_training_summary} \
-
-\hline
-\textbf{Epoch} & \textbf{Train Loss} & \textbf{Val Loss} &
-\textbf{Train MAE} & \textbf{Val MAE} \
-\hline
-\endfirsthead
-
-\hline
-\textbf{Epoch} & \textbf{Train Loss} & \textbf{Val Loss} &
-\textbf{Train MAE} & \textbf{Val MAE} \
-\hline
-\endhead
-
-\hline
-\multicolumn{5}{r}{\textit{Continued on next page}} \
-\endfoot
-
-\hline
-\endlastfoot
-
-1 (initial)
-& 576.6667
-& 19.6584
-& 8.9699
-& 3.3617 \
-
-99 (best validation)
-& 0.0015
-& \textbf{0.0035}
-& 0.0139
-& \textbf{0.0173} \
-
-100 (final)
-& \textbf{0.0014}
-& 0.0035
-& \textbf{0.0140}
-& 0.0172 \
-
+	\caption{CSRNet training progression at key epochs.}
+	\label{tab:csrnet_training_summary} \\
+	
+	\hline
+	\textbf{Epoch} &
+	\textbf{Train Loss} &
+	\textbf{Val Loss} &
+	\textbf{Train MAE} &
+	\textbf{Val MAE} \\
+	\hline
+	\endfirsthead
+	
+	\hline
+	\textbf{Epoch} &
+	\textbf{Train Loss} &
+	\textbf{Val Loss} &
+	\textbf{Train MAE} &
+	\textbf{Val MAE} \\
+	\hline
+	\endhead
+	
+	\hline
+	\multicolumn{5}{r}{\textit{Continued on next page}} \\
+	\endfoot
+	
+	\hline
+	\endlastfoot
+	
+	1 (initial)
+	& 576.6667
+	& 19.6584
+	& 8.9699
+	& 3.3617 \\
+	
+	99 (best validation)
+	& 0.0015
+	& \textbf{0.0035}
+	& 0.0139
+	& \textbf{0.0173} \\
+	
+	100 (final)
+	& \textbf{0.0014}
+	& 0.0035
+	& \textbf{0.0140}
+	& 0.0172 \\
+	
 \end{longtable}
 
 The final training and validation metrics remain closely aligned, with the train--validation MAE difference remaining below approximately 0.003 during the last 20 epochs, as indicated by Figure~\ref{fig:csrnet_training_curves}. This behaviour suggests that CSRNet does not exhibit the same degree of post-optimal training divergence observed for MDNN. Instead, the model reaches a stable solution in which further reductions in training error produce little change in validation performance. The substantially smaller loss and MAE values compared with the count-level errors reported in Table~\ref{csrnet_training_summary} also indicate that the training metrics are associated with normalised or rescaled density targets and should therefore be interpreted primarily as indicators of optimisation behaviour rather than as direct measures of image-level counting error.
@@ -756,7 +926,7 @@ Compared with MDNN, CSRNet therefore demonstrates a more stable training traject
 The aggregate CSRNet results are presented in Table~\ref{csrnet_training_summary}. Compared with the MDNN results in Table~\ref{tab:mdnn_summary}, CSRNet achieves lower MAE, RMSE, and MAPE, together with a slightly higher Pearson correlation and a positive coefficient of determination. These results indicate that CSRNet provides a modest overall improvement in count prediction relative to MDNN. However, the correlation remains weak and the overall errors remain substantial, showing that the improvement does not translate into consistently accurate predictions across the complete test set.
 
 \begin{longtable}{@{\extracolsep{\fill}}lc@{}}
-\caption{Aggregate CSRNet performance on the 285-image test set.}
+\caption{Aggregate CSRNet performance.}
 \label{csrnet_training_summary} \\
 
 \hline
@@ -794,7 +964,7 @@ The per-image prediction behaviour is illustrated in Figure~\ref{fig:csrnet_actu
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1.0\linewidth]{figures/csrnet_per_image_error_and_gt_vs_predicted.png}
-\caption{Per-image counting error (left) and ground-truth versus predicted count (right) across the 285 CSRNet test images.}
+\caption{CSRNet counting error and predictions }
 \label{fig:csrnet_actual_predicted}
 \end{figure}
 
@@ -809,14 +979,14 @@ To examine whether the aggregate improvement of CSRNet is consistent across diff
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1.0\linewidth]{figures/csrnet_range_metrics.png}
-\caption{CSRNet performance across ground-truth count ranges, showing MAE, RMSE, mean percentage error, mean accuracy, and mean bias.}
+\caption{CSRNet metrics across ground-truth count ranges.}
 \label{fig:csrnet_range_metrics}
 \end{figure}
 
 Figure~\ref{fig:csrnet_range_metrics} shows a clear dependence of CSRNet performance on ground-truth crowd density. The largest errors occur in the sparsest range of 1--10 individuals, while the error decreases substantially in the moderate-density ranges. Performance then remains comparatively stable at higher counts. This pattern is broadly consistent with the behaviour observed for MDNN in Figure~\ref{fig:range_metrics}, although CSRNet generally achieves lower errors in the moderate-density regime.
 
 \begin{longtable}{@{\extracolsep{\fill}}lcccccc@{}}
-\caption{CSRNet prediction performance by ground-truth count range (bin width = 10).}
+\caption{CSRNet prediction performance by ground-truth count range.}
 \label{tab:csrnet_range_breakdown} \\
 
 \hline
@@ -891,3 +1061,789 @@ Figure~\ref{fig:csrnet_range_metrics} shows a clear dependence of CSRNet perform
 The comparison with MDNN in Table~\ref{tab:range_breakdown} shows that CSRNet's overall advantage is concentrated mainly in the moderate-density ranges. In the 11--20 range, CSRNet reduces MAE from 16.2676 to 11.7854 and RMSE from 21.2526 to 16.0560. Similar improvements are observed in the 31--40 and 41--50 ranges. In the 21--30 range, the two networks perform comparatively similarly, with MDNN achieving a slightly lower MAE of 7.0901 compared with CSRNet's 7.5173.
 
 The density-stratified results therefore show that CSRNet improves upon MDNN primarily when a moderate density signal is present. At low counts, neither density-regression architecture provides the reliability achieved by the detection-based methods. This supports the density-adaptive interpretation developed in Section~\ref{sec:mdnn}: detection-based counting is better suited to sparse scenes, while density-based methods become more competitive as crowd density increases and individual localisation becomes more difficult.
+
+\subsection{Hybrid Adaptive Counting: SCUT-Head YOLO Combined with MDNN}
+\label{sec:hybrid_mdnn}
+
+The previous sections show that the SCUT-Head YOLO detector and density-regression networks have complementary strengths on the 285-image test set. The fine-tuned SCUT-Head YOLO detector (Section~\ref{sec:scut_yolo}) performs well in sparse and moderately crowded scenes but increasingly undercounts as crowd density and occlusion increase. In contrast, the density-regression networks (Sections~\ref{sec:mdnn} and~\ref{sec:csrnet}) are less reliable in sparse scenes due to background noise but become more stable in dense crowds. This section presents a hybrid counting framework that combines the per-image predictions of the SCUT-Head YOLO detector and the MDNN density estimator to benefit from their complementary strengths, using the same 285-image test set.
+
+\subsubsection{Quantitative Performance Evaluation}
+
+Table~\ref{tab:hybrid_summary} reports the aggregate counting performance of the hybrid framework on the 285-image test set. The total and mean ground-truth counts match those reported for the individual detection- and density-based models in the preceding sections, confirming that the same test set is used throughout.
+
+\begin{longtable}{|l|c|}
+\caption{Hybrid counting performance}
+\label{tab:hybrid_summary} \\
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+\endfirsthead
+
+\multicolumn{2}{|c|}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{2}{|r|}{{Continued on next page}} \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+Images & 285 \\
+\hline
+Total Ground Truth & 8{,}310 \\
+\hline
+Total Predicted & 7{,}716.47 \\
+\hline
+Mean Ground Truth Count & 29.1579 \\
+\hline
+Mean Predicted Count & 27.0753 \\
+\hline
+Mean Absolute Error (MAE) & 4.4191 \\
+\hline
+Root Mean Squared Error (RMSE) & 6.6569 \\
+\hline
+Mean Absolute Percentage Error (MAPE) & 25.3332\% \\
+\hline
+Pearson Correlation (GT vs.\ Predicted) & 0.9370 \\
+\hline
+Coefficient of Determination ($R^2$) & 0.8647 \\
+\hline
+
+\end{longtable}
+
+To determine whether adaptive fusion is beneficial relative to either constituent model in isolation, Table~\ref{tab:hybrid_component_comparison} compares the hybrid framework directly against the SCUT-Head YOLO detector and the MDNN density estimator evaluated independently on the same 285 images.
+
+\begin{longtable}{|l|c|c|c|c|c|}
+\caption{Comparison of the hybrid framework against its two constituent models.}
+\label{tab:hybrid_component_comparison} \\
+\hline
+\textbf{Model} & \textbf{MAE} & \textbf{RMSE} & \textbf{MAPE (\%)} &
+\textbf{Pearson} & \textbf{$R^2$} \\
+\hline
+\endfirsthead
+
+\multicolumn{6}{|c|}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+\textbf{Model} & \textbf{MAE} & \textbf{RMSE} & \textbf{MAPE (\%)} &
+\textbf{Pearson} & \textbf{$R^2$} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{6}{|c|}{{Continued on next page}} \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+SCUT-Head YOLO (detector only)
+& \textbf{3.8035}
+& \textbf{5.5510}
+& \textbf{17.1045}
+& \textbf{0.9674}
+& \textbf{0.9059} \\
+\hline
+
+MDNN (density only)
+& 18.3891
+& 36.5703
+& 193.4962
+& 0.1243
+& $-3.0822$ \\
+\hline
+
+Hybrid (adaptive fusion)
+& 4.4191
+& 6.6569
+& 25.3332
+& 0.9370
+& 0.8647 \\
+\hline
+
+\end{longtable}
+
+
+However, Table~\ref{tab:hybrid_component_comparison} shows that the hybrid framework does not outperform the SCUT-Head YOLO detector. YOLO achieves lower MAE, RMSE, and MAPE, as well as slightly higher Pearson correlation and $R^2$. This indicates that YOLO is already a strong counting method on this test set, while adding the noisier MDNN predictions introduces some additional error. Therefore, as further reflected in Figure~\ref{fig:hybrid_actual_predicted}, the main advantage of the hybrid framework is not better overall performance than YOLO, but providing a more reliable alternative to MDNN alone, particularly across different crowd-density and count ranges.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1.0\linewidth]{figures/hybrid_mdnn_scut_per_image_error_and_gt_vs_predicted.png}
+\caption{Hybrid framework counting error and predictions.}
+\label{fig:hybrid_actual_predicted}
+\end{figure}
+
+\subsubsection{Performance by Density Category}
+
+Table~\ref{tab:hybrid_density_breakdown} reports hybrid counting performance stratified by the sparse/dense scene labels used to condition the fusion rule.
+
+\begin{longtable}{lcccccc}
+\caption{Hybrid counting performance by scene density category.}
+\label{tab:hybrid_density_breakdown} \\
+\hline
+Density & $n$ & MAE & RMSE & Mean \% Error & Mean Acc.\ (\%) & Mean Bias \\
+\hline
+\endfirsthead
+
+\multicolumn{7}{c}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+Density & $n$ & MAE & RMSE & Mean \% Error & Mean Acc.\ (\%) & Mean Bias \\
+\hline
+\endhead
+
+\hline
+\multicolumn{7}{r}{{Continued on next page}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+Sparse & 151 & \textbf{3.2968} & \textbf{4.6657} & 25.6076 & 76.5932 & $-2.1233$ \\
+Dense  & 134 & 5.6837 & 8.3498 & \textbf{25.0238} & \textbf{87.3793} & $-2.0366$ \\
+
+\end{longtable}
+
+Absolute error is lower in sparse scenes and higher in dense scenes, mirroring the pattern observed for the detector alone, since the detector-trusted and averaged branches together account for the great majority of predictions in both categories. Mean percentage error is similar across the two categories, while mean counting accuracy is higher for dense scenes, reflecting the fact that a fixed absolute error represents a smaller relative deviation when the ground-truth count is larger. The mean bias remains negative in both categories, indicating that the hybrid framework, like its constituent detector, tends to undercount rather than overcount on average.
+
+\subsubsection{Performance by Ground-Truth Count Range}
+
+Table~\ref{tab:hybrid_range_breakdown} presents hybrid counting performance across the same six ground-truth count ranges used to stratify the individual models in the preceding sections, allowing direct comparison with Tables~\ref{tab:pretrained_yolo_range_breakdown}, \ref{tab:yolo_range_breakdown}, \ref{tab:range_breakdown}, and~\ref{tab:csrnet_range_breakdown}.
+
+\begin{longtable}{lcccccc}
+\caption{Hybrid counting performance by ground-truth count range.}
+\label{tab:hybrid_range_breakdown} \\
+\hline
+GT Range & $n$ & MAE & RMSE & Mean \% Error & Mean Acc.\ (\%) & Mean Bias \\
+\hline
+\endfirsthead
+
+\multicolumn{7}{c}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+GT Range & $n$ & MAE & RMSE & Mean \% Error & Mean Acc.\ (\%) & Mean Bias \\
+\hline
+\endhead
+
+\hline
+\multicolumn{7}{r}{{Continued on next page}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+1--10  & 61 & 2.8697 & 7.2603 & 60.6097 & 72.0843 & 1.1330 \\
+11--20 & 48 & 3.6665 & 4.4979 & 27.6735 & 72.3265 & $-2.6502$ \\
+21--30 & 40 & \textbf{3.4920} & \textbf{4.3179} & 13.1790 & 86.8210 & $-0.2840$ \\
+31--40 & 42 & 4.7781 & 6.3679 & 13.2705 & 86.7298 & $-2.4895$ \\
+41--50 & 49 & 5.4453 & 6.9067 & \textbf{11.7014} & 88.2986 & $-3.0853$ \\
+51--60 & 45 & 6.6936 & 9.0144 & 11.9229 & \textbf{88.0771} & $-5.9629$ \\
+
+\end{longtable}
+
+As with the individual models, absolute error increases with ground-truth crowd size while relative (percentage) error decreases, and mean counting accuracy is highest in the moderate-to-high density ranges. The RMSE in the sparsest range (1--10) is disproportionately large relative to its MAE, indicating that a small number of large outlier errors dominate this bin; this is examined further in Section~\ref{sec:hybrid_discussion}. In the 21--50 range the hybrid framework achieves relative errors broadly comparable to the fine-tuned detector alone, consistent with the observation in Table~\ref{tab:hybrid_component_comparison} that the two are closely matched overall, with the detector retaining a modest edge.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1.0\linewidth]{figures/hybrid_mdnn_scut_performance_by_gt_range.png}
+\caption{Hybrid framework metrics across ground-truth count ranges.}\label{fig:hybrid_range_metrics}
+\end{figure}
+
+\subsection{Hybrid Adaptive Counting: SCUT-Head YOLO Combined with CSRNet}
+\label{sec:hybrid_csrnet}
+
+Section~\ref{sec:fusion} introduced an adaptive fusion rule that combines the fine-tuned SCUT-Head YOLO detector with a density-regression estimate, and evaluated this framework using the MDNN network as the density-based component. Since CSRNet (Section~\ref{sec:csrnet}) is a second, independently trained density-regression network evaluated on the same 285-image test set, the identical fusion rule is applied here with the CSRNet prediction substituted for the MDNN prediction, allowing the two candidate hybrid configurations to be compared directly under otherwise identical conditions.
+
+\subsubsection{Quantitative Performance Evaluation}
+
+Table~\ref{tab:hybrid_csrnet_summary} reports the aggregate performance of the SCUT-Head YOLO + CSRNet hybrid on the 285-image test set. It provide an overall view of the hybrid model's counting behaviour across the complete test set. In particular, the difference between the total ground-truth count and total predicted count indicates a tendency toward undercounting, while the MAE and RMSE quantify the average and larger counting deviations, respectively. 
+
+\begin{longtable}{lc}
+\caption{Hybrid YOLO+CSRNet performance.}
+\label{tab:hybrid_csrnet_summary} \\
+\hline
+Metric & Value \\
+\hline
+\endfirsthead
+
+\multicolumn{2}{c}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+Metric & Value \\
+\hline
+\endhead
+
+\hline
+\multicolumn{2}{r}{{Continued on next page}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+Images & 285 \\
+Total Ground Truth & 8{,}310 \\
+Total Predicted & 7{,}447.86 \\
+Mean Ground Truth Count & 29.1579 \\
+Mean Predicted Count & 26.1328 \\
+Mean Absolute Error (MAE) & 4.3410 \\
+Root Mean Squared Error (RMSE) & 5.8849 \\
+Mean Absolute Percentage Error (MAPE) & 19.4782\% \\
+Pearson Correlation (GT vs.\ Predicted) & 0.9614 \\
+Coefficient of Determination ($R^2$) & 0.8943 \\
+
+\end{longtable}
+
+The aggregate values show that the hybrid maintains a high degree of agreement with the ground-truth counts, as reflected by the Pearson correlation of 0.9614 and $R^2$ of 0.8943. However, the lower mean predicted count compared with the mean ground-truth count suggests that the hybrid configuration generally underestimates the number of people. The MAE of 4.3410 and RMSE of 5.8849 indicate that, although the typical counting error remains relatively limited, some images produce larger deviations that increase the RMSE. The MAPE of 19.4782% provides an additional normalized measure of this prediction error across images.
+
+The per-image behaviour of these predictions is shown in Figure~\ref{fig:hybrid_csrnet_actual_predicted}. This visualization complements the aggregate statistics by showing how the prediction error changes from image to image and how closely the predicted counts track the corresponding ground-truth counts.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1.0\linewidth]{figures/hybrid_csrnet__scut_per_image_error_and_gt_vs_predicted.png}
+\caption{Hybrid YOLO+CSRNet counting error and predictions.}
+\label{fig:hybrid_csrnet_actual_predicted}
+\end{figure}
+
+Table~\ref{tab:hybrid_csrnet_component_comparison} compares this hybrid configuration against its two constituent models evaluated independently. The component-level comparison is particularly relevant in this case because it shows whether incorporating CSRNet into the stronger SCUT-Head YOLO detector provides any additional counting benefit. It also highlights the extent to which the hybrid configuration preserves the detector's performance while substantially improving upon CSRNet's standalone results.
+
+\begin{longtable}{lccccc}
+\caption{Comparison of hybrid YOLO+CSRNet and constituent models.}
+\label{tab:hybrid_csrnet_component_comparison} \\
+\hline
+Model & MAE & RMSE & MAPE (\%) & Pearson & $R^2$ \\
+\hline
+\endfirsthead
+
+\multicolumn{6}{c}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+Model & MAE & RMSE & MAPE (\%) & Pearson & $R^2$ \\
+\hline
+\endhead
+
+\hline
+\multicolumn{6}{r}{{Continued on next page}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+SCUT-Head YOLO (detector only)
+& \textbf{3.8035}
+& \textbf{5.5510}
+& \textbf{17.1045}
+& \textbf{0.9674}
+& \textbf{0.9059} \\
+
+CSRNet (density only)
+& 10.0025
+& 15.8509
+& 87.8095
+& 0.6056
+& 0.2331 \\
+
+Hybrid (SCUT-Head YOLO + CSRNet)
+& 4.3410
+& 5.8849
+& 19.4782
+& 0.9614
+& 0.8943 \\
+
+\end{longtable}
+
+
+As with the MDNN-based hybrid, fusing the detector with CSRNet does not exceed the accuracy of the detector used in isolation, but the gap here is considerably narrower: MAE increases by only 0.5375 (versus 0.6156 for the MDNN-based hybrid), RMSE increases by only 0.3339 (versus 1.1059), and Pearson correlation and $R^2$ remain close to the detector-only values, as shown in Table~\ref{tab:hybrid_csrnet_component_comparison}. At the same time, the hybrid again yields a very large improvement over its density-based component used alone, more than halving CSRNet's standalone MAE and RMSE and recovering a positive, moderately strong $R^2$ from a value that was weak when CSRNet was used on its own, as shown in Table~\ref{tab:hybrid_csrnet_component_comparison} and illustrated in Figure~\ref{fig:hybrid_csrnet_actual_predicted}.
+
+\subsubsection{Performance by Density Category}
+
+To further evaluate the behaviour of the SCUT-Head YOLO + CSRNet hybrid across different crowd levels, the test images were divided into sparse and dense scene categories. Table~\ref{tab:hybrid_csrnet_density_breakdown} summarizes the counting performance for each category using MAE, RMSE, mean percentage error, mean accuracy, and mean bias.
+
+\begin{longtable}{lcccccc}
+\caption{Hybrid YOLO+CSRNet performance by scene density.}
+\label{tab:hybrid_csrnet_density_breakdown} \\
+\hline
+Density & $n$ & MAE & RMSE & Mean \% Error & Mean Acc.\ (\%) & Mean Bias \\
+\hline
+\endfirsthead
+
+\multicolumn{7}{c}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+Density & $n$ & MAE & RMSE & Mean \% Error & Mean Acc.\ (\%) & Mean Bias \\
+\hline
+\endhead
+
+\hline
+\multicolumn{7}{r}{{Continued on next page}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+Sparse
+& 159
+& \textbf{3.2709}
+& \textbf{4.4495}
+& 25.4764
+& 75.8669
+& $-2.0635$ \\
+
+Dense
+& 126
+& 5.6913
+& 7.3041
+& \textbf{11.9096}
+& \textbf{88.0905}
+& $-4.2385$ \\
+
+\end{longtable}
+
+
+As shown in Table~\ref{tab:hybrid_csrnet_density_breakdown}, the density-stratified pattern mirrors that of the MDNN-based hybrid: absolute error is lower for sparse scenes and higher for dense scenes, while relative error and mean accuracy favour dense scenes. The mean bias is negative in both categories, and is somewhat larger in magnitude for dense scenes than for the MDNN-based hybrid, indicating a slightly stronger undercounting tendency once CSRNet is substituted as the density-based component.
+
+\subsubsection{Performance by Ground-Truth Count Range}
+
+To further examine how the SCUT-Head YOLO + CSRNet hybrid performs across different crowd sizes, the test set was divided into ground-truth count ranges with a bin width of 10. Figure~\ref{fig:hybrid_csrnet_range_metrics} visualizes the main performance metrics across these ranges, while the detailed numerical results are presented in Table~\ref{tab:hybrid_csrnet_range_breakdown}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1.0\linewidth]{figures/hybrid_csrnet_scut_performance_by_gt_range.png}
+\caption{Hybrid YOLO+CSRNet metrics across count ranges.}
+\label{fig:hybrid_csrnet_range_metrics}
+\end{figure}
+
+The range-stratified results show the same broad shape as the MDNN-based hybrid -- absolute error rising and relative error falling with crowd size -- as shown in Table~\ref{tab:hybrid_csrnet_range_breakdown} and Figure~\ref{fig:hybrid_csrnet_range_metrics}. However, there is a notably lower MAE and RMSE in the sparsest range (1--10), where the mean bias is close to zero rather than positive. This is consistent with CSRNet's own range-level behaviour (Table~\ref{tab:csrnet_range_breakdown}), which, while still weak in absolute terms, is less prone to the extreme sparse-scene overestimation observed for MDNN (Table~\ref{tab:range_breakdown}).
+
+\begin{longtable}{lcccccc}
+\caption{Hybrid YOLO+CSRNet performance across count ranges.}
+\label{tab:hybrid_csrnet_range_breakdown} \\
+\hline
+GT Range & $n$ & MAE & RMSE & Mean \% Error & Mean Acc.\ (\%) & Mean Bias \\
+\hline
+\endfirsthead
+
+\multicolumn{7}{c}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+GT Range & $n$ & MAE & RMSE & Mean \% Error & Mean Acc.\ (\%) & Mean Bias \\
+\hline
+\endhead
+
+\hline
+\multicolumn{7}{r}{{Continued on next page}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+1--10
+& 61
+& \textbf{1.7816}
+& \textbf{2.6275}
+& 31.7077
+& 71.7936
+& 0.0748 \\
+
+11--20
+& 48
+& 3.6640
+& 4.4360
+& 27.7942
+& 72.2058
+& $-2.7602$ \\
+
+21--30
+& 40
+& 3.4970
+& 4.3349
+& 13.4627
+& 86.5373
+& $-1.7135$ \\
+
+31--40
+& 42
+& 4.3481
+& 5.5297
+& 12.1695
+& 87.8307
+& $-3.5733$ \\
+
+41--50
+& 49
+& 5.5312
+& 6.6318
+& \textbf{12.0735}
+& \textbf{87.9265}
+& $-3.7802$ \\
+
+51--60
+& 45
+& 7.9800
+& 9.7906
+& 14.2631
+& 85.7369
+& $-7.3413$ \\
+
+\end{longtable}
+
+
+\subsection{Selecting the Best Hybrid Configuration}
+\label{sec:hybrid_selection}
+
+Sections~\ref{sec:hybrid_mdnn} and~\ref{sec:hybrid_csrnet} evaluated two candidate hybrid configurations -- SCUT-Head YOLO combined with MDNN, and SCUT-Head YOLO combined with CSRNet -- under an identical adaptive fusion rule and on the same 285-image test set. This section compares the two configurations directly across all previously reported criteria in order to select the hybrid best suited for general deployment.
+
+\subsubsection{Aggregate Performance Comparison}
+
+Table~\ref{tab:hybrid_selection_aggregate} compares the two hybrid configurations on overall counting accuracy, together with the degradation each incurs relative to the SCUT-Head YOLO detector used in isolation.
+
+\begin{longtable}{|p{4.2cm}|c|c|c|}
+\caption{Aggregate comparison of the two hybrid configurations.}
+\label{tab:hybrid_selection_aggregate} \\
+
+\hline
+\textbf{Metric} & \textbf{YOLO+MDNN} & \textbf{YOLO+CSRNet} & \textbf{Better Config} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Metric} & \textbf{YOLO+MDNN} & \textbf{YOLO+CSRNet} & \textbf{Better Config} \\
+\hline
+\endhead
+
+\hline
+\textit{Continued on next page} & & & \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+MAE
+& 4.4191
+& \textbf{4.3410}
+& CSRNet \\
+\hline
+
+RMSE
+& 6.6569
+& \textbf{5.8849}
+& CSRNet \\
+\hline
+
+MAPE (\%)
+& 25.3332
+& \textbf{19.4782}
+& CSRNet \\
+\hline
+
+Pearson Correlation
+& 0.9370
+& \textbf{0.9614}
+& CSRNet \\
+\hline
+
+$R^2$
+& 0.8647
+& \textbf{0.8943}
+& CSRNet \\
+\hline
+
+\end{longtable}
+
+As shown in Table~\ref{tab:hybrid_selection_aggregate}, the SCUT-Head YOLO + CSRNet configuration outperforms the SCUT-Head YOLO + MDNN configuration on every aggregate metric, and does so while deviating less from the detector-only baseline, indicating that CSRNet integrates more cleanly with the detector's predictions than MDNN does.
+
+\subsubsection{Comparison by Scene Density}
+
+Table~\ref{tab:hybrid_selection_density} compares the two configurations stratified by sparse and dense scene category.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2.0cm}|
+                    >{\raggedright\arraybackslash}p{2.5cm}|
+                    >{\centering\arraybackslash}p{2.3cm}|
+                    >{\centering\arraybackslash}p{2.3cm}|
+                    >{\centering\arraybackslash}p{2.5cm}|}
+\caption{Density-stratified comparison of the two hybrid configurations.}
+\label{tab:hybrid_selection_density} \\
+\hline
+\textbf{Density} & \textbf{Metric} & \textbf{YOLO+MDNN} &
+\textbf{YOLO+CSRNet} & \textbf{Better Config} \\
+\hline
+\endfirsthead
+
+\multicolumn{5}{|c|}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+\textbf{Density} & \textbf{Metric} & \textbf{YOLO+MDNN} &
+\textbf{YOLO+CSRNet} & \textbf{Better Config} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{5}{|c|}{Continued on next page} \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+Sparse
+& MAE
+& 3.2968
+& \textbf{3.2709}
+& CSRNet \\
+\hline
+
+Sparse
+& RMSE
+& 4.6657
+& \textbf{4.4495}
+& CSRNet \\
+\hline
+
+Sparse
+& Mean Bias
+& $-2.1233$
+& \textbf{$-2.0635$}
+& CSRNet \\
+\hline
+
+Dense
+& RMSE
+& 8.3498
+& \textbf{7.3041}
+& CSRNet \\
+\hline
+
+Dense
+& MAPE (\%)
+& 25.0238
+& \textbf{11.9096}
+& CSRNet \\
+\hline
+
+Dense
+& Mean Bias
+& \textbf{$-2.0366$}
+& $-4.2385$
+& MDNN \\
+\hline
+
+\end{longtable}
+
+CSRNet retains a modest advantage in sparse scenes and a substantial advantage in dense-scene RMSE and MAPE. The one criterion favoring the MDNN-based hybrid is dense-scene bias, where CSRNet undercounts more heavily ($-4.2385$ vs.\ $-2.0366$), indicating that CSRNet's efficiency gains in dense crowds come with a slightly stronger systematic undercount.
+
+\subsubsection{Comparison by Ground-Truth Count Range}
+
+Table~\ref{tab:hybrid_selection_range} compares MAE and RMSE across the six ground-truth count ranges, identifying the better-performing configuration in each bin.
+
+\setlength{\LTcapwidth}{\textwidth}
+
+\begin{longtable}{|p{1.4cm}|c|c|c|c|p{4.0cm}|}
+\caption{Range-stratified comparison of the two hybrid configurations.}
+\label{tab:hybrid_selection_range} \\
+
+\hline
+\textbf{GT Range}
+& \textbf{MAE}
+& \textbf{MAE}
+& \textbf{RMSE}
+& \textbf{RMSE}
+& \textbf{Better Config} \\
+\hline
+
+& \textbf{MDNN}
+& \textbf{CSRNet}
+& \textbf{MDNN}
+& \textbf{CSRNet}
+& \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{GT Range}
+& \textbf{MAE}
+& \textbf{MAE}
+& \textbf{RMSE}
+& \textbf{RMSE}
+& \textbf{Better Config} \\
+\hline
+
+& \textbf{MDNN}
+& \textbf{CSRNet}
+& \textbf{MDNN}
+& \textbf{CSRNet}
+& \\
+\hline
+\endhead
+
+\hline
+\textit{Continued on next page}
+& & & & & \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+1--10
+& 2.8697
+& \textbf{1.7816}
+& 7.2603
+& \textbf{2.6275}
+& CSRNet (large margin) \\
+\hline
+
+11--20
+& 3.6665
+& 3.6640
+& 4.4979
+& \textbf{4.4360}
+& CSRNet (marginal) \\
+\hline
+
+21--30
+& \textbf{3.4920}
+& 3.4970
+& \textbf{4.3179}
+& 4.3349
+& MDNN (negligible) \\
+\hline
+
+31--40
+& 4.7781
+& \textbf{4.3481}
+& 6.3679
+& \textbf{5.5297}
+& CSRNet \\
+\hline
+
+41--50
+& \textbf{5.4453}
+& 5.5312
+& \textbf{6.9067}
+& 6.6318
+& MDNN \\
+\hline
+
+51--60
+& \textbf{6.6936}
+& 7.9800
+& \textbf{9.0144}
+& 9.7906
+& MDNN \\
+\hline
+
+\end{longtable}
+
+
+The range-stratified comparison in Table~\ref{tab:hybrid_selection_range} shows that the CSRNet-based hybrid holds a decisive advantage in the sparsest range (1--10), where the MDNN-based hybrid's RMSE is inflated by outlier errors consistent with MDNN's known tendency to overestimate in background-heavy scenes. The two configurations are closely matched in the 11--20 and 21--30 ranges, CSRNet holds a moderate advantage in the 31--40 range, and MDNN performs modestly better in the highest-density range (51--60).
+
+\subsubsection{Final Model Selection}
+
+Table~\ref{tab:hybrid_selection_summary} consolidates the comparison into a criterion-by-criterion summary.
+
+\begin{longtable}{|l|c|c|}
+\caption{Summary of criteria favoring each hybrid configuration.}
+\label{tab:hybrid_selection_summary} \\
+\hline
+\textbf{Criterion} & \textbf{Favors YOLO+MDNN} & \textbf{Favors YOLO+CSRNet} \\
+\hline
+\endfirsthead
+
+\multicolumn{3}{|c|}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+\textbf{Criterion} & \textbf{Favors YOLO+MDNN} & \textbf{Favors YOLO+CSRNet} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{|c|}{{Continued on next page}} \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+Aggregate MAE / RMSE / MAPE & & \checkmark \\
+\hline
+Pearson / $R^2$ & & \checkmark \\
+\hline
+Degradation vs.\ YOLO-only & & \checkmark \\
+\hline
+Sparse-scene accuracy & & \checkmark \\
+\hline
+Dense-scene RMSE / MAPE & & \checkmark \\
+\hline
+Dense-scene bias magnitude & \checkmark & \\
+\hline
+1--10 GT range (outlier robustness) & & \checkmark \\
+\hline
+51--60 GT range & \checkmark & \\
+\hline
+
+\end{longtable}
+
+Weighing the criteria in Table~\ref{tab:hybrid_selection_summary}, the SCUT-Head YOLO + CSRNet configuration is selected as the best-performing hybrid framework. It dominates on every aggregate metric, degrades least relative to the detector-only baseline, and -- most decisively -- eliminates the severe outlier-driven RMSE inflation that affects the MDNN-based hybrid in sparse scenes (GT range 1--10). The MDNN-based hybrid remains preferable only in two narrower respects: it produces a smaller undercounting bias in dense scenes, and it achieves a lower MAE/RMSE in the highest count range (51--60). Since these advantages are confined to a single density regime and a single count range, whereas the CSRNet-based hybrid's advantages hold consistently across the full range of scene densities and crowd sizes, SCUT-Head YOLO + CSRNet is adopted as the final hybrid model for subsequent analysis, with the caveat that applications specifically concerned with undercounting in very dense, high-count scenes may warrant reconsidering the MDNN-based configuration.
+
+\section{Comparison with Related Work}
+\label{sec:related_work}
+
+\subsection{Detection-Based Head Counting}
+
+The SCUT-Head dataset was introduced by Peng et al.~\cite{peng2018scuthead} together with a Feature Refine Net and cascaded multi-scale detection architecture specifically designed for small, densely-packed head instances; the original publication does not report results in the precision/recall/mAP@50 format used by the Ultralytics YOLO framework employed here, precluding a direct numerical comparison of detection metrics on identical terms. The general finding of that work, that head detection in dense, small-instance conditions benefits from architectural provisions for small-object and multi-scale detection is broadly consistent with the resolution sensitivity directly observed in Section~\ref{sec:scut_yolo} (a 7.6-point mAP@50 drop when inference resolution was halved), though this study did not test an architecture specifically designed for small-head detection and cannot claim to have reproduced or extended that paper's specific findings.
+
+\subsection{Density-Map Estimation on ShanghaiTech}
+
+The Multi-Column CNN (MCNN) architecture that the Four-Column MDNN implementation extends was introduced by Zhang et al.~\cite{Zhang2016}, reporting a whole-image count MAE of 26.4 on the official ShanghaiTech Part~B \emph{test} set (316 images). CSRNet~\cite{li2018csrnet} later reported a substantially lower MAE of 10.6 on the same official Part~B test set. As Table~\ref{tab:fair_comparison} states, neither published figure is directly comparable to the results in Sections~\ref{sec:mdnn}--\ref{sec:csrnet}: both published figures are whole-image count MAE on the official 316-image \emph{test} split, whereas this study's Four-Column MDNN figure (15.20, best epoch) is a per-pixel density MAE on a 40-image internal \emph{validation} split that was never applied to the official test set.
+% , and this study's CSRNet figure reflects only 4 of 200 planned training epochs.
+
+% \textbf{No like-for-like MAE comparison against either published benchmark can therefore be responsibly reported for either network in this study.} 
+
+The qualitative pattern that both published works report, substantially lower error on Part~B than on the denser Part~A split, is consistent with, and reinforces, the general density-dependent degradation pattern directly observed for the sparse detection branch in Section~\ref{sec:sparse_external}, even though the specific architectures differ.
+
+\subsection{YOLO-Family Detection}
+
+Both the classic and SCUT-Head-fine-tuned detectors are based on the YOLOv8 architecture by Ultralytics~\cite{yolov8_ultralytics}, which follows the single-shot detection framework introduced by Redmon et al.~\cite{redmon2016yolo}. Since the reported COCO benchmarks use a different dataset, task, and evaluation protocol, they are not directly comparable with the head-specific SCUT-Head or person-detection results evaluated in this chapter.
+
+\section{Discussion of Findings}
+\label{sec:discussion}
+
+The preceding sections evaluated four standalone counting approaches -- a pretrained, off-the-shelf person detector (Section~\ref{sec:classic_yolo}), a head detector fine-tuned on the SCUT-Head dataset (Section~\ref{sec:scut_yolo}), and two density-regression networks, MDNN and CSRNet (Sections~\ref{sec:mdnn} and~\ref{sec:csrnet}) -- together with two adaptive hybrid configurations that fuse the fine-tuned detector with each density-regression network in turn (Sections~\ref{sec:hybrid} and~\ref{sec:hybrid_csrnet}). This section draws these results together and interprets the patterns that recur across methods; their broader implications for deployment, limitations, and future directions are addressed in the concluding chapter (Section~\ref{sec:conclusion}).
+
+\subsection{Fine-Tuning Closes the Geometric Mismatch but Not the Occlusion Gap}
+\label{sec:discussion_finetuning}
+
+Comparing the pretrained detector (Table~\ref{tab:pretrained_yolo_summary}) with its fine-tuned counterpart (Table~\ref{tab:yolo_summary}) isolates the effect of adapting a general-purpose person detector to head-level annotations. Fine-tuning improves precision at IoU~0.50 from 0.0175 to 0.4541, recall from 0.0150 to 0.4160, and reduces MAE from 7.2351 to 3.3579, confirming that the pretrained model's poor box-level scores in Section~\ref{sec:classic_yolo} were substantially, though not entirely, an artefact of the geometric mismatch between whole-body and head-level bounding boxes rather than a genuine inability to identify individuals -- a distinction already anticipated qualitatively when the pretrained model's count-level correlation with ground truth (Pearson $= 0.8704$) was found to be far stronger than its box-level metrics implied. What fine-tuning does \emph{not} resolve, however, is the underlying occlusion problem: the fine-tuned detector's counting bias remains negative and grows in magnitude across the higher-density ranges (Table~\ref{tab:yolo_range_breakdown}), mirroring, in attenuated form, the same density-dependent undercounting observed for the pretrained model (Table~\ref{tab:pretrained_yolo_range_breakdown}). This indicates that occlusion-driven undercounting is a structural limitation of the detection paradigm itself -- a consequence of relying on discrete, non-overlapping instance localisation -- rather than a limitation specific to any one model's training data or weights.
+
+\subsection{Detection and Density Regression Exhibit Complementary Error Structure}
+\label{sec:discussion_complementary}
+
+The single clearest pattern to emerge from this chapter is that detection-based and density-based counting fail in different, largely non-overlapping regions of the crowd-density spectrum. The fine-tuned SCUT-Head YOLO detector achieves its best relative accuracy in sparse and lightly populated scenes (Table~\ref{tab:yolo_range_breakdown}), where individual heads are rarely occluded and can be localised reliably, but its performance -- and, more specifically, its counting bias -- degrades as crowd density increases, with the largest negative bias occurring in the most densely populated range evaluated (51--60 individuals). This behaviour is consistent with the underlying mechanism of detection-based counting: non-maximum suppression and increasing inter-person occlusion cause a growing share of true instances to go undetected as density rises, a pattern already visible in exaggerated form for the pretrained, non-fine-tuned detector in Section~\ref{sec:classic_yolo}.
+
+MDNN and CSRNet display the opposite tendency. Both density-regression networks perform poorly in the sparsest range evaluated (1--10 individuals), where mean percentage error exceeds 100\% for MDNN (Table~\ref{tab:range_breakdown}) and remains very high for CSRNet (Table~\ref{tab:csrnet_range_breakdown}), before improving substantially and stabilising in the moderate-to-high density ranges. This is consistent with density regression's reliance on learned spatial texture and contextual cues rather than explicit per-instance localisation: in sparse scenes, background clutter and photometric noise can be misattributed as crowd density, producing errors that are large relative to the (small) true count, whereas in denser scenes genuine crowd texture provides a stronger and more consistent signal for the network to exploit.
+
+Overall, the results show that detection- and density-based methods have complementary strengths that depend on crowd density. This complementarity motivates the hybrid fusion framework evaluated in Sections~\ref{sec:hybrid} and~\ref{sec:hybrid_csrnet}.
+
+\subsection{Hybrid Fusion Reduces Density-Regression Failure but Does Not Surpass the Detector}
+\label{sec:discussion_hybrid}
+
+The two hybrid configurations evaluated in this chapter were designed to test whether the complementary error structure identified in Section~\ref{sec:discussion_complementary} could be exploited through simple, rule-based fusion. The results are consistent across both configurations and support two conclusions simultaneously.
+
+First, hybrid fusion is highly effective at neutralising the specific weakness of density regression in sparse and lightly populated scenes. Relative to using MDNN or CSRNet in isolation, fusing either network with the fine-tuned detector reduces aggregate MAE by more than a factor of two (CSRNet: from 10.0025 to 4.3410) and, in the MDNN case, by more than a factor of four (from 18.3891 to 4.4191), while restoring a strongly positive Pearson correlation and coefficient of determination in place of values that were weak or, for MDNN, negative when used alone (Tables~\ref{tab:hybrid_component_comparison} and~\ref{tab:hybrid_csrnet_component_comparison}). This demonstrates that a simple, interpretable, threshold-based fusion rule -- requiring no additional training and no learned combination weights -- is sufficient to suppress the great majority of density regression's characteristic sparse-scene overestimation errors.
+
+Second, and more surprisingly, neither hybrid configuration exceeds the accuracy of the fine-tuned detector used on its own (Table~\ref{tab:hybrid_final_comparison}). The explanation lies in the asymmetry of the two components' reliability: across the density ranges evaluated in this test set, the fine-tuned detector's counting error, while density-dependent, never becomes as large in absolute or relative terms as either density-regression network's error in the sparse range. Consequently, in the substantial share of images where the two estimators broadly agree and are therefore averaged (55.79\% for the MDNN-based hybrid; 63.86\% for the CSRNet-based hybrid), averaging in a comparatively noisier density-based estimate pulls the fused prediction away from the detector's already more accurate count more often than it corrects for a genuine detector error. In effect, the detector on this test set is simply the stronger of the two estimators across most of the density spectrum evaluated, and unweighted averaging under those conditions is expected to degrade accuracy slightly rather than improve it.
+
+The choice between the two hybrid configurations is nonetheless not immaterial. Selecting CSRNet over MDNN as the density-based component narrows the gap to the detector-only baseline considerably (an MAE increase of 0.5375 over the detector alone, versus 0.6156 for the MDNN-based hybrid; Section~\ref{sec:hybrid_selection}), because CSRNet's sparse-scene predictions are less extreme and therefore less damaging when averaged in. This distinction becomes most consequential in the density-only fallback branch, where the detector produces zero detections and the framework must rely entirely on the density estimate: here the choice of density-regression component determines the difference between a fallback error of a few individuals (CSRNet) and a fallback error of thirty or more (MDNN), on scenes where the true count was as low as three or four. This is arguably the most practically important finding of the hybrid evaluation, since it is precisely in this rare but high-stakes failure mode -- complete detector failure -- that the choice of fallback estimator matters most.
+
+% \subsection{Implications for Public Transport Crowd Monitoring}
+% \label{sec:discussion_implications}
+
+% The practical setting motivating this study -- automated occupancy and crowd estimation in public transport environments such as buses -- typically spans the full range of density conditions evaluated in this chapter, from near-empty vehicles to tightly packed peak-hour crowds, and the specific images drawn from bus interiors that form part of the evaluated test set illustrate this range directly. The density-dependent error patterns identified above therefore have a direct bearing on deployment. A detector-only system would be expected to perform best during off-peak periods but to systematically undercount ridership during the high-density conditions -- crowded boarding, standing passengers, peak-hour services -- that are often of greatest operational interest for capacity planning and overcrowding alerts. Conversely, a density-regression-only system would be least reliable precisely when vehicles are empty or nearly empty, a condition in which accurate counting is comparatively low-stakes but false positives (reporting passengers where none exist) could nonetheless undermine confidence in the system. The adaptive hybrid framework, despite not exceeding the detector's aggregate accuracy in this evaluation, offers a form of risk mitigation that neither standalone approach provides on its own: it converts the density-regression network's largest failure mode (sparse-scene overestimation) into a comparatively minor correction, while retaining detector-level accuracy across the moderate-to-high density conditions that dominate the practical deployment setting. For a public transport operator, a system whose worst-case error is bounded and predictable may be preferable to one that is marginally more accurate on average but occasionally fails catastrophically in either direction, even where, as here, that marginal average advantage favours the simpler detector-only configuration.
+
