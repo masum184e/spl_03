@@ -72,7 +72,7 @@ This characteristic makes YOLO based detection appropriate for passenger countin
 
 % In a bus environment, passengers frequently overlap because of the limited available space. Consequently, full-body detection may become unreliable when only the upper portion of a passenger is visible. Detecting heads provides a more localized representation and can therefore improve the ability to identify individual passengers in crowded scenes.
 
-% Crowd-counting research commonly uses head annotations as a supervisory signal for density estimation because heads provide a relatively consistent representation of individual people under occlusion \cite{zhang2022survey}. The use of head detection in this research is therefore motivated by the characteristics of bus interiors and the need to identify passengers even when their bodies are partially hidden.
+% Crowd-counting research commonly uses head annotations as a supervisory signal for density estimation because heads provide a relatively consistent representation of individual people under occlusion \cite{zhang2022survey}. The use of head detection in this study is therefore motivated by the characteristics of bus interiors and the need to identify passengers even when their bodies are partially hidden.
 
 % \subsection{Small-Object Detection}
 
@@ -80,7 +80,7 @@ This characteristic makes YOLO based detection appropriate for passenger countin
 
 % Small objects provide less visual information than large objects and are therefore more difficult to detect accurately. Recent research identifies scale variation, insufficient feature representation, and loss of spatial information as important challenges in small-object detection \cite{liu2021small}.
 
-% Camera distance and viewpoint therefore have a direct effect on the apparent size of passenger heads. This makes small-object detection particularly relevant to the comparison of detection architectures in this research.
+% Camera distance and viewpoint therefore have a direct effect on the apparent size of passenger heads. This makes small-object detection particularly relevant to the comparison of detection architectures in this study.
 
 \subsection{Crowd Density}
 
@@ -421,7 +421,7 @@ In summary, the literature demonstrates that although video-counting solutions a
 
 The literature reveals several research gaps in vision-based passenger counting. First, most crowd counting studies focus on outdoor crowd datasets such as ShanghaiTech ~\cite{Zhu2020}, UCF-QNRFQNRF ~\cite{ucf_qnrf_dataset}, and NWPU-Crowd ~\cite{wang2020nwpu}, which do not adequately represent bus interior environments. Second, although head detection has shown promise in crowded scenes, there is limited research comparing different detection architectures for small-head detection in buses. Third, the impact of integrating object tracking with head detection for stable passenger counting remains insufficiently explored.
 
-Therefore, this research aims to address these gaps by investigating the effectiveness of head detection for passenger counting in bus interiors, comparing different detection models for small head detection, and evaluating whether object tracking can improve counting stability and reduce double counting across video frames.
+Therefore, this study aims to address these gaps by investigating the effectiveness of head detection for passenger counting in bus interiors, comparing different detection models for small head detection, and evaluating whether object tracking can improve counting stability and reduce double counting across video frames.
 
 \subsection{Research Question}
 
