@@ -14,7 +14,7 @@
 - What existing paper does(uses dataset and don't deploy model)
 - what this paper will do(trial occured both on and off bus use cases).
 
-The primary objective of this research is to evaluate and compare the performance and practical implications of a video-based APC system when deployed in on-vehicle versus off-vehicle settings. The study aims to highlight differences in accuracy, operational considerations, and the validity of underlying assumptions for both scenarios within the public transport sector.
+The primary objective of this study is to evaluate and compare the performance and practical implications of a video-based APC system when deployed in on-vehicle versus off-vehicle settings. The study aims to highlight differences in accuracy, operational considerations, and the validity of underlying assumptions for both scenarios within the public transport sector.
 ### Introduction
 - Overcrowding
 - Solved by APC.
