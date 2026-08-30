@@ -762,7 +762,7 @@ The evaluation strategy uses metrics appropriate to each component of the propos
 
 \subsection{Count-Based Evaluation Metrics}
 
-For the sparse-branch external evaluation (Section~\ref{sec:sparse_external}), the following whole-image count metrics are used, with $\hat c_i$ the predicted count and $c_i$ the ground-truth count for image $i$ of $M$ evaluated images:
+For the sparse and dense branch evaluation, the following whole-image count metrics are used, with $\hat c_i$ the predicted count and $c_i$ the ground-truth count for image $i$ of $M$ evaluated images:
 
 \begin{equation}
 	\text{MAE} = \frac{1}{M}\sum_{i=1}^{M} \left| \hat{c}_i - c_i \right|, \qquad
