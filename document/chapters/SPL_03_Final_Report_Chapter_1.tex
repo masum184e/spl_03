@@ -5,7 +5,7 @@
 
 Public transportation is one of the essential components of today's urban fabric. Buses are the fastest growing mode of transport and carry the greatest proportion of daily commuters globally, especially in the developing world, which is undergoing rapid urbanisation \cite{itf_outlook_2023}. It is crucial that passenger occupancy information is accurate in order to optimize scheduling, fleet management, prevent overcrowding and ensure safety for passengers.
 
-Typical APC systems use the hardware sensors including an infrared beam, a pressure mat or a ticketing system. These methods are common, but they can also have drawbacks such as high installation and maintenance expenses, susceptibility to environmental conditions, and decreased accuracy with multiple passengers simultaneously entering or exiting the system \cite{Chris2024}. Field evaluations comparing infrared, WiFi and video based APC solutions confirm that traditional sensing technologies show accuracy declines under crowded or high-throughput boarding conditions~\cite{grgurevic2021review}.
+Typical APC systems use the hardware sensors including an infrared beam, a pressure mat or a ticketing system. These methods are common, but they can also have drawbacks such as high installation and maintenance expenses, susceptibility to environmental conditions, and decreased accuracy with multiple passengers simultaneously entering or exiting the system. Field evaluations comparing infrared, WiFi and video based APC solutions confirm that traditional sensing technologies show accuracy declines under crowded or high-throughput boarding conditions~\cite{grgurevic2021review}.
 
 With some recent progress in computer vision and deep learning, camera based passenger counting systems have been developed. Many buses are already using surveillance cameras for security reasons making vision an affordable and scalable solution \cite{Chris2023}. Neural networks can accurately assess occupancy in complex visual scenes, deep learning models that integrate object detection and density estimation have presented state of the art results in crowd counting benchmarks \cite{gao2022caaisurvey}.
 
@@ -20,6 +20,18 @@ In rececompont years, computer vision and deep learning have shown promising res
 The existing crowd counting methods have been developed and tested for public datasets which are primarily outdoor scenes or general crowd environments, such as ShanghaiTech\cite{Zhu2020}, UCF-QNRF\cite{ucf_qnrf_dataset} and NWPU-Crowd\cite{wang2020nwpu}. The data sets are not representative enough of the visual properties and problems of the interior of a bus. Another drawback of many studies is the estimation of crowd density instead of the identification of the individuals who make up the crowd in video frames, which can cause double counting if used in a video based application and may lead to unstable counts \cite{hassan2023crowd}.
 
 Thus, it is important to test if head detection can accurately estimate the number of passengers in a bus environment, explore optimal head detection models to detect small heads, and evaluate if head detection combined with object tracking can enhance the stability of counting and avoid multiple counting of passengers among different frames \cite{occupancy2026mot}.
+
+\subsection{Research Question}
+
+Based on the aforementioned, the following research questions are proposed to guide the investigation and evaluation of the proposed passenger head-counting system:
+
+\begin{itemize}
+    \item \textbf{RQ1:} Can the number of passengers be accurately counted in the interior of the bus with head detection?
+    \item \textbf{RQ2:} What impact do camera angles have in the accuracy of head-counting in a bus with a high level of occupancy?
+    \item \textbf{RQ3:} What is the best detection model for the small-head detection of real bus scenes?
+    \item \textbf{RQ4:} How stable is the system in low light, occlusion and with motion blur?
+\end{itemize}
+
 
 \section{Research Objectives}
 
