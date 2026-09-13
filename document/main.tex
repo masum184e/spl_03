@@ -1,0 +1,208 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[margin=1in]{geometry} % set margin
+\usepackage{newtxtext,newtxmath} % set font
+\usepackage{titlesec} % customize section title
+\usepackage{graphicx} % read image
+\usepackage{longtable} % long table
+\usepackage{array}
+\usepackage{enumitem} % control over list
+
+\setlength{\parindent}{0pt}  % remove paragraph indentation
+\setlength{\parskip}{6pt}    % add space between paragraphs
+
+% ==================================================
+% Header and Footer
+% ==================================================
+\usepackage{fancyhdr}
+
+% Header image dimensions
+\newcommand{\headerheight}{1.2cm}
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header/footer fields
+
+% Header
+\fancyhead[L]{%
+    \raisebox{-0.5\height}{%
+        \includegraphics[height=\headerheight]{figures/logo/iit.jpeg}%
+    }%
+}
+
+\fancyhead[R]{%
+    \raisebox{-0.5\height}{%
+        \includegraphics[height=\headerheight]{figures/logo/nstu.jpeg}%
+    }%
+}
+
+% Footer
+\usepackage{xcolor}
+\fancyfoot[L]{%
+    \textcolor{gray}{Institute of Information Technology, Noakhali Science and Technology University}%
+}
+\fancyfoot[R]{\thepage}
+
+% Header/footer line settings
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% Header/footer spacing
+%\setlength{\headheight}{25pt}
+\setlength{\headheight}{35pt}
+\setlength{\headsep}{15pt}
+\setlength{\footskip}{25pt}
+
+% ==================================================
+% Pages without Header/Footer
+% ==================================================
+\fancypagestyle{empty}{
+    \fancyhf{}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+}
+
+%=======================================================%
+%   Compact Table of Contents, Figures, and Tables
+%=======================================================%
+\usepackage{tocloft} 
+
+% TOC spacing
+\setlength{\cftbeforetoctitleskip}{0pt}
+\setlength{\cftaftertoctitleskip}{15pt}
+
+% List of Figures spacing
+\setlength{\cftbeforeloftitleskip}{0pt}
+\setlength{\cftafterloftitleskip}{15pt}
+
+% List of Tables spacing
+\setlength{\cftbeforelottitleskip}{0pt}
+\setlength{\cftafterlottitleskip}{15pt}  
+
+% ==================================================
+% Algorithm Packages
+% ==================================================
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{float}
+
+% ==================================================
+% Hyperlinks and Cross-References
+% ==================================================
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+
+\makeatletter
+\renewcommand{\theHfigure}{\thechapter.\arabic{figure}}
+\renewcommand{\theHtable}{\thechapter.\arabic{table}}
+\makeatother
+
+% ==================================================
+% Chapter Page
+% ==================================================
+% \newcommand{\chapterpage}[1]{%
+%     \clearpage
+%     \stepcounter{chapter}%
+%     \phantomsection
+%     \addcontentsline{toc}{chapter}{\protect\numberline{\thechapter}#1}
+%     \thispagestyle{empty}
+
+%     \vspace*{\fill}
+%     \begin{center}
+%         {\fontsize{32}{38}\selectfont\bfseries #1}
+%     \end{center}
+%     \vspace*{\fill}
+
+%     \clearpage
+% }
+\newcommand{\chapterpage}[1]{%
+    \clearpage
+    \stepcounter{chapter}%
+    \phantomsection
+    \addcontentsline{toc}{chapter}{\protect\numberline{\thechapter}#1}
+    \thispagestyle{empty}
+
+    \vspace*{\fill}
+    \begin{center}
+        {\fontsize{32}{38}\selectfont\bfseries #1}
+    \end{center}
+    \vspace*{\fill}
+
+    \clearpage
+}
+
+
+% ==================================================
+% Chapter Heading
+% ==================================================
+\newcommand{\mychapter}[1]{%
+    \noindent
+    {\normalfont\bfseries\fontsize{18}{22}\selectfont
+    Chapter \thechapter: #1}\par
+    \vspace{0pt}
+}
+
+\begin{document}
+
+%=======================================================%
+%       Cover Page
+%=======================================================%
+\include{pages/cover}
+
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+\include{pages/declaration}
+\include{pages/approval}
+\include{pages/dedication}
+
+% ==================================================
+% Table of Contents
+% ==================================================
+\renewcommand{\contentsname}{Table of Contents}
+\thispagestyle{fancy}
+\tableofcontents
+\clearpage
+
+% ==================================================
+% List of Figures
+% ==================================================
+\listoffigures
+% \addcontentsline{toc}{chapter}{List of Figures}
+\thispagestyle{fancy}
+\clearpage
+
+% ==================================================
+% List of Tables
+% ==================================================
+\listoftables
+\thispagestyle{fancy}
+% \addcontentsline{toc}{chapter}{List of Tables}
+\clearpage
+
+\include{pages/acknowledgement}
+\include{pages/abstract}
+
+% ==================================================
+% CHAPTER 1
+% ==================================================
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\include{chapters/SPL_03_Final_Report_Chapter_1}	
+\include{chapters/SPL_03_Final_Report_Chapter_2}	
+\include{chapters/SPL_03_Final_Report_Chapter_3}	
+\include{chapters/SPL_03_Final_Report_Chapter_4}	
+\include{chapters/SPL_03_Final_Report_Chapter_5}	
+% \include{chapters/SPL_03_Final_Report_Chapter_6}	
+% \include{chapters/SPL_03_Final_Report_Chapter_7}	
+% \include{chapters/SPL_03_Final_Report_Chapter_8}	
+
+% ==================================================
+% References
+% ==================================================
+\newpage
+\renewcommand{\bibname}{References}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+	
+\end{document}

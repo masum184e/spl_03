@@ -1,0 +1,197 @@
+\chapterpage{Conclusion and Future Work}
+\mychapter{Conclusion and Future Work}
+\label{chap:conclusion}
+
+\subsection{Summary of Contributions}
+\label{sec:conclusion_contributions}
+
+The aim of this work was to evaluate the comparative performance of detection-based and density-based crowd head counting techniques in the case of different crowd densities, and to explore if the strengths of both types of techniques, can be integrated into a more comprehensive counting framework, using as a practical test case, images provided by public-transport-related infrastructure. The following are the key findings of this investigation.
+
+
+In this work, by comparing the same YOLO architecture before and after fine-tuning on head-level annotations (Section~\ref{sec:classic_yolo} and~\ref{sec:scut_yolo}) the specific effect of task-specific fine-tuning was isolated and quantified, demonstrating that task-specific fine-tuning makes up for the geometric mismatch between whole-body and head-level predictions, but cannot counteract density-dependent and occlusion-driven undercounting.
+
+A like-for-like comparison of the training convergence behaviour and counting accuracy of MDNN and CSRNet (Sections~\ref{sec:mdnn} and~\ref{sec:csrnet}) was made possible by their training and evaluation on a shared test set, a comparison that would not be possible based on one MDNN's performance or one CSRNet's performance alone.
+
+This work directly demonstrated that the four independent models were complementary in different regions of the crowd-density spectrum with a consistent and density-stratified evaluation of all four models using a common set of ground-truth count ranges (Section~\ref{sec:discussion_complementary}), thus motivating the hybrid framework as a principled solution to a demonstrated, but not assumed, complementarity.
+
+A simple, interpretable fusion rule (Equation~\ref{eq:hybrid_rule}) that combines detector counts and density-regression counts -- without needing to train any additional components -- has been designed, formalized, and evaluated in comparison to two independent density-regression components (Sections~\ref{sec:hybrid} and~\ref{sec:hybrid_csrnet}), and its branch-level behaviour has been analysed in detail to explain not only how well it performs but also why it does so.
+
+The selection between competing hybrid configurations was made systematic and based on evidence; directly comparing the SCUT-Head YOLO~+~MDNN and SCUT-Head YOLO~+~CSRNet configurations under identical conditions and claiming that the latter was the preferred configuration, attributing this to specific, mechanistic causes (Section~\ref{sec:hybrid_selection}), as opposed to just reporting the aggregate result.
+
+The reusability and the fact that the six different models and configurations were evaluated using a consistent methodology (aggregate metrics (MAE, RMSE, MAPE, Pearson correlation, $R^2$), and a common six-bin range breakdown for ground truth) is a methodological contribution that would not have been possible without the use of a number of aggregate metrics where each one alone would have not provided sufficient insights for direct comparison across models.
+
+This work also addresses bus-interior images among a set of images whose annotations are based on the surrounding crowd density, as well as other crowd images and related annotations, which highlights the practical relevance of the findings, while also discussing implications (Section~\ref{sec:discussion_implications}) that link the observed density dependent error patterns directly to operational concerns including peak-hour crowd monitoring and overcrowding detection.
+
+% \begin{enumerate}
+% \item \textbf{A controlled comparison of a pretrained and a fine-tuned head detector.} By evaluating the same YOLO architecture before and after fine-tuning on head-level annotations (Sections~\ref{sec:classic_yolo} and~\ref{sec:scut_yolo}), this work isolated and quantified the specific contribution of task-specific fine-tuning, showing that it resolves the geometric mismatch between whole-body and head-level predictions but does not eliminate density-dependent, occlusion-driven undercounting.
+
+% \item \textbf{Training and evaluation of two density-regression architectures on a common test set.} MDNN and CSRNet (Sections~\ref{sec:mdnn} and~\ref{sec:csrnet}) were trained and evaluated under consistent conditions, enabling a direct, like-for-like comparison of their training convergence behaviour and counting accuracy that would not be possible from either network's results considered in isolation.
+
+% \item \textbf{Empirical demonstration of complementary error structure between counting paradigms.} Through consistent, density-stratified evaluation of all four standalone models using a common set of ground-truth count ranges, this work provided direct empirical evidence that detection-based and density-based counting fail in opposite regions of the crowd-density spectrum (Section~\ref{sec:discussion_complementary}), motivating the hybrid framework as a principled response to a demonstrated, rather than merely assumed, complementarity.
+
+% \item \textbf{Design and evaluation of an adaptive, rule-based hybrid fusion framework.} A lightweight, interpretable fusion rule (Equation~\ref{eq:hybrid_rule}) combining detector and density-regression counts -- requiring no additional training -- was designed, formalised, and evaluated against two independent density-regression components (Sections~\ref{sec:hybrid} and~\ref{sec:hybrid_csrnet}), with its branch-level behaviour analysed in detail to explain not just \emph{how well} but \emph{why} it performs as observed.
+
+% \item \textbf{A systematic, evidence-based selection between competing hybrid configurations.} Rather than adopting a single hybrid configuration by default, this work directly compared the SCUT-Head YOLO~+~MDNN and SCUT-Head YOLO~+~CSRNet configurations under identical conditions and identified the latter as preferable, tracing this advantage to specific, mechanistic causes -- higher agreement rates with the detector and more moderate sparse-scene fallback behaviour (Section~\ref{sec:hybrid_selection}) -- rather than reporting only the aggregate result.
+
+% \item \textbf{A reusable, density-stratified evaluation methodology.} The consistent use of aggregate metrics (MAE, RMSE, MAPE, Pearson correlation, $R^2$) alongside a common six-bin ground-truth range breakdown across all six evaluated models and configurations constitutes a methodological contribution in its own right, enabling direct cross-model comparison that a single aggregate metric alone would obscure.
+
+% \item \textbf{Evaluation on public-transport-relevant imagery.} By incorporating bus-interior imagery alongside general crowd-counting scenes within the evaluation set, this work grounds its findings in a practically motivated deployment context, and the discussion of implications (Section~\ref{sec:discussion_implications}) connects the observed density-dependent error patterns directly to operational concerns such as peak-hour occupancy monitoring and overcrowding detection.
+% \end{enumerate}
+
+\subsection{Limitations and Challenges}
+\label{sec:conclusion_limitations}
+
+Despite these contributions, this work has some limitations and challenges that need to be taken into account when interpreting or extending these results.
+
+All quantitative results presented in this chapter are based on the same 285 image test set and limited scene diversity. This set includes dedicated crowd-counting images as well as public-transport specific images, but does not fully represent the variety of conditions that may be encountered by a deployed system, such as a large crowd, night or low light imaging, poor weather, or completely different camera angles and orientations from those included in this set. The observed density thresholds and error magnitudes have yet to be proved generalizable to other test sets.
+
+The adaptive fusion rule used in the two hybrid configurations (Equation~\ref{eq:hybrid_rule}) was learned on the evaluation set, and is not tuned on a held-out validation partition. The reported hybrid performance should thus be treated as an indicator of the expected performance of a well matched fixed threshold for the same data distribution, but does not constitute a statement of performance equivalence with an independently validated threshold or on previously unseen data.
+
+For the detection-based methods, the IoU-thresholded box matching (precision, recall, F1) metrics were used alongside with count-level metrics (for the density-based and hybrid methods only count-level metrics were used, as they do not provide discrete, localisable predictions). This asymmetry has a number of implications for the box-level metrics reported for the detectors (Tables~\ref{tab:pretrained_yolo_summary} and~\ref{tab:yolo_summary}) – comparisons with the box-level metrics reported elsewhere are not necessarily possible, and conclusions in this work are consequently limited to the box-level comparisons where all methods can be compared on equal footing.
+
+As noted in Section~\ref{sec:discussion_hybrid}, the fallback branch of the fusion rule that is used when the detector fails to detect anything is only based on the detector's density, and thus is unable to determine if the image is truly empty, or if the image was unable to be captured due to occlusion. This branch was activated on the three test images, and its fallback estimates resulted in overestimation of the actual, low ground truth count: by a smaller but still relevant margin in the case of the CSRNet. This is not a fluke; it is a design flaw in the existing fusion design.
+
+All models and evaluations herein rely on individual still images rather than using temporal data that is present in a video stream. Neither of the two public transport deployments mentioned above are considered by the single-frame evaluation protocol used here, but could in principle be achieved with successive frames from a fixed or near-fix camera.
+
+Inference latency, memory footprint and power consumption measures are not reported for any of the models evaluated, although they are all important for deployment on resource-constrained computing hardware, usually embedded systems, found on-board public transport vehicles. Architecturally different, the fine-tuned YOLO detectors, MDNN, and the backbone of CSRNet using VGG-16 are unlikely to be comparable in terms of computation cost, and the practicality of the various combinations evaluated, including the hybrid framework which would require two models per frame, has not been tested in this aspect.
+
+% \textbf{Single test set and limited scene diversity.} All quantitative results reported in this chapter derive from a single 285-image test set. While this set spans a wide range of ground-truth counts, from single digits to approximately sixty individuals, and includes both dedicated crowd-counting imagery and public-transport-specific scenes, it does not capture the full diversity of conditions a deployed system would encounter -- for example, substantially larger crowds, night-time or low-light imaging, adverse weather, or camera placements and viewpoints markedly different from those represented in the current data. The generalisability of the observed density thresholds and error magnitudes beyond this specific test set has not been established.
+
+% \textbf{An empirically fitted, non-learned fusion rule.} The adaptive fusion rule underlying both hybrid configurations (Equation~\ref{eq:hybrid_rule}) uses a fixed 50\% relative-discrepancy threshold that was derived from the observed relationship between detector and density-regression outputs on the evaluation set itself, rather than tuned independently on a held-out validation partition. The reported hybrid performance should therefore be interpreted as an indication of what a well-matched fixed threshold can achieve on data drawn from the same distribution, rather than as a guarantee of equivalent performance under an independently validated threshold or on previously unseen data.
+
+% \textbf{Non-commensurable evaluation protocols across paradigms.} Detection-based methods were evaluated using IoU-thresholded box matching (precision, recall, F1) in addition to count-level metrics, whereas density-based and hybrid methods were evaluated using count-level metrics only, since they do not produce discrete, localisable predictions. This asymmetry means that the box-level metrics reported for the detectors (Tables~\ref{tab:pretrained_yolo_summary} and~\ref{tab:yolo_summary}) are not directly comparable to the count-only metrics reported elsewhere, and conclusions in this work are necessarily restricted to count-level comparisons where all methods can be assessed on equal terms.
+
+% \textbf{The fallback branch remains an unresolved weak point.} As identified in Section~\ref{sec:discussion_hybrid}, the fusion rule's density-only fallback branch, triggered when the detector produces zero detections, is not able to distinguish a genuinely empty or near-empty scene from a detector failure caused by occlusion. On the three test images where this branch was triggered, both hybrid configurations produced fallback estimates that overshot the true, low ground-truth count, in the CSRNet case by a smaller but still non-trivial margin. This represents a structural gap in the current fusion design rather than an incidental error.
+
+% \textbf{Reliance on static imagery.} All models and evaluations in this work operate on individual still images, without exploiting temporal information available in a video stream. In a genuine public transport deployment, successive frames from a fixed or near-fixed camera could in principle be used to track individuals across occlusion events or to smooth density estimates over time, neither of which is captured by the single-frame evaluation protocol adopted here.
+
+% \textbf{Unmeasured computational and deployment considerations.} This work evaluates counting accuracy but does not report inference latency, memory footprint, or power consumption for any of the evaluated models, all of which are directly relevant to deployment on the resource-constrained, often embedded computing hardware typically available on board public transport vehicles. Fine-tuned YOLO detectors, MDNN, and CSRNet are architecturally distinct and are unlikely to have comparable computational cost, particularly given CSRNet's VGG-16-based backbone; the practicality of any of the evaluated configurations, including the hybrid framework's requirement to run two models per frame, has not been assessed in this respect.
+
+\subsection{Recommendations for Future Enhancements}
+\label{sec:conclusion_future_work}
+
+Based on the contributions and limitations mentioned above, the following directions are suggested for further research built upon this work.
+
+% \begin{itemize}
+% \item \textbf{Learned or confidence-weighted fusion.} Rather than relying on a fixed relative-discrepancy threshold, future work could learn the fusion decision directly -- for example, using a lightweight classifier or regression model trained to predict, on a per-image basis, which estimator is more reliable, or to produce a continuous confidence-weighted combination of the two counts. Such an approach could recover some of the accuracy currently lost to unweighted averaging in cases where the detector is the stronger estimator, while preserving the demonstrated robustness benefits in sparse scenes.
+
+% \item \textbf{An explicit scene-emptiness safeguard for the fallback branch.} To address the weakness identified in Section~\ref{sec:conclusion_limitations}, future iterations of the fusion framework could incorporate an independent, low-cost signal of scene emptiness -- such as overall image activity, motion, or texture statistics -- to corroborate a zero-detection result before defaulting to an unconstrained density-based fallback estimate, guarding against the specific failure mode observed for both hybrid configurations on near-empty scenes.
+
+% \item \textbf{Evaluation on a larger and more diverse dataset.} Extending the evaluation to a larger, more demographically and environmentally diverse set of public transport imagery -- spanning multiple vehicle types, camera placements, lighting conditions, and crowd densities beyond the approximately sixty-individual ceiling evaluated here -- would help establish whether the density-dependent patterns and fusion-rule threshold identified in this work generalise beyond the present test set, and would support independent, out-of-sample validation of the fusion threshold itself.
+
+% \item \textbf{Temporal fusion using video sequences.} Since public transport deployments typically involve continuous video rather than isolated still images, incorporating temporal information -- for instance, tracking detected heads across frames, or smoothing density estimates over a short temporal window -- represents a natural extension that could mitigate single-frame occlusion failures without requiring architectural changes to the underlying detection or density-regression models.
+
+% \item \textbf{Domain-specific fine-tuning on public transport imagery.} The detector evaluated in this work was fine-tuned on the general-purpose SCUT-Head dataset rather than on public-transport-specific imagery. Curating and fine-tuning on a dataset drawn specifically from bus or transit-vehicle interiors -- capturing domain-specific occlusion sources such as seating, poles, and handrails -- may further improve detection accuracy in the specific deployment context motivating this work.
+
+% \item \textbf{Assessment of computational cost and deployment feasibility.} Future work should benchmark inference latency, memory usage, and, where relevant, power consumption for each evaluated model and for the combined hybrid pipeline on representative embedded or edge hardware, to establish whether the accuracy gains and robustness benefits documented in this work are achievable within the computational constraints of an on-vehicle deployment, and to explore model compression techniques such as quantisation or pruning where necessary.
+
+% \item \textbf{Exploration of alternative density-regression architectures.} Given that CSRNet outperformed MDNN as a fusion partner primarily because of its more moderate sparse-scene behaviour (Section~\ref{sec:hybrid_selection}), evaluating additional or more recent density-regression architectures -- particularly those explicitly regularised against background overestimation in sparse scenes, or incorporating attention mechanisms sensitive to genuine crowd presence -- represents a promising avenue for further improving the hybrid framework's fallback reliability without sacrificing its demonstrated robustness across the remainder of the density spectrum.
+% \end{itemize}
+
+Future work could involve learning the fusion decision rather than using a fixed relative discrepancy threshold; for example, by training a light-weight classifier or regression model to predict which estimator is more reliable, or to produce a continuous confidence-weighted combination of the two counts, on a per-image basis. This would help to recover some of the accuracy that is lost with unweighted averaging when the detector is the stronger estimator, and retain the benefits of being robust as shown in sparse scenes.
+
+Future versions of the fusion framework could include a low-cost, scene independent, explicit scene-emptiness guard on the fallback branch to support a result from the zero-detection branch in a way that would avoid the particular failure mode seen in the hybrid configurations when testing near empty scenes, as identified in Section~\ref{sec:conclusion_limitations}.
+
+Evaluating the performance on a larger and more demographically and environmentally diverse collection of public transport imagery (including a greater number of the types of vehicles, camera placements, lighting conditions and crowd densities not evaluated here but found in the real world) would enable better understanding of the generalizability of the density-dependent patterns and the fusion-rule threshold, and would permit independent, out-of-sample validation of the fusion-rule threshold itself.
+
+The use of video sequences as temporal features is natural and can be used to help reduce the number of failures due to occlusion in a single frame without changing the underlying architecture of the utilized detection or density-regression models for public transport deployments which require continuous video instead of just one frame.
+
+In this work, the detector was fine-tuned on the general purpose SCUT-Head dataset while not fine-tuned on imagery specific to public transport. Fine-tuning and curating on a dataset that is specifically collected from the interior of the bus/tram/other transit vehicles, which includes domain-specific sources of occlusion like seats, poles, and handrails, could further improve the accuracy of the detection in the specific deployment scenario that motivated this work.
+
+Future work should benchmark the latency for inference, power consumption, and memory usage of each of the models tested and evaluate whether the accuracy improvements and robustness benefits shown in this work can be achieved on representative embedded or edge hardware, which poses a computational challenge for an on-vehicle deployment; if required, model compression, including quantisation or pruning, should be explored.
+
+It is also notable that the ability of CSRNet to be a better fusion partner was largely due to its more moderate behaviour in sparse scenes (Section~\ref{sec:hybrid_selection}), suggesting that other or more recent density-regression architectures, specifically adding regularisation for background overestimation in sparse scenes or attention mechanisms specific to real crowd presence, would be promising for further improving the robustness of the hybrid framework in the sparse end of the density spectrum without diminishing its successful performance on the rest of the spectrum.
+
+% This final chapter draws together the research design, implementation, and empirical results presented in the preceding chapters into a single account of what this work has established, where it falls short, and what should be done next. It is organised into three parts: a summary of the concrete contributions made, a candid discussion of the limitations and challenges encountered, and a set of prioritised recommendations for future enhancement.
+
+% % ============================================================
+% \section{Summary of Contributions}
+
+% The research problem motivating this work was that neither of the two dominant strategies for automated crowd counting is individually sufficient across the full range of real world crowd densities: detection-based counting is precise in sparse-to-moderate scenes but degrades under occlusion, while density-regression counting is robust to occlusion but comparatively imprecise for small, easily-resolved groups. The response to that problem, developed across this work, is a scene-aware hybrid architecture that runs both strategies and arbitrates between them.
+
+% % % Figure~\ref{fig:contributions} summarises the resulting contributions, spanning the architectural design, the engineering implementation, and the empirical evidence gathered to test it.
+
+% % \begin{figure}[h]
+% % \centering
+% % \includegraphics[width=\textwidth]{images/contributions_map.png}
+% % \caption{Summary of the contributions made across this work}
+% % \label{fig:contributions}
+% % \end{figure}
+
+% \subsection{Architectural and Methodological Contributions}
+
+% A layered, pipe-and-filter system architecture was designed in which a sparse (detection-based) branch and a dense (density-regression) branch operate in parallel over the same pre-processed input, arbitrated by a lightweight, rule-based scene-density classifier. This decomposition was specified as a formal research design and methodology, then independently re-derived at the system-design level as a data-flow decomposition, a set of module-level detailed designs, and a UML component diagram exposing each module's provided and required interfaces. Presenting the same architecture from three complementary angles -- research methodology, high-level data flow, and component-level structure -- was a deliberate choice to make the design traceable from problem statement through to implementation, rather than leaving the connection between the stated methodology and the resulting code implicit.
+
+% The fusion mechanism itself is a specific, reproducible contribution in its own right: rather than a fixed-weight ensemble, a disagreement-gated decision rule was specified in which the two branch estimates are blended when they broadly agree, but the branch designated authoritative for the detected scene type is trusted outright when they diverge sharply. This directly targets the known failure mode of naive ensembling, where averaging with a badly-miscalibrated second estimate can make a result worse rather than better.
+
+% \subsection{Engineering Contributions}
+
+% The architecture was translated into a modular, configuration-driven implementation in which every tunable parameter across every processing stage is centralised in a single, inspectable configuration object, and every major component (detection backend, density-estimation backend) is built behind a stable interface with interchangeable underlying implementations. This is what makes the system's central architectural claim empirically testable at all: because backends can be swapped by configuration rather than by code change, the sparse-only baseline evaluated in this work could be isolated and measured cleanly, and the same protocol can later be re-applied unchanged to the fused configuration.
+
+% A complete, four-level testing strategy (unit, integration, system, and user acceptance) was specified and, alongside it, a full requirements baseline of 12 functional and 8 non-functional requirements, each traced to at least one of seven concrete use cases. Together these give the implementation a defined, checkable contract rather than an informal notion of ``working.''
+
+% \subsection{Empirical Contribution}
+
+% Perhaps the most consequential contribution of this work is that its central design hypothesis was actually tested against real, manually annotated data, rather than asserted on theoretical grounds alone. A 30-image evaluation sample spanning a wide range of crowd densities was manually annotated and used to measure the sparse branch's standalone accuracy, yielding a mean absolute error of 1.83 people per image overall, but with a roughly 3.9$\times$ larger error in dense scenes (MAE 3.45) than in sparse scenes (MAE 0.89). This is direct empirical evidence for the specific failure mode -- density-dependent degradation of detection-based counting -- that motivated the hybrid architecture in the first place, and it is corroborated in direction, if not in absolute scale, by the sparse/dense performance gap reported across standard benchmark splits in the published crowd-counting literature~\cite{Zhang2016}.
+
+% \subsection{Reusable Research Deliverables}
+
+% Beyond the core system, this work also produced deliverables intended to outlive the specific evaluation reported here: a browser-based point-annotation labeling tool requiring no server or installation, an adapter-pattern inference runner that decouples the evaluation protocol from any specific model implementation, and a metrics-and-plotting evaluation script implementing the stratified MAE/RMSE/MAPE/bias analysis used throughout this work. These are designed to be re-run, unmodified, against the fused pipeline and against larger future samples, which is what makes the recommendations in Section~8.3 concrete next steps rather than open-ended suggestions.
+
+% % ============================================================
+% \section{Limitations and Challenges}
+
+% % No part of this work should be read as a finished, unqualified result. Figure~\ref{fig:limitations} groups the limitations identified across the research design, implementation, and evaluation into four categories, each discussed below.
+
+% % \begin{figure}[h]
+% % \centering
+% % \includegraphics[width=0.92\textwidth]{images/limitations_quadrant.png}
+% % \caption{Limitations identified, grouped by category}
+% % \label{fig:limitations}
+% % \end{figure}
+
+% \subsection{Data and Evaluation Limitations}
+
+% The empirical results reported in this work rest on ground truth produced by a single reviewer rather than a reconciled multi-annotator consensus, which is a recognised source of measurement noise, particularly in heavily occluded scenes where reasonable reviewers can disagree by a person or two. The evaluation sample itself, at 30 images (only 11 of which fall in the dense stratum), is large enough to establish a clear directional pattern but too small to report the stratified metrics with tight statistical confidence. Most importantly, the reported results characterise the sparse branch evaluated \emph{in isolation}; the fused pipeline's accuracy against the same ground truth has not yet been measured, so while the evidence strongly motivates the value of fusion, it does not yet directly confirm the magnitude of improvement fusion delivers.
+
+% \subsection{Model and Algorithmic Limitations}
+
+% The empirical results themselves surface the central algorithmic limitation directly: accuracy degrades sharply under heavy occlusion, which is precisely the condition the dense branch and fusion logic exist to mitigate but which no purely 2D, single-frame visual method fully solves. The scene-density decision rule is threshold-based rather than learned, which makes it interpretable and cheap to compute but means its thresholds must be manually tuned and may not transfer well to camera angles or crowd compositions very different from those used during development. The classical density-estimation backend, being a kernel-smoothed approximation built from detected points rather than a model trained directly on density-map supervision, is a comparatively coarse instrument relative to a fully learned density-regression network.
+
+% % \subsection{System and Engineering Limitations}
+
+% % The system persists run artefacts to the file system rather than to a managed database; a normalised logical schema was designed for this purpose but was not implemented in the delivered system, so run history and per-frame results are not currently queryable at scale. The multi-object tracking module was implemented and is independently usable, but its invocation inside the video-processing path was not enabled pending further integration testing, meaning the video-level unique-individual count described in the methodology is not yet produced automatically end-to-end. Finally, the testing strategy defines four levels of testing conceptually, but no automated continuous-integration test suite accompanies the implementation to enforce them on every change.
+
+% \subsection{Deployment and Operational Limitations}
+
+% The system was designed and evaluated as a single-machine, offline, single-operator tool; it has not been tested under continuous or multi-camera deployment, concurrent multi-user access, or sustained real-time throughput requirements. Inference latency, while within the performance target specified in the requirements baseline, still scales with input resolution and was measured on a single hardware configuration rather than across the range of lower-powered or edge devices a field deployment might realistically use. No accessibility or multi-language interface evaluation was performed, since the current interaction layer is a command-line tool aimed at a technically capable operator.
+
+% % ============================================================
+% \section{Recommendations for Future Enhancements}
+
+% % The limitations above translate directly into a set of concrete next steps, organised by time horizon.
+
+% % in Figure~\ref{fig:roadmap} and detailed below.
+
+% % \begin{figure}[h]
+% % \centering
+% % \includegraphics[width=\textwidth]{images/future_roadmap.png}
+% % \caption{Prioritised roadmap of recommended future enhancements}
+% % \label{fig:roadmap}
+% % \end{figure}
+
+% \subsection{Closing the Evaluation Loop}
+
+% The single highest-priority next step is to re-run the existing evaluation protocol, unchanged against the fully fused pipeline on the same images and the same ground truth. This is the direct, decisive test of this work's central hypothesis: if fusion substantially narrows the sparse/dense accuracy gap reported in Chapter~\ref{chap:results}, that is strong confirmation of the architecture's value; if it does not, that is equally important information about where the fusion logic or the dense backend needs further work. Alongside this, adopting the multi-annotator consensus protocol specified in the original methodology (independent counts from at least two annotators, reconciled by a third) would materially strengthen confidence in any accuracy figures reported thereafter, and enabling the already-implemented tracking module in the video execution path would complete the video-mode capability the methodology describes.
+
+% \subsection{Scaling and Hardening}
+
+% Growing the evaluation sample in both size and diversity, with particular attention to increasing the number of densely crowded examples, which are currently the smaller and statistically less certain stratum -- would tighten confidence in the stratified accuracy figures reported in this work. On the engineering side, implementing the proposed persistent-storage schema would enable querying run history and trends over time rather than only inspecting individual run artefacts, and introducing an automated continuous-integration test suite covering the four testing levels specified in the methodology would convert the testing strategy from a documented intention into an enforced practice.
+
+% \subsection{Architectural and Operational Evolution}
+
+% Looking further ahead, three directions stand out. First, the dense-estimation backend could be replaced or augmented with a transformer-based crowd-counting architecture; transformer-based localisation and counting models have recently demonstrated strong performance on dense, highly-occluded benchmark scenes~\cite{liang2022cltr}, which is exactly the regime where this work's results show the largest remaining accuracy gap. Second, deploying the system to resource-constrained or edge hardware would require model compression: techniques such as structured pruning and quantisation~\cite{han2016deepcompression,jacob2018quantization}, or knowledge distillation from a larger teacher network into a smaller deployable one~\cite{hinton2015distillation}, are well-established routes to reducing inference cost without a proportional loss of accuracy. Third, given that manual annotation is the single largest cost identified in the evaluation methodology, an active-learning annotation workflow~\cite{settles2009active} -- in which the system itself flags the frames it is least confident about for priority human labeling -- could substantially reduce the annotation effort needed to grow the evaluation sample recommended above.
+
+% % \subsection{Closing Remark}
+
+% % Taken together, the work presented across this thesis moves the underlying research question from a theoretical argument -- that a hybrid sparse/dense approach should outperform either strategy alone -- to a partially, honestly evidenced one: the specific failure mode motivating that hybrid design has now been directly measured, and a complete, reproducible toolchain exists to finish measuring the rest. That is the appropriate note on which to end a piece of applied systems research: not a claim of a finished, optimal system, but a working one, evaluated as far as the available time and data allowed, with the exact next measurements it needs clearly identified.

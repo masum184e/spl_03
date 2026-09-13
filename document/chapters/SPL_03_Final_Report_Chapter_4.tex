@@ -41,7 +41,7 @@ For each elicited requirement, a uniquely identified statement was subsequently 
 % ============================================================
 \label{sec:functional-requirements}
 
-Functional requirements are those of the system that define the observable behaviour and capabilities it must demonstrate, without regard to whether they are done well or not. Table~\ref{tab:fr} describes the functional requirements in each of the five functional areas outlined.
+Functional requirements are those of the system that define the observable behaviour and capabilities it must demonstrate, without regard to whether they are done well or not. Each requirement is documented individually in Tables~\ref{tab:fr01}--\ref{tab:fr02}, providing its identifier, description, stakeholder, and priority.
 
 % \begin{figure}[h]
 %     \centering
@@ -52,99 +52,274 @@ Functional requirements are those of the system that define the observable behav
 %     \label{fig:frtree}
 % \end{figure}
 
-\begin{longtable}{|p{1.5cm}|p{7.5cm}|p{2.0cm}|p{3cm}|}
-\caption{Functional requirements}
-\label{tab:fr} \\
+% ------------------------------------------------------------
+% FR-01: Image Input
+% ------------------------------------------------------------
 
-\hline
-\textbf{ID} &
-\textbf{Description} &
-\textbf{Priority} &
-\textbf{Group} \\
-\hline
-\endfirsthead
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{FR-01} &
+		\textbf{Image Input} \\ \hline
+		
+		\textbf{Description} &
+		The system shall accept a single still image as an input for crowd estimation. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & High
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Functional requirement for image input.}
+	\label{tab:fr01}
+\end{table}
 
-\hline
-\textbf{ID} &
-\textbf{Description} &
-\textbf{Priority} &
-\textbf{Group} \\
-\hline
-\endhead
 
-FR-01 &
-The system shall accept a single still image as input. &
-Must &
-Input Handling \\
-\hline
+% ------------------------------------------------------------
+% FR-02: Video Input
+% ------------------------------------------------------------
 
-FR-02 &
-Must be a video file. &
-Must &
-Input Handling \\
-\hline
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{FR-02} &
+		\textbf{Video Input} \\ \hline
+		
+		\textbf{Description} &
+		The system shall accept a video file as an input for frame-based crowd estimation. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & High
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Functional requirement for video input.}
+	\label{tab:fr02}
+\end{table}
 
-FR-03 &
-The system shall sample frames from a video input at a rate that is programmable and not at every frame. &
-Should &
-Input Handling \\
-\hline
 
-FR-04 &
-Detection of discrete person/head instances in a frame and reporting locations and number of instances. &
-Must &
-Estimation \\
-\hline
+% ------------------------------------------------------------
+% FR-03: Configurable Frame Sampling
+% ------------------------------------------------------------
 
-FR-05 &
-The system shall estimate a continuous density map for a frame and integrate it to a count. &
-Must &
-Estimation \\
-\hline
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{FR-03} &
+		\textbf{Configurable Frame Sampling} \\ \hline
+		
+		\textbf{Description} &
+		The system shall sample frames from a video input at a configurable rate rather than processing every frame. The sampling rate shall be adjustable according to the operating requirements of the system. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & Medium
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Functional requirement for configurable frame sampling.}
+	\label{tab:fr03}
+\end{table}
 
-FR-06 &
-The detection and density estimation backends are allowed to be selected independently of each other. &
-Should &
-Estimation \\
-\hline
 
-FR-07 &
-The system shall classify each processed frame as sparse or dense based on the detections observed. &
-Must &
-Decision \& Fusion \\
-\hline
+% ------------------------------------------------------------
+% FR-04: Person/Head Detection
+% ------------------------------------------------------------
 
-FR-08 &
-The system shall fuse the detection and density based estimates to produce a single estimate. &
-Must &
-Decision \& Fusion \\
-\hline
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{FR-04} &
+		\textbf{Person/Head Detection} \\ \hline
+		
+		\textbf{Description} &
+		The system shall detect discrete person or head instances within a processed frame and report their corresponding locations and total number of detected instances. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & High
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Functional requirement for person or head detection.}
+	\label{tab:fr04}
+\end{table}
 
-% FR-09 &
-% The system shall, in the case of video input, link detections of the same individual to subsequent frames. &
-% Must &
-% Tracking \\
-% \hline
 
-% FR-10 &
-% The system shall report the number of unique people observed in a video as opposed to the number of people observed per frame in a video. &
-% Must &
-% Tracking \\
-% \hline
+% ------------------------------------------------------------
+% FR-05: Density Map Estimation
+% ------------------------------------------------------------
 
-FR-09 &
-The system shall display an annotated image or video that displays the number of detected instances. &
-Must &
-Output \\
-\hline
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{FR-05} &
+		\textbf{Density Map Estimation} \\ \hline
+		
+		\textbf{Description} &
+		The system shall estimate a continuous crowd density map for each processed frame and integrate the predicted density map to obtain an estimated crowd count. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & High
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Functional requirement for density map estimation.}
+	\label{tab:fr05}
+\end{table}
 
-FR-10 &
-Output should be exposed in an externally editable configuration file, along with the operating parameters (threshold, backend choice, sampling rate) Should: &
-Should &
-Output \\
-\hline
 
-\end{longtable}
+% ------------------------------------------------------------
+% FR-06: Independent Backend Selection
+% ------------------------------------------------------------
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{FR-06} &
+		\textbf{Independent Backend Selection} \\ \hline
+		
+		\textbf{Description} &
+		The system shall allow the detection backend and density estimation backend to be selected independently of one another, enabling different combinations of detection and density estimation models to be configured. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & Medium
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Functional requirement for independent backend selection.}
+	\label{tab:fr06}
+\end{table}
+
+
+% ------------------------------------------------------------
+% FR-07: Density Classification
+% ------------------------------------------------------------
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{FR-07} &
+		\textbf{Density Classification} \\ \hline
+		
+		\textbf{Description} &
+		The system shall classify each processed frame as sparse or dense based on the number of detections observed in the frame. The classification shall determine the appropriate estimation approach for the subsequent processing stage. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & High
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Functional requirement for density classification.}
+	\label{tab:fr07}
+\end{table}
+
+
+% ------------------------------------------------------------
+% FR-08: Estimate Fusion
+% ------------------------------------------------------------
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{FR-08} &
+		\textbf{Detection and Density Estimate Fusion} \\ \hline
+		
+		\textbf{Description} &
+		The system shall combine the detection-based and density-based crowd estimates to produce a single final crowd estimate for each processed frame. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & High
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Functional requirement for detection and density estimate fusion.}
+	\label{tab:fr08}
+\end{table}
+
+
+% ------------------------------------------------------------
+% FR-09: Annotated Output
+% ------------------------------------------------------------
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{FR-09} &
+		\textbf{Annotated Output} \\ \hline
+		
+		\textbf{Description} &
+		The system shall display an annotated image or video containing the estimated number of detected instances for the corresponding input. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & High
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Functional requirement for annotated output.}
+	\label{tab:fr09}
+\end{table}
+
+
+% ------------------------------------------------------------
+% FR-10: External Configuration
+% ------------------------------------------------------------
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{FR-10} &
+		\textbf{External Configuration} \\ \hline
+		
+		\textbf{Description} &
+		The system shall expose its operating parameters through an externally editable configuration file. The configuration shall include parameters such as the density threshold, detection and density estimation backend selection, and video frame sampling rate. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & Medium
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Functional requirement for external system configuration.}
+	\label{tab:fr10}
+\end{table}
 
 % ============================================================
 % Non-functional Requirements
@@ -152,79 +327,231 @@ Output \\
 \section{Non-functional Requirements}
 \label{sec:nfr}
 
-Non-functional requirements prevent the system operating in a particular way and limit the quality of the system's functions, such as its speed, robustness, user-friendliness, etc. The relative importance of each characteristic for this system is shown in Figure~\ref{fig:nfrradar} and each requirement is given in Table~\ref{tab:nfr}.
+Non-functional requirements prevent the system operating in a particular way and limit the quality of the system's functions, such as its speed, robustness, user-friendliness, etc. The individual requirements are documented in Tables~\ref{tab:nfr01}--\ref{tab:nfr08}. Among these characteristics, accuracy and performance efficiency receive particular emphasis because the primary objective of the system is to produce a reliable numerical crowd estimate within a practically acceptable processing time.
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[
+%         width=0.55\textwidth
+%     ]{figures/nfr_radar.png}
+%     \caption{Quality characteristics with the relative emphasis}
+%     \label{fig:nfrradar}
+% \end{figure}
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[
-        width=0.55\textwidth
-    ]{figures/nfr_radar.png}
-    \caption{Quality characteristics with the relative emphasis}
-    \label{fig:nfrradar}
-\end{figure}
 
-The accuracy and the performance efficiency dominate the profile in Figure~\ref{fig:nfrradar} as the main value proposition of the system is delivering an accurate and reliable numeric estimate within a practically useful time budget, the usability is given a high weight, as the intended operator is not assumed to have machine learning expertise, and the security is comparatively low, which reflects the current deployment model of the system, as it is operated by one person and is offline.
+% ------------------------------------------------------------
+% NFR-01: Performance Efficiency
+% ------------------------------------------------------------
 
-\begin{longtable}{|p{1.5cm}|p{2.5cm}|p{10.0cm}|}
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{NFR-01} &
+		\textbf{Performance Efficiency} \\ \hline
+		
+		\textbf{Description} &
+		The system shall process a single input frame within a bounded and predefined time when executed on commodity computing hardware. The processing time shall remain sufficiently low to support practical frame-based crowd estimation. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & High
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Non-functional requirement for performance efficiency.}
+	\label{tab:nfr01}
+\end{table}
 
-\caption{Non-functional requirements}
-\label{tab:nfr} \\
 
-\hline
-\textbf{ID} &
-\textbf{Category} &
-\textbf{Description} \\
-\hline
-\endfirsthead
+% ------------------------------------------------------------
+% NFR-02: Accuracy
+% ------------------------------------------------------------
 
-\hline
-\textbf{ID} &
-\textbf{Category} &
-\textbf{Description} \\
-\hline
-\endhead
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{NFR-02} &
+		\textbf{Accuracy} \\ \hline
+		
+		\textbf{Description} &
+		The fused crowd estimate shall maintain an acceptable level of agreement with the ground-truth count across both sparse and dense scenes. The system shall be evaluated using appropriate crowd-counting performance metrics to assess its estimation accuracy. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & High
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Non-functional requirement for crowd-counting accuracy.}
+	\label{tab:nfr02}
+\end{table}
 
-NFR-01 &
-Performance Efficiency &
-In a known and bounded time, shall the system process a single frame on commodity computing hardware? \\
-\hline
 
-NFR-02 &
-Accuracy &
-The fused count and NFR-02 (Accuracy \& The fused count) should be close to the true count in both sparse and dense scenes. \\
-\hline
+% ------------------------------------------------------------
+% NFR-03: Reliability
+% ------------------------------------------------------------
 
-NFR-03 &
-Reliability &
-The system shall run a complete video without any crash on malformed or empty frames. \\
-\hline
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{NFR-03} &
+		\textbf{Reliability} \\ \hline
+		
+		\textbf{Description} &
+		The system shall be capable of processing a complete video without unexpected termination or system crashes caused by malformed, corrupted, empty, or otherwise invalid frames encountered during processing. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & High
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Non-functional requirement for system reliability.}
+	\label{tab:nfr03}
+\end{table}
 
-NFR-04 &
-Usability &
-An operator who is not familiar with the internal workings of the system should be able to run it without external assistance. \\
-\hline
 
-NFR-05 &
-Maintainability &
-Individual estimation backends shall be changeable without changing other modules. \\
-\hline
+% ------------------------------------------------------------
+% NFR-04: Usability
+% ------------------------------------------------------------
 
-NFR-06 &
-Portability &
-The system shall be able to be run without modification on the major desktop operating systems supported by its runtime environment. \\
-\hline
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{NFR-04} &
+		\textbf{Usability} \\ \hline
+		
+		\textbf{Description} &
+		The system shall provide a sufficiently straightforward execution and configuration process such that an operator without detailed knowledge of the system's internal implementation can run the crowd estimation pipeline without external assistance. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & Medium
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Non-functional requirement for system usability.}
+	\label{tab:nfr04}
+\end{table}
 
-NFR-07 &
-Compatibility &
-The system shall allow for common image and video formats and codecs to be accepted without being previously converted. \\
-\hline
 
-NFR-08 &
-Security &
-Input files and model assets shall be validated prior to use on each run. \\
-\hline
+% ------------------------------------------------------------
+% NFR-05: Maintainability
+% ------------------------------------------------------------
 
-\end{longtable}
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{NFR-05} &
+		\textbf{Maintainability} \\ \hline
+		
+		\textbf{Description} &
+		The system shall employ a modular architecture in which individual detection and density estimation backends can be replaced, updated, or modified without requiring changes to unrelated modules of the processing pipeline. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Developer, Inspector &
+				\textbf{Priority:} & High
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Non-functional requirement for system maintainability.}
+	\label{tab:nfr05}
+\end{table}
+
+
+% ------------------------------------------------------------
+% NFR-06: Portability
+% ------------------------------------------------------------
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{NFR-06} &
+		\textbf{Portability} \\ \hline
+		
+		\textbf{Description} &
+		The system shall be executable without modification on the major desktop operating systems supported by the underlying runtime environment, provided that the required dependencies and execution environment are available. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Developer, Inspector &
+				\textbf{Priority:} & Medium
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Non-functional requirement for system portability.}
+	\label{tab:nfr06}
+\end{table}
+
+
+% ------------------------------------------------------------
+% NFR-07: Compatibility
+% ------------------------------------------------------------
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{NFR-07} &
+		\textbf{Input Compatibility} \\ \hline
+		
+		\textbf{Description} &
+		The system shall support commonly used image and video file formats and codecs without requiring the input files to be manually converted into another format before processing. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Inspector &
+				\textbf{Priority:} & Medium
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Non-functional requirement for input compatibility.}
+	\label{tab:nfr07}
+\end{table}
+
+
+% ------------------------------------------------------------
+% NFR-08: Input and Asset Validation
+% ------------------------------------------------------------
+
+\begin{table}[H]
+	\centering
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|p{3.2cm}|p{11.8cm}|}
+		\hline
+		\textbf{NFR-08} &
+		\textbf{Input and Asset Validation} \\ \hline
+		
+		\textbf{Description} &
+		The system shall validate input files and required model assets before initiating the estimation process. Invalid, inaccessible, corrupted, or incompatible inputs and model assets shall be identified and handled without causing unexpected system failure. \\ \hline
+		
+		\multicolumn{2}{|l|}{
+			\begin{tabular}{p{3cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}}
+				\textbf{Stakeholders:} & Developer, Inspector &
+				\textbf{Priority:} & High
+			\end{tabular}
+		} \\ \hline
+	\end{tabular}
+	\caption{Non-functional requirement for input and model asset validation.}
+	\label{tab:nfr08}
+\end{table}
 
 % ============================================================
 % Use Cases and Scenarios

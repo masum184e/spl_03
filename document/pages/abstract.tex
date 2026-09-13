@@ -1,0 +1,11 @@
+% \thispagestyle{empty} % remove page number from this page
+
+\begin{center}
+	{\Large\bfseries ABSTRACT}
+\end{center}
+
+Automated crowd counting based on visual data is crucial for public-safety monitoring, transport-capacity management and urban planning. While detection based methods work well in sparse-to-moderate scenes, they fail under significant occlusion, and density regression methods work well in highly crowded scenes, but struggle with sparse populations. A hybrid crowd-counting framework is developed and empirically tested that consists of a detection-based sparse branch and a density-regression dense branch, and is unified by a lightweight rule-based scene-density classifier and a disagreement-gated fusion mechanism. The entire framework was tested end-to-end on a benchmark of 285 images, in which 1–60 people appear in each scene. Fine-tuning the detector at the head level with annotated head positions, the mean absolute error (MAE) of the detector was decreased from 7.24 to 3.36 persons per image. The density-regression models, namely MDNN and CSRNet, obtained 12.94 and 10.66 MAEs, respectively, which indicates that they are less capable in such sparse scenes. The density-regression-based counting was significantly enhanced by hybrid fusion to reach the MAE of 4.42 for MDNN and 4.34 for CSRNet. CSRNet-based fusion was chosen because it performed better than the other options when the detector failed, with the lowest worst case error.
+
+\noindent\textbf{Keywords:} crowd counting; computer vision; density estimation; scene classification; hybrid architecture; occlusion robustness
+
+\clearpage
