@@ -21,6 +21,10 @@
 
 These are some of the **projects and research work I have completed** as part of my academic journey:
 
+**Literature:**
+
+- [Papers](https://drive.google.com/drive/folders/1Wfrfa24TMKrYaqMCnInq1RnQBZW51t6n?usp=sharing)
+
 **Software:**
 
 - [Software Project](https://github.com/masum184e/jatricount)
