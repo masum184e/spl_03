@@ -543,7 +543,6 @@ Identify the Strongest and Most Relevant Studies
 
 </details>
 
-<!-- 
 
 <details> <summary>4. How do I find good papers for my thesis?</summary>
 
@@ -669,108 +668,113 @@ The goal is:
 
 Before reading a paper completely, ask:
 
-Does it address my research problem?
-Does it study the same or a related population/dataset?
-Does it use a method relevant to my research?
-Does it address one of my research variables?
-Does it provide theoretical background I need?
-Does it identify a limitation relevant to my research?
-Does it provide a useful comparison or benchmark?
-Is its research context sufficiently similar to mine?
+* Does it address my research problem?
+* Does it study the same or a related population/dataset?
+* Does it use a method relevant to my research?
+* Does it address one of my research variables?
+* Does it provide theoretical background I need?
+* Does it identify a limitation relevant to my research?
+* Does it provide a useful comparison or benchmark?
+* Is its research context sufficiently similar to mine?
 
-You can use a quick 5-question screening test:
+You can use a quick 5-question screening test(Yes/No):
 
-Question	Yes/No
-Is the topic relevant?	
-Is the research question relevant?	
-Is the methodology relevant?	
-Are the findings useful to my research?	
-Does it help establish my research gap?	
+* Is the topic relevant?	
+* Is the research question relevant?	
+* Is the methodology relevant?	
+* Are the findings useful to my research?	
+* Does it help establish my research gap?	
 
 If almost everything is "No," don't spend an hour reading the paper.
 
-</details> <details> <summary>9. Which parts of a research paper should I read first?</summary>
+</details>
+
+<details> <summary>9. Which parts of a research paper should I read first?</summary>
 
 You usually should not begin by reading from page 1 to the end.
 
 A productive order is:
 
-Title
-Abstract
-Keywords
-Introduction
-Conclusion
-Figures and tables
-Methodology
-Results
-Discussion
-References
+* Title
+* Abstract
+* Keywords
+* Introduction
+* Conclusion
+* Figures and tables
+* Methodology
+* Results
+* Discussion
+* References
 
 The exact order can change depending on your purpose.
 
 For example, if you only want to know whether the paper is relevant:
 
-Title → Abstract → Conclusion
+> Title → Abstract → Conclusion
 
 If it appears highly relevant:
 
-Introduction → Methodology → Results → Discussion → Conclusion
+> Introduction → Methodology → Results → Discussion → Conclusion
 
 If you are trying to reproduce the study:
 
-Methodology becomes extremely important.
+> Methodology becomes extremely important.
 
-</details> <details> <summary>10. Should I read the entire paper?</summary>
+</details> 
+
+<details> <summary>10. Should I read the entire paper?</summary>
 
 No—not every paper.
 
-This is one of the biggest mistakes students make.
+This is one of the biggest mistakes students make. You should read papers at different depths.
 
-You should read papers at different depths.
-
-Level 1: Quick scan
-
-Use this for potentially relevant papers.
+1. Level 1: Quick scan: Use this for potentially relevant papers.
 
 Read:
 
-Title
-Abstract
-Keywords
-Figures/tables
-Conclusion
+- Title
+- Abstract
+- Keywords
+- Figures/tables
+- Conclusion
 
 Time: roughly 5–10 minutes.
 
-Level 2: Focused reading
+2. Level 2: Focused reading
 
 For relevant papers, read:
 
-Introduction
-Methodology
-Results
-Discussion
-Conclusion
-Level 3: Deep reading
+- Introduction
+- Methodology
+- Results
+- Discussion
+- Conclusion
+
+3. Level 3: Deep reading
 
 For your most important papers, examine:
 
-Research question
-Theoretical framework
-Detailed methodology
-Sampling/data
-Statistical analysis
-Results
-Assumptions
-Limitations
-Comparisons with previous work
-References
+* Research question
+* Theoretical framework
+* Detailed methodology
+* Sampling/data
+* Statistical analysis
+* Results
+* Assumptions
+* Limitations
+* Comparisons with previous work
+* References
 
 You might deeply read 20 important papers while only screening 100+ papers.
 
 That's completely normal.
 
-</details> <details> <summary>11. How do I understand a difficult research paper?</summary>
+</details>
+
+<!-- 
+
+
+<details><summary>11. How do I understand a difficult research paper?</summary>
 
 Don't try to understand everything at once.
 

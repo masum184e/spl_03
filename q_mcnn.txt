@@ -1,0 +1,1183 @@
+CombinedLoss - re read it properly, at first, and review it
+
+
+
+
+
+
+
+
+
+Path
+shutil
+Path
+dir.iterdir()
+item.is_dir()
+shutil.rmtree()
+item.unlink()/link()
+import os
+CUDA/cuBLAS
+
+
+
+
+
+
+rglob
+is_file
+suffix
+
+
+
+
+
+
+
+downsample
+sigma_base
+
+
+
+
+
+
+
+Dataset class in pytorch
+
+
+
+
+
+
+
+
+
+
+
+
+            # Skip points that fall outside the resized image boundaries 
+            if 0 <= x < width and 0 <= y < height:
+               # Place one unit of density at the person's annotated location 
+                density_map[y, x] += 1.0  # Preserve overlapping annotations
+
+
+
+
+
+
+
+
+
+
+
+  if len(points) > 0:
+            density_map = gaussian_filter(
+                density_map,
+                sigma=sigma,
+                truncate=3
+            )
+
+
+
+
+
+
+
+
+
+   # Scale the density map to preserve the total number of people 
+            density_map *= len(points) / density_map.sum()  # Preserve GT count
+
+
+
+
+
+
+
+
+
+
+
+
+        # Calculate the density-map dimensions after downsampling 
+        ds_h = h // self.gt_downsample 
+        ds_w = w // self.gt_downsample 
+ 
+        # Resize the image so its dimensions are divisible by the downsampling factor 
+        img = cv2.resize(img, (ds_w * self.gt_downsample, ds_h * self.gt_downsample)) 
+ 
+        # Downsample the ground-truth density map 
+        gt_density_map = cv2.resize(gt_density_map, (ds_w, ds_h)) 
+ 
+        # Add a channel dimension and compensate density values for downsampling 
+        gt_density_map = (gt_density_map[np.newaxis, :, :] * (self.gt_downsample ** 2)) 
+
+
+
+
+
+
+
+
+Unlike an augmented training pipeline, the current implementation does not perform any geometric or photometric augmentation.
+
+
+
+
+
+
+kagglehub dataset download: dataset_download
+
+
+
+
+
+enhanced dataset - suffle true
+
+
+
+
+subset
+
+
+
+
+
+dataloader
+pin memory
+
+
+
+
+
+
+
+
+
+torch.nn.functional as F
+
+
+
+
+
+
+
+
+
+def __init__(self):
+        super(FourColumnMCNN, self).__init__()
+
+
+
+
+
+
+
+Receptive Field Column
+
+
+
+
+
+
+
+    nn.Conv2d(3, 16, kernel_size=11, padding=5),
+            nn.BatchNorm2d(16),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+- each column configuration meaning
+
+
+why last part don't have maxpool in each column
+
+
+
+
+
+resolve the MCNN image
+
+
+
+
+
+
+
+So Column 4 focuses more on local details. - how? how it work internally
+Batch Normalization normalizes intermediate feature activations. - "
+channel dimensions
+
+
+
+
+
+
+
+
+
+
+fusion layer
+second fusion convolution
+
+
+
+
+
+304 feature channels
+        ↓
+learn how to combine them
+        ↓
+64 feature channels
+
+
+
+
+
+
+
+how 304 -> 1*1 conv -> 64 channels then another 1*1 conv -> 1 channel
+
+
+
+
+
+
+
+torch.optim as optim
+
+
+
+
+
+
+
+
+
+
+# Defines a custom loss function class
+class CombinedLoss(nn.Module):            
+    # Initializes the loss weights
+    def __init__(self, weight_dmap=0.9, weight_sum_gt=0.1):  
+        # Initializes the parent nn.Module class
+        super(CombinedLoss, self).__init__()
+
+
+
+
+
+
+
+
+
+
+
+adam optimizer
+
+
+model.parameters()
+
+
+
+
+
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+
+
+
+
+
+tqdm.auto
+
+
+
+
+
+
+
+
+tqdm(train_loader, desc="Training", leave=False)
+
+
+
+
+
+
+
+
+
+
+
+model.train()
+
+
+
+
+
+
+
+
+
+
+
+
+        loss.backward()
+
+        # Gradient Clipping
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)
+        optimizer.step()
+
+        # Accumulate Metrics
+        batch_size_current = images.size(0)
+        train_loss_total += (loss.item() * batch_size_current)
+        train_mae_total += (count_mae.item() * batch_size_current)
+
+        progress_bar.set_postfix(loss=f"{loss.item():.4f}", mae=f"{count_mae.item():.2f}")
+
+    # Average Training Metrics
+    train_loss = (train_loss_total / len(train_loader.dataset))
+    train_mae = (train_mae_total / len(train_loader.dataset))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   # VALIDATION
+    model.eval()
+
+
+
+
+
+
+
+
+
+ with torch.inference_mode():
+
+
+
+
+
+
+
+
+
+
+
+
+
+differenfces between training and validation code
+
+
+
+
+
+
+
+
+
+
+   # LEARNING RATE SCHEDULER
+    scheduler.step()
+    current_lr = optimizer.param_groups[0]["lr"]
+    print(f"Current LR: {current_lr:.2e}")
+
+
+
+
+
+
+
+Learning-rate update
+After validation:
+
+scheduler.step()
+Since i'm using StepLR, the learning rate decreases according to the fixed epoch schedule.
+
+
+
+
+
+
+
+
+why epoch + 1? index 0 theke tai
+
+
+
+   "input_size": (512, 512),
+                "gt_downsample": 4,
+                "sigma": 5,
+
+
+
+
+
+
+
+
+"epoch": np.arange(1, len(train_losses) + 1)
+
+
+
+
+
+
+
+df prottekbar csv te naki last e ekbar e kora better?
+
+
+
+
+
+
+
+Validation forward pass
+
+
+
+
+
+
+
+
+
+
+
+Learning-rate update
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+make it runnable for interrupt training
+
+
+
+
+
+
+
+
+
+
+
+What does the model actually learn?
+
+
+
+
+
+
+
+
+
+
+model.load_state_dict(checkpoint["model_state_dict"])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The most important mathematical formulation
+
+
+
+
+
+
+
+
+Full end-to-end exa
+
+
+
+
+
+
+
+
+
+
+
+What each major component is r
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+print(f"{'Test loss:':<25} {test_loss:.6f}")
+print(f"{'Test MAE:':<25} {test_mae:.4f}")
+
+
+what's the meaning of :<25
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # CONVERT TO PYTORCH TENSOR
+    input_tensor = torch.from_numpy(resized_image.transpose(2, 0, 1)).float() / 255.0
+        
+    # Add batch dimension
+    input_tensor = input_tensor.unsqueeze(0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    density_map = prediction.squeeze().cpu().numpy()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The most important mathematical formu
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Full end-to-end exam
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Total Images         : 285
+Total GT Objects     : 8310
+Total Predictions    : 11190.90730381012
+
+------------------------------------------------------------
+              COUNTING METRICS
+------------------------------------------------------------
+Mean GT Count        : 29.16
+Mean Predicted Count : 39.27
+MAE                  : 14.7544
+RMSE                 : 24.9473
+MAPE                 : 132.90%
+
+
+
+# Mean Absolute Percentage Error
+if (len(results_df) > 0):
+    valid_mape_values = (results_df[results_df["ground_truth"] > 0]["absolute_error"]/results_df[results_df["ground_truth"] > 0]["ground_truth"])
+
+    if len(valid_mape_values) > 0:
+        mape = (valid_mape_values.mean()* 100)
+    else:
+        mape = 0.0
+else:
+    mape = 0.0
+
+
+
+prottek metrics er explanation
+
+
+
+
+
+
+
+
+
+
+
+
+
+# import zipfile
+
+# source_dir = "/kaggle/working"
+# output_zip = "/kaggle/working/jatricount_mcnn.zip"
+
+# with zipfile.ZipFile(output_zip, "w", zipfile.ZIP_DEFLATED) as zipf:
+
+#     for root, dirs, files in os.walk(source_dir):
+
+#         # Ignore .virtual_documents directory
+#         dirs[:] = [
+#             d for d in dirs
+#             if d != ".virtual_documents"
+#         ]
+
+#         for file in files:
+
+#             file_path = os.path.join(root, file)
+
+#             # Don't include the ZIP itself
+#             if file_path == output_zip:
+#                 continue
+
+#             # Path inside ZIP
+#             arcname = os.path.relpath(file_path, source_dir)
+
+#             zipf.write(file_path, arcname)
+
+# print(f"Created: {output_zip}")
+
+- explaination on how it work
+
+
+
+
+
+
+
+
+
+
+
+
+
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+
+all_results = []
+
+for image_path in tqdm(image_files, desc="Processing images"):
+
+    image_bgr = cv2.imread(str(image_path))
+    if image_bgr is None:
+        print(f"Could not read: {image_path}")
+        continue
+
+    height, width = (image_bgr.shape[:2])
+
+    # LOAD GROUND TRUTH
+    label_path = (LABEL_DIR / f"{image_path.stem}.txt")
+
+    gt_boxes = load_gt_boxes(label_path,width,height)
+    gt_count = len(gt_boxes)
+
+
+    # MODEL PREDICTION
+    (
+        original_image,
+        resized_image,
+        density_map,
+        pred_count
+    ) = predict_fourcolumn_mcnn(image_path)
+
+    # COUNT ERROR
+    error = (pred_count - gt_count)
+    absolute_error = abs(error)
+    squared_error = (error ** 2)
+    
+    # PERCENTAGE ERROR
+    if gt_count > 0:
+        percentage_error = (absolute_error / gt_count) * 100
+    else:
+        percentage_error = np.nan
+
+    # COUNTING ACCURACY
+    if gt_count > 0:
+        counting_accuracy = max(0, 1 - (absolute_error / gt_count)) * 100
+    else:
+        counting_accuracy = np.nan
+        
+    # STORE RESULTS
+    all_results.append({
+        # "image": image_path.name,
+        "ground_truth": gt_count,
+        "predicted": pred_count,
+        "error": error,
+        "absolute_error": absolute_error,
+        "squared_error": squared_error,
+        "percentage_error": percentage_error,
+        "counting_accuracy": counting_accuracy,
+        # "TP": tp,
+        # "FP": fp,
+        # "FN": fn,
+        # "precision": precision,
+        # "recall": recall,
+        # "f1": f1
+    }) - generate image
+
+
+
+
+
+remove name base sorting
+
+# image_files = sorted(
+#     IMAGE_DIR.glob("*.jpg"),
+#     key=lambda x: int(x.stem.split("_")[-1])
+# )
+
+# label_files = sorted(
+#     LABEL_DIR.glob("*.txt"),
+#     key=lambda x: int(x.stem.split("_")[-1])
+# )
+image_files = sorted(IMAGE_DIR.glob("*.jpg"))
+label_files = sorted(LABEL_DIR.glob("*.txt"))
+
+print("Number of JPG images:", len(image_files))
+print("Number of TXT labels:", len(label_files))
+
+
+
+
+
+
+
+
+
+
+
+label_path = LABEL_DIR / f"{image_path.stem}.txt" - .stem?
+
+
+
+
+
+
+
+
+
+
+
+
+
+ with open(label_path, "r") as f:
+        lines = [line.strip() for line in f if line.strip()]
+
+    for line_number, line in enumerate(lines, start=1):
+- explanation
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def predict_fourcolumn_mcnn(image_path):
+    image_bgr = cv2.imread(str(image_path))
+
+    if image_bgr is None:
+        raise ValueError(f"Could not read image: {image_path}")
+
+    # RGB copy for visualization
+    original_image = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB) 
+
+
+- is rgb only for visualization? or for deep Learning
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 2. `target_size` vs checkpoint metadata
+
+The dataset default is:
+
+```python
+target_size=(768,768)
+```
+
+while the checkpoint metadata says:
+
+```python
+"input_size": (512,512)
+```
+
+Those two values do not match in the shown code.
+
+So for your thesis documentation, you should be careful not to claim 512×512 input if this exact training configuration used 768×768.
+
+The source code itself explicitly stores `(512, 512)` in the checkpoint metadata. 
+
+---
+
+### 3. `gt_downsample=4`
+
+The actual density-map output from the architecture is:
+
+```text
+768 / 4 = 192
+```
+
+so the model's natural output resolution corresponds to:
+
+```text
+192 × 192
+```
+
+for a 768×768 input.
+
+---
+
+### 4. `shuffle=True` and train/validation splitting
+
+The dataset itself is shuffled and then the indices are separately shuffled before splitting.
+
+The second shuffle is what explicitly randomizes the train/validation split.
+
+---
+
+### 5. Test set isn't used during training
+
+That's good.
+
+The code creates:
+
+```python
+test_set
+test_loader
+```
+
+but the shown training loop only uses:
+
+```text
+train_loader
+val_loader
+```
+
+So the test set remains untouched during model training.
+
+---
+
+# 105. The architecture in thesis language
+
+If you need to explain this during your thesis defense, you can say:
+
+> The density-estimation branch uses a custom four-column Multi-Column Convolutional Neural Network. The network processes the input image through four parallel convolutional columns with progressively different receptive-field sizes. The first column uses \(11\times11\), \(9\times9\), and \(7\times7\) kernels, while the subsequent columns use \(9/7/5\), \(7/5/3\), and \(5/3/3\) kernel configurations. Each column contains two \(2\times2\) max-pooling layers, resulting in a spatial downsampling factor of four. The extracted features from the four columns are concatenated along the channel dimension, producing 304 feature channels, which are subsequently fused using \(1\times1\) convolutions to generate a single-channel density map. A ReLU activation is used at the output to maintain non-negative density values. 
+
+And for the loss:
+
+> The model is trained using a combined objective consisting of a pixel-wise mean squared error between the predicted and ground-truth density maps and an absolute counting error obtained by summing the predicted density map. The density-map loss receives a weight of 0.9, while the counting loss receives a weight of 0.1. 
+
+---
+
+# 106. The whole thing in one diagram
+
+```text
+                 ShanghaiTech Part B
+                         │
+                         ▼
+                    Input Image
+                         │
+                         ▼
+                  Resize 768×768
+                         │
+                         ▼
+             Head-point Ground Truth
+                         │
+                         ▼
+                Gaussian Filtering
+                         │
+                         ▼
+                  Density Map
+                         │
+                         ▼
+                  Downsample ×4
+                         │
+                         ▼
+                 192×192 GT Map
+                         │
+                         │
+                         │
+Input Image ─────────────┐
+                         ▼
+                 ┌───────────────┐
+                 │   FourColumn  │
+                 │     MCNN      │
+                 └───────┬───────┘
+                         │
+          ┌──────────────┼──────────────┐
+          ▼              ▼              ▼
+      Column 1       Column 2       Column 3       Column 4
+      11/9/7         9/7/5          7/5/3          5/3/3
+          │              │              │              │
+          └──────────────┴──────────────┴──────────────┘
+                         │
+                    Concatenate
+                         │
+                      304 ch
+                         │
+                       1×1
+                         │
+                       64 ch
+                         │
+                       1×1
+                         │
+                      1 ch
+                         │
+                         ▼
+              Predicted Density Map
+                         │
+              ┌──────────┴──────────┐
+              │                     │
+              ▼                     ▼
+       Compare with GT       Sum all pixels
+       Density Map MSE              │
+              │                     ▼
+              │              Predicted Count
+              │                     │
+              │                     ▼
+              │                Count MAE
+              │                     │
+              └──────────┬──────────┘
+                         ▼
+                 Combined Loss
+                 0.9 × MSE
+                 +
+                 0.1 × MAE
+                         │
+                         ▼
+                    Backpropagation
+                         │
+                         ▼
+                  Gradient Clipping
+                         │
+                         ▼
+                    Adam Update
+                         │
+                         ▼
+                  Updated MCNN
+```
+
+---
+
+# 107. The single most important idea
+
+If you remember only one thing from this entire code, remember this:
+
+> **The network does not directly predict the number of people. It predicts a spatial density map, and the total crowd count is obtained by summing the density map.**
+
+So:
+
+$$
+\boxed{
+\text{Image}
+\rightarrow
+\text{Density Map}
+\rightarrow
+\text{Sum}
+\rightarrow
+\text{Crowd Count}
+}
+$$
+
+And your training simultaneously teaches the network:
+
+$$
+\boxed{
+\text{“Predict the correct density everywhere”}
++
+\text{“Predict the correct total number”}
+}
+$$
+
+with:
+
+$$
+\boxed{
+L=0.9L_{\text{density}}+0.1L_{\text{count}}
+}
+$$
+
+That is the core of the entire implementation.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- # Complete Pipeline
+
+```text
+ShanghaiTech Part B
+        │
+        ▼
+   Load images
+        │
+        ▼
+Load head point annotations
+        │
+        ▼
+Resize image
+        │
+        ▼
+Generate Gaussian density map
+        │
+        ▼
+Optional augmentation
+        │
+        ▼
+Downsample density map
+        │
+        ▼
+PyTorch tensors
+        │
+        ▼
+   FourColumnMCNN
+        │
+        ▼
+Predicted density map
+        │
+        ├───────────────┐
+        │               │
+        ▼               ▼
+Density map MSE     Predicted count
+                         │
+                         ▼
+                    Count MAE
+        │               │
+        └───────┬───────┘
+                ▼
+          Combined Loss
+                │
+                ▼
+        Backpropagation
+                │
+                ▼
+         Adam optimizer
+                │
+                ▼
+         Updated model
+``` -->
