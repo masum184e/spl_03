@@ -1,0 +1,144 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[margin=1in]{geometry} % set margin
+\usepackage{newtxtext,newtxmath} % set font
+\usepackage{titlesec} % customize section title
+\usepackage{graphicx} % read image
+\usepackage{longtable} % long table
+\usepackage{array}
+\usepackage{enumitem} % control over list
+
+\setlength{\parindent}{0pt}  % remove paragraph indentation
+\setlength{\parskip}{6pt}    % add space between paragraphs
+
+% ==================================================
+% Algorithm Packages
+% ==================================================
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{float}
+
+% ==================================================
+% Hyperlinks and Cross-References
+% ==================================================
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+
+\makeatletter
+\renewcommand{\theHfigure}{\thechapter.\arabic{figure}}
+\renewcommand{\theHtable}{\thechapter.\arabic{table}}
+\makeatother
+
+% ==================================================
+% Chapter Page
+% ==================================================
+\newcommand{\chapterpage}[1]{%
+    % \clearpage
+    \refstepcounter{chapter}%
+    \phantomsection
+    \addcontentsline{toc}{chapter}{\protect\numberline{\thechapter}#1}
+    % \thispagestyle{empty}
+
+    % \vspace*{\fill}
+    % \begin{center}
+    %     {\fontsize{32}{38}\selectfont\bfseries #1}
+    % \end{center}
+    % \vspace*{\fill}
+
+    % \clearpage
+}
+
+% ==================================================
+% Chapter Heading
+% ==================================================
+\newcommand{\mychapter}[1]{%
+    \vspace*{1.cm}
+    \noindent
+    {\normalfont\bfseries\fontsize{18}{22}\selectfont
+    \thechapter.\ #1}\par
+    \vspace{0pt}
+}
+
+% ==================================================
+% Table and Figure Caption
+% ==================================================
+\usepackage{caption}
+
+\captionsetup[figure]{
+    width=\linewidth,
+    justification=centering,
+    singlelinecheck=false
+}
+
+\captionsetup[table]{
+    width=\linewidth,
+    justification=centering,
+    singlelinecheck=false
+}
+
+% ==================================================
+% Title and Author
+% ==================================================
+\title{\textbf{Your Paper Title}}
+\author{Your Name}
+\date{}
+
+\begin{document}
+
+
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+\begin{center}
+    {\fontsize{18}{22}\selectfont\bfseries
+    Enhanced Urban Mobility through Deep Learning Based Real-Time Passenger Head Counting and Occupancy Estimation\par}
+
+    \vspace{6pt}
+
+    {\fontsize{12}{15}\selectfont
+    Md Masum Billah\par}
+
+    \vspace{18pt}
+\end{center}
+
+{
+    \let\clearpage\relax
+    \input{pages/abstract}
+}
+
+% ==================================================
+% CHAPTER 1
+% ==================================================
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\input{chapters/SPL_03_Final_Report_Chapter_1}	
+
+% ==================================================
+% CHAPTER 2
+% ==================================================
+\input{chapters/SPL_03_Final_Report_Chapter_2}	
+
+% ==================================================
+% CHAPTER 3
+% ==================================================
+\input{chapters/SPL_03_Final_Report_Chapter_3}	
+
+% ==================================================
+% CHAPTER 7
+% ==================================================
+\input{chapters/SPL_03_Final_Report_Chapter_7}	
+
+% ==================================================
+% CHAPTER 8
+% ==================================================
+\input{chapters/SPL_03_Final_Report_Chapter_8}	
+
+% ==================================================
+% References
+% ==================================================
+\newpage
+\renewcommand{\bibname}{References}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+	
+\end{document}
