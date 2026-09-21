@@ -4,22 +4,20 @@
 
 \section{Research Design}
 
-Crowd counting from imagery is typically approached through one of two families of method: detection based counting, in which individual people or heads are localised and the count is obtained as the cardinality of the localisation set, and density based counting, in which a model regresses a continuous density map over the image and the count is recovered by spatial integration of that map~\cite{sindagi2018survey}. Detection based counting is generally reliable in sparse scenes, where individuals are visually separable, but its accuracy degrades under heavy occlusion and inter person overlap, which is precisely the regime in which density map regression becomes more robust~\cite{Zhang2016}. This study adopts an adaptive hybrid design that exploits both families rather than committing to either one: a scene density assessment, computed from preliminary detection evidence, determines whether a given frame is treated as sparse (and counted by detection) or dense (and counted by density map integration), and the outputs of both families are subsequently reconciled by a fusion stage rather than being reported in isolation.
+Generally, crowd counting methods are divided into two groups: detection based counting, that localises people (or heads) and counts the number of people (or heads) by the cardinality of the set of localisations and density based counting, in which a model estimates the density of people (or heads) on an image, and the count is recovered by spatial integration of the estimated density map~\cite{sindagi2018survey}. Detection based counting is generally accurate when people are sparse, easy to visually distinguish from each other, while it is less accurate when occluded by other persons or objects, which is just the regime in which density map regression works more accurately~\cite{Zhang2016}. This study proposes an adaptive hybrid design, which takes advantage of the fact that both families are not exclusively used to detect the frame, but rather one or the other is used, depending on the scene density evaluation, derived from preliminary detection evidence, and that the output of both families is passed to a fusion stage, not separately reported.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.92\textwidth]{figures/pipeline_diagram.png}
+	\includegraphics[width=0.92\textwidth]{./../images/pipeline_diagram.png}
 	\caption{Architecture of the proposed adaptive hybrid crowd counting framework.}
 	\label{fig:pipeline}
 \end{figure}
 
-The overall architecture therefore consists of five conceptual stages, illustrated in Figure~\ref{fig:pipeline}: (i) an input frame is passed to one or more candidate detector techniques; (ii) the resulting detections are passed to a  component, which classifies the frame as sparse or dense using detection count, detection density, and pairwise detection overlap; (iii) sparse frames are counted directly from the retained detections, while dense frames are additionally processed by one of several candidate density estimation techniques; (iv) both a sparse branch count and a dense branch count are computed for the frame and (v) a fusion component reconciles the two branch level counts into a single final crowd count, using a primary/secondary weighting scheme that falls back to the branch selected by the density decision whenever the two branches disagree strongly. 
-
-This design distinguishes two levels of investigation. At the level of the overall framework, the study proposes and specifies the decision and fusion architecture itself: a single, principled procedure for routing a frame between counting families and for reconciling their outputs. At the level of individual techniques, the research investigates multiple alternative implementations for each role in that architecture, so that the relative behaviour, computational cost, and data requirements of different detectors and different density estimators can be examined under an identical surrounding architecture. Three techniques were investigated for the detection role an unmodified, general purpose pretrained detector; a detector fine tuned specifically for head localisation; and a classical cascade classifier detector predating deep learning and three techniques were investigated for the density estimation role two learned convolutional density regressors of different architectural families, and one non-learned, rule-based estimator that combines detection evidence with image edge information. Investigating several candidate techniques within each role, rather than fixing a single detector or a single density estimator, allows the framework to be evaluated independently of any one technique's idiosyncrasies, and allows techniques with different training requirements (from no training at all, to fine tuning, to training from randomly initialised weights) to be compared under a common architectural role.
+The overall architecture is then five conceptual stages as illustrated in Figure~\ref{fig:pipeline}: (i) the input frame is passed to one or more candidate detector techniques; (ii) the outputs of the detector techniques are passed to a component that decides on whether the frame is sparse or dense based on the number of detections, detection density, and pairwise detection overlap; (iii) if the frame is dense, it is also passed to one of several candidate density estimation techniques, while if it is sparse, the detections are passed directly to a branch count component; (iv) both a sparse and a dense branch count are computed from the detections and passed to a (v) fusion component that reconciles the counts from the two branches into a single final crowd count, using one of several primary/secondary weighting schemes, with the secondary chosen whenever there is a strong disagreement between the two branches. 
 
 \section{Research Approach}
 
-This study follows the five stage sequence set out above and summarised for a single frame in Table~\ref{tab:stages}. Each stage is examined independently in the corresponding subsection of ~\cref{sec:proposed-algorithm}: frame preprocessing (technique specific, since the three detector techniques and three density estimation techniques each impose different input requirements), detection (\cref{sec:sparse}), density decision (~\cref{sec:density-decision}), density estimation (\cref{sec:dense}), and fusion (\cref{sec:fusion}). Video level acquisition and frame extraction are treated only at the level of the conceptual pipeline, since the processing unit exercised throughout the remainder of this chapter is a single frame together with whatever detections have already been produced for it; the mechanism by which frames would be sampled from a video stream prior to this point is outside the scope of the components examined here.
+This study is conducted in the above sequence of five stages and summarised for one frame in Table~\ref{tab:stages}. The two detector techniques and two density estimation techniques have different requirements for the preprocessed frames and require the input of a different set of frames, so each stage is examined separately in the corresponding subsection of Section~\ref{sec:proposed-algorithm}: frame preprocessing (technique specific), detection (Section~\ref{sec:sparse}), density decision (Section~\ref{sec:density-decision}), density estimation (Section~\ref{sec:dense}), and fusion (Section~\ref{sec:fusion}). The processing unit used throughout the rest of this chapter is a single frame and any detections that have been made for that frame; however, the way video frames are acquired and extracted from a video stream before this point is not examined here.
 
 \begin{longtable}{|
 		>{\raggedright\arraybackslash}p{0.19\textwidth}|
@@ -52,7 +50,7 @@ This study follows the five stage sequence set out above and summarised for a si
 	&
 	Raw frame
 	&
-	Model-ready tensor (technique-specific)
+	Model ready tensor (technique specific)
 	\\
 	\hline
 	
@@ -60,7 +58,7 @@ This study follows the five stage sequence set out above and summarised for a si
 	&
 	Preprocessed frame
 	&
-	Set of bounding-box detections
+	Set of bounding box detections
 	\\
 	\hline
 	
@@ -76,7 +74,7 @@ This study follows the five stage sequence set out above and summarised for a si
 	&
 	Retained detections
 	&
-	Sparse-branch count
+	Sparse branch count
 	\\
 	\hline
 	
@@ -84,13 +82,13 @@ This study follows the five stage sequence set out above and summarised for a si
 	&
 	Frame and, optionally, detections
 	&
-	Density map and dense-branch count
+	Density map and dense branch count
 	\\
 	\hline
 	
 	Fusion
 	&
-	Sparse-branch count, dense-branch count, and scene label
+	Sparse branch count, dense branch count, and scene label
 	&
 	Final crowd count
 	\\
@@ -98,12 +96,10 @@ This study follows the five stage sequence set out above and summarised for a si
 	
 \end{longtable}
 
-% \section{Data Collection Methods}
-
 \section{Data Analysis Techniques}
 \label{sec:analysis-techniques}
 
-Because the sparse and dense branches produce structurally different outputs (discrete detections versus continuous density maps), and because the classical, non-learned techniques (cascade-classifier detection, classical density estimation, density decision, fusion) are not trained against a loss function, each component of the framework is analysed with the metric family appropriate to its output.
+As the sparse and dense branches produce structurally different outputs (discrete detections versus continuous density maps), and the classical, non-learned techniques (classical density estimation, density decision, fusion) are not trained against a loss function, each component of the framework is analysed with the metric family appropriate to its output.
 
 \subsection{Image Pre-processing}
 
@@ -118,17 +114,11 @@ Before any denoising or contrast operation is applied, the raw frame $I_{raw}$ p
 	\label{eq:resize}
 \end{equation}
 
-where $w_t$ is the configured target width, $h_t$ the resulting target height, and the aspect ratio of the original frame $(w_{raw}, h_{raw})$ is preserved throughout. Area-based interpolation is used because it is the theoretically appropriate choice for downscaling: unlike bilinear or nearest-neighbour interpolation, which sample a fixed, small neighbourhood regardless of the scale change, area interpolation averages over the full block of source pixels each destination pixel covers, which reduces aliasing artefacts that would otherwise appear as spurious high-frequency texture -- exactly the kind of artefact non-local means denoising (Section~3.\ref{sec:analysis-techniques}.1.2) would otherwise mistake for genuine, similarity-matchable structure~\cite{gonzalez2018digital}.
-
-% This stage serves two purposes beyond simple standardisation. First, it bounds the computational cost of every subsequent stage: non-local means denoising in particular scales with the number of pixels processed and the size of the search window, so operating at a fixed, moderate resolution rather than a source frame's native resolution (which may vary considerably across input videos and images) keeps per-frame processing time predictable regardless of the input source. Second, because the sparse and dense branches are not guaranteed to require the same input resolution -- the domain-fine-tuned detector is deployed at a higher input resolution than the pretrained general-purpose detector (Section~\ref{sec:head-detection-techniques}), while the density-estimation branch operates on its own downsampled grid -- resizing to a single, shared working resolution at the preprocessing stage establishes one consistent coordinate space in which detections, density maps, and fused outputs can all be related back to the same pixel grid, before any branch-specific resampling is applied further downstream.
-
-% \subsection{Image Pre-processing}
-
-% The preprocessor apply conditions on each frame before detection and density estimation using up to three optional, independently configurable stages, applied in sequence: non-local means denoising, Contrast Limited Adaptive Histogram Equalization (CLAHE) applied to the L-channel of the CIELAB colour space, and Gaussian smoothing. When a stage is disabled, its input passes through unchanged to the next stage.
+where $w_t$ is the configured target width, $h_t$ the resulting target height, and the aspect ratio of the original frame $(w_{raw}, h_{raw})$ is preserved throughout. Area based interpolation is used because it is the theoretically appropriate choice for downscaling: unlike bilinear or nearest neighbour interpolation, which sample a fixed, small neighbourhood regardless of the scale change, area interpolation averages over the full block of source pixels each destination pixel covers, which reduces aliasing artefacts that would otherwise appear as spurious high frequency texture exactly the kind of artefact non-local means denoising would otherwise mistake for genuine, similarity matchable structure~\cite{gonzalez2018digital}.
 
 \subsubsection{Non-Local Means Denoising}
 
-Unlike local filters that average a pixel with its immediate spatial neighbours, non-local means denoising~\cite{buades2005nonlocal} estimates each pixel's true value by averaging over all pixels in a search window whose surrounding patches are photometrically similar, exploiting the redundancy of self similar texture and background regions that recur throughout a crowd scene. For a pixel $p$, the denoised value is
+Non-local means denoising~\cite{buades2005nonlocal} relies on the fact that in a crowd scene, similar texture and background regions occur many times throughout the image and the value of each pixel can be estimated by averaging with all the pixels in a search window where the surrounding patches are photometrically similar. denoised value of a pixel $p$ is
 
 \begin{equation}
 	I_{1}(p) = \frac{1}{C(p)} \sum_{q \in \Omega(p)} w(p,q)\, I_{in}(q)
@@ -138,9 +128,8 @@ Unlike local filters that average a pixel with its immediate spatial neighbours,
 	w(p,q) = \exp\left(-\frac{\lVert N(p) - N(q) \rVert_2^2}{h^2}\right), \qquad C(p) = \sum_{q \in \Omega(p)} w(p,q)
 	\label{eq:nlm-weight}
 \end{equation}
-\hfill
 
-where $\Omega(p)$ is the search window around $p$ (\text{searchWindowSize}=21), $N(p)$ and $N(q)$ denote the local patches centred at $p$ and $q$ used for similarity comparison (\text{templateWindowSize}=7), and $h$ is the filtering strength that controls how aggressively dissimilar patches are down weighted. For colour images, denoising is applied in a luminance chrominance decomposition with separate strengths for the luminance and colour components, $h=3$ and $h_{color}=3$ respectively, following the colour extension of the algorithm~\cite{buades2005nonlocal_colour}, which suppresses chroma noise without over smoothing edges in brightness. Because $w(p,q)$ depends on patch similarity rather than spatial proximity alone, this scheme preserves fine structure (heads, edges of occlusion boundaries) more effectively than a purely spatial filter~\cite{buades2005review}, which is important since such structure is exactly what the downstream detector and density estimator rely on. 
+The search window around $p$ ($\text{searchWindowSize}=21$), the local patches centred at $p$ and $q$ ($\text{templateWindowSize}=7$) used for similarity comparison, the filtering strength $h$ that controls the down weighting of dissimilar patches. In the case of colour images, denoising is done in the luminance chrominance decomposition with different strengths for luminance and colour channels, $h=3$ and $h_{color}=3$ respectively, respectively following the colour extension of the algorithm that suppress chroma noise without over smoothing brighteness edge. The spatial filter scheme, which depends only on the spatial distance between the two patches, does not preserve fine structure as well as the $w(p,q)$ scheme does because it does not consider similarity between the two patches.The fine structure (heads, edge of the occlusion boundary) is preserved better than a spatial filter scheme since the latter does not consider the similarity between the two patches. 
 
 \subsubsection{Contrast Limited Adaptive Histogram Equalization}
 
@@ -153,7 +142,7 @@ where $\Omega(p)$ is the search window around $p$ (\text{searchWindowSize}=21), 
 	\label{eq:clahe}
 \end{equation}
 
-CLAHE partitions the $L$-channel into an $8\times8$ grid of contextual tiles, equalises the histogram within each tile, and clips histogram bins above a fixed limit (clipLimit $=2.0$) before redistributing the excess. This prevents noise over-amplification that plain histogram equalisation can introduce in near-uniform regions~\cite{zuiderveld1994clahe}. Operating in the perceptually motivated CIELAB space isolates luminance from chrominance, so that contrast enhancement does not distort colour~\cite{lab_colorspace}. Applied to $I_1$ (or directly to $I_{in}$ if denoising is disabled), CLAHE improves local contrast in unevenly illuminated crowd scenes, such as shadowed platforms and backlit doorways. This enhancement can improve the recall of the downstream head/person detector, consistent with reported gains from CLAHE preprocessing in low-contrast detection pipelines.
+CLAHE partitions the $L$-channel into an $8\times8$ grid of contextual tiles, equalises the histogram within each tile, and clips histogram bins above a fixed limit (clipLimit $=2.0$) before redistributing the excess. This prevents noise over-amplification that plain histogram equalisation can introduce in near uniform regions~\cite{zuiderveld1994clahe}. Operating in the perceptually motivated CIELAB space isolates luminance from chrominance, so that contrast enhancement does not distort colour~\cite{lab_colorspace}. Applied to $I_1$ (or directly to $I_{in}$ if denoising is disabled), CLAHE improves local contrast in unevenly illuminated crowd scenes, such as shadowed platforms and backlit doorways. This enhancement can improve the recall of the downstream head/person detector, consistent with reported gains from CLAHE preprocessing in low contrast detection pipelines.
 
 \subsubsection{Gaussian Smoothing}
 
@@ -167,15 +156,16 @@ CLAHE partitions the $L$-channel into an $8\times8$ grid of contextual tiles, eq
 
 A final, optional Gaussian smoothing pass with configurable kernel size $k_{blur}$ removes residual high-frequency artefacts introduced by CLAHE's per-tile equalisation before the frame is passed to the detection and density branches~\cite{gonzalez2018digital}. Setting $\sigma=0$ allows the Gaussian standard deviation to be determined automatically from the selected kernel size.
 
-% % \subsection{Runtime and Computational Cost}
-% No inference-time, frames-per-second, or memory-usage measurement is implemented for any of the six techniques; consequently, no computational-efficiency analysis is reported in this chapter.
+\subsection{ShanghaiTech Dataset Preparation}
+
+The ShanghaiTech dataset is prepared for density based crowd estimation using a dedicated preprocessing pipeline. Each image and its corresponding head annotations are resized to a fixed resolution of $768\times768$, with the annotation coordinates scaled accordingly. Ground truth density maps are generated by placing unit impulses at the annotated head locations and applying an adaptive Gaussian kernel whose standard deviation depends on the number of annotated heads. The resulting density maps are normalized to preserve the ground truth crowd count and subsequently downsampled by a factor of four to match the spatial resolution of the density estimation network. A scaling factor of $16$ is applied after downsampling to compensate for the reduction in spatial resolution. Input images are converted to RGB format and normalized to the range $[0,1]$. The resulting image density map pairs provide the supervision required for training the multi column density estimator.
 
 \section{Proposed Algorithm}
 \label{sec:proposed-algorithm}
 
 \subsection{Overall Proposed Framework}
 
-The overall workflow of the proposed adaptive hybrid crowd-counting framework is summarized in Algorithm~\ref{alg:overall}. It integrates density-based scene decision, sparse detection, dense estimation, and count fusion into a unified pipeline as shows in Figure~\ref{fig:pipeline}.
+The overall workflow of the proposed adaptive hybrid crowd counting framework is summarized in Algorithm~\ref{alg:overall}. It integrates density-based scene decision, sparse detection, dense estimation, and count fusion into a unified pipeline as shows in Figure~\ref{fig:pipeline}.
 
 \begin{algorithm}[H]
 	\caption{Adaptive Hybrid Crowd Counting}
@@ -191,163 +181,141 @@ The overall workflow of the proposed adaptive hybrid crowd-counting framework is
 		\State Preprocess $f_t$ for the selected density estimation technique
 		\State $\hat D \gets$ density map from the selected density estimation technique (Section~\ref{sec:dense})
 		\State $C_{\text{dense}} \gets \sum \hat D$ \Comment{Equation~\ref{eq:density-sum}}
-		\State $C_t \gets$ \Call{Fuse}{$s$, $C_{\text{sparse}}$, $C_{\text{dense}}$} \Comment{~\cref{sec:fusion}}
+		\State $C_t \gets$ \Call{Fuse}{$s$, $C_{\text{sparse}}$, $C_{\text{dense}}$} \Comment{Section~\ref{sec:fusion}}
 		\EndFor
 		\State $C \gets$ aggregation of $\{C_1,\dots,C_n\}$ across frames 
-		% \Comment{Not examined in this chapter for multi-frame video}
 		\State \Return $C$
 	\end{algorithmic}
 \end{algorithm}
 
-Note that both the sparse branch count and the dense branch count are computed for every frame, regardless of the scene label $s$ assigned by the density decision component; $s$ determines which of the two counts the fusion component treats as primary rather than determining which branch is computed at all (Section~\ref{sec:fusion}).
-
-\subsection{Input Frame and Preprocessing}
-
-Preprocessing is specific to each of the three detector techniques and each of the three density estimation techniques, so no single, shared preprocessing routine applies across the framework. Where an implementation resizes an image to a fixed resolution, converts colour space, or applies channel wise normalisation, these operations are described alongside the corresponding technique in Sections~\ref{sec:sparse} and Section~\ref{sec:dense}. In general, the pretrained and fine-tuned detectors rely on their underlying detection framework's internal resizing and normalisation~\cite{yolov8_ultralytics}; the cascade classifier detector operates on a grayscale converted frame; and the two learned density estimators each resize frames to a fixed resolution and apply their own normalisation scheme (mean subtraction normalisation for one, simple range scaling for the other) before their respective convolutional networks are applied.
+Note that both the sparse branch count and the dense branch count are computed for every frame, regardless of the scene label $s$ assigned by the density decision component, $s$ determines which of the two counts the fusion component treats as primary rather than determining which branch is computed at all (Section~\ref{sec:fusion}).
 
 \subsection{Head Detection}
 \label{sec:sparse-detection}
-Three candidate techniques were implemented for the detection role, spanning a general purpose pretrained deep detector, a domain-fine-tuned deep detector, and a classical, pre-deep-learning cascade classifier. All three produce a common output representation, a set of bounding boxes, each optionally carrying a confidence score which downstream components (density decision, sparse counting, fusion) consume identically regardless of which technique produced it.
+
+Two candidate techniques were implemented for the detection role, spanning a general purpose pretrained deep detector, a domain-fine-tuned deep detector. All two produce a common output representation, a set of bounding boxes, each optionally carrying a confidence score which downstream components (density decision, sparse counting, fusion) consume identically regardless of which technique produced it.
 
 \subsection{Sparse Scene Crowd Counting}
 \label{sec:sparse}
 
 \subsubsection{Pretrained General Purpose Detector}
 
+The first sparse branch technique employs the pretrained YOLOv8m object detector as a general-purpose person detector, as illustrated in Fig.~\ref{fig:sparse_yolov8_pretrained}. The model is loaded using the Ultralytics detection framework~\cite{yolov8_ultralytics} and is used without additional training or fine-tuning. During inference, the detector is configured with an input image size of $1024$ pixels, a confidence threshold of $0.25$, and the person class (class $0$). Therefore, only detections classified as persons with confidence scores satisfying the specified threshold are retained for counting.
+
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=\textwidth]{figures/sparse_yolov8_pretrained.png}
+	\includegraphics[width=\textwidth]{./../images/sparse/yolo/yolo_pretrained.png}
 	\caption{Architecture of the pretrained YOLOv8 based sparse branch technique.}
 	\label{fig:sparse_yolov8_pretrained}
 \end{figure}
 
-The first sparse branch technique uses an unmodified, general purpose object detector pretrained on a large natural image benchmark, following the single stage, grid regression detection paradigm introduced by \cite{redmon2016yolo} and implemented via a widely used open source detection framework~\cite{yolov8_ultralytics} as illustrated in Fig.~\ref{fig:sparse_yolov8_pretrained}; no additional training or fine-tuning is performed. Inference restricts detections to the relevant person/human class and applies a minimum confidence threshold of 0.25 before counting. Formally, given the raw detection set $B$ returned for confidence threshold $\tau=0.25$ and the person class,
+Let $B$ denote the set of bounding boxes returned by the pretrained YOLOv8m detector under the person class and confidence-threshold constraints. The sparse scene count is obtained directly from the number of retained detections:
 
 \begin{equation}
-	C_{\text{sparse}} = \bigl|\{\, b \in B : \text{class}(b) = \text{person},\; \text{conf}(b) \ge \tau \,\}\bigr|.
+C_{\text{sparse}} = |B|.
 \end{equation}
-Duplicate or overlapping detections are resolved by the detection framework's internal non-maximum suppression~\cite{neubeck2006nms}, without any additional NMS logic layered on top. This technique was demonstrated qualitatively on a single crowd photograph, with the detected boxes overlaid on the image for visual inspection, but was not evaluated quantitatively against a ground truth count.
 
-\subsubsection{Fine Tuned Head Detector}
+The detector's built-in post-processing, including non-maximum suppression (NMS), is used to handle overlapping candidate detections, no additional NMS procedure is applied in the counting pipeline.
+
+For quantitative evaluation, the predicted bounding boxes are compared with the ground truth bounding boxes provided with the public transport crowd counting dataset. A predicted box and a ground truth box are considered a match when their intersection-over-union (IoU) is at least $0.50$. A greedy one-to-one matching procedure is then used to determine true positives (TP), false positives (FP), and false negatives (FN). Based on these detections, precision, recall, and F1-score are calculated. In addition, counting performance is evaluated using the absolute counting error, mean absolute error (MAE), root mean squared error (RMSE), and mean absolute percentage error (MAPE).
+
+\subsubsection{Fine-Tuned Head Detector}
+
+The second sparse branch technique fine tunes the pretrained YOLOv8m detector for single class head detection using the SCUT-HEAD dataset~\cite{peng2018scuthead}, as illustrated in Fig.~\ref{fig:sparse_yolov8_head}. The detector is initialized from the pretrained YOLO weights and fine tuned for 50 epochs with a batch size of 8 and an input image size of 1{,}280 pixels. Early stopping is enabled with a patience of 10 epochs, while a fixed random seed of 42 and deterministic training are used to improve reproducibility. The dataset contains a single object class, namely \textit{head} (class 0).
 
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=\textwidth]{figures/sparse_yolov8_head.png}
+	\includegraphics[width=\textwidth]{./../images/sparse/yolo/yolo_scut_head.png}
 	\caption{Architecture of the fine-tuned YOLOv8 head detection technique.}
 	\label{fig:sparse_yolov8_head}
 \end{figure}
 
-The second sparse branch technique fine-tunes the same general purpose detection architecture specifically for head localisation on SCUT-HEAD~\cite{peng2018scuthead} as shown in Fig.~\ref{fig:sparse_yolov8_head}, using a single object class (head). Fine-tuning is run for 50 epochs at an input resolution of 1{,}280 pixels with a batch size of 8, using early stopping with a patience of 10 epochs without improvement; the underlying framework's default optimisation schedule governs the learning rate during this run (a separately configured learning-rate value was recorded but was not observed to be passed into the training call actually used, and is reported here for completeness rather than as the rate that was in effect). Following fine-tuning, the checkpoint selected as best by the framework's internal fitness criterion is evaluated at a reduced input resolution of 640 pixels, a confidence threshold of 0.15, an IoU threshold of 0.4, and a maximum of 500 detections per image, the same operating point at which the detection metrics in Table~\ref{tab:metrics} are computed. Analogously to the pretrained detector, a predicted head count would be obtained as
+The Ultralytics validation procedure is performed at an input resolution of 1{,}280 pixels with a batch size of 8, a confidence threshold of 0.25, an IoU threshold of 0.4, and a maximum of 500 detections per image.
+
+For sparse scene counting, the number of detected heads is obtained directly from the retained detection boxes. Let $B_{\text{head}}$ denote the set of head detections returned by the fine tuned detector after the specified class and confidence filtering. The sparse scene count is then calculated as
 
 \begin{equation}
-	C_{\text{sparse}} = \bigl|\{\, b \in B_{\text{head}} : \text{conf}(b) \ge 0.15 \,\}\bigr|,
+    C_{\text{sparse}} = |B_{\text{head}}|.
 \end{equation}
 
-though the evaluation actually carried out for this technique is expressed through the detection metrics of Table~\ref{tab:metrics} rather than through an explicit head-counting demonstration.
-
-\subsubsection{Cascade Classifier Detector}
-
-The third sparse branch technique uses a classical, pre-deep-learning object detector: a cascade of boosted classifiers over Haar-like rectangular features, following the formulation introduced by ~\cite{viola2001rapid}. The frame is first converted to grayscale, and a multi-scale sliding-window search is then applied via the classifier's built-in scale-scanning procedure, controlled by three configured parameters: a scale factor governing how much the search window shrinks between successive scales, a minimum neighbours parameter governing how many overlapping candidate detections must agree before a region is accepted (functioning as this technique's implicit non-maximum-suppression control), and a minimum detectable object size. Because this classical classifier produces a binary accept/reject decision per candidate window rather than a graded confidence score, every returned detection is assigned a fixed confidence of 1.0:
-
-\begin{equation}
-	\begin{aligned}
-		C_{\text{sparse}}
-		&= \bigl|\{\, b : b \text{ accepted by the cascade classifier at the configured} \\
-		&\qquad \text{scale factor, minimum neighbours, and minimum size} \,\}\bigr|.
-	\end{aligned}
-\end{equation}
-
-No fine-tuning or additional training is performed on this classifier; it is used as a pre-existing, general purpose face/head cascade in the manner originally proposed for rapid face detection~\cite{viola2001rapid}.
+No additional non-maximum suppression is applied outside the YOLO detection framework.
 
 \subsubsection{Comparison of Sparse Branch Techniques}
 \label{sec:sparse-comparison}
 
-Table~\ref{tab:sparse-compare} summarizes the main characteristics of these three sparse branch techniques and provides a basis for selecting an appropriate detector within the proposed hybrid framework.
+Table~\ref{tab:sparse-compare} summarizes the main characteristics of these two sparse branch techniques and provides a basis for selecting an appropriate detector within the proposed hybrid framework.
 
 \begin{longtable}{|
-		>{\raggedright\arraybackslash}p{0.18\textwidth}|
-		>{\raggedright\arraybackslash}p{0.24\textwidth}|
-		>{\raggedright\arraybackslash}p{0.24\textwidth}|
-		>{\raggedright\arraybackslash}p{0.22\textwidth}|}
-	
-	\caption{Comparison of the three sparse branch (detection-based) techniques.}
-	\label{tab:sparse-compare}\\
-	
-	\hline
-	\textbf{Aspect} &
-	\textbf{Pretrained Detector} &
-	\textbf{Fine-Tuned Detector} &
-	\textbf{Cascade Classifier} \\
-	\hline
-	\endfirsthead
-	
-	\multicolumn{4}{c}%
-	{{\tablename\ \thetable{} -- continued from previous page}} \\
-	\hline
-	\textbf{Aspect} &
-	\textbf{Pretrained Detector} &
-	\textbf{Fine-Tuned Detector} &
-	\textbf{Cascade Classifier} \\
-	\hline
-	\endhead
-	
-	\hline
-	\multicolumn{4}{r}{{Continued on next page}} \\
-	\endfoot
-	
-	\hline
-	\endlastfoot
-	
-	Underlying method
-	&
-	Deep, single-stage regression detector~\cite{redmon2016yolo}
-	&
-	Same architecture, fine-tuned
-	&
-	Boosted Haar-feature cascade~\cite{viola2001rapid}
-	\\
-	\hline
-	
-	Training performed
-	&
-	None (pretrained weights only)
-	&
-	Fine-tuning, 50 epochs
-	&
-	None (pretrained cascade)
-	\\
-	\hline
-	
-	Target class
-	&
-	Person (general)
-	&
-	Head (domain-specific)
-	&
-	Face/head (cascade-specific)
-	\\
-	\hline
-	
-	Confidence output
-	&
-	Graded score
-	&
-	Graded score
-	&
-	Fixed at 1.0 (binary accept)
-	\\
-	\hline
-	
-	Quantitative evaluation
-	&
-	None (qualitative only)
-	&
-	Detection metrics (~\cref{tab:metrics})
-	&
-	None observed
-	\\
-	\hline
-	
+    >{\raggedright\arraybackslash}p{0.22\textwidth}|
+    >{\raggedright\arraybackslash}p{0.38\textwidth}|
+    >{\raggedright\arraybackslash}p{0.32\textwidth}|}
+
+\caption{Comparison of the two sparse branch (detection-based) techniques.}
+\label{tab:sparse-compare}\\
+
+\hline
+\textbf{Aspect} &
+\textbf{Pretrained Detector} &
+\textbf{Fine-Tuned Detector} \\
+\hline
+\endfirsthead
+
+\multicolumn{3}{c}%
+{{\tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+\textbf{Aspect} &
+\textbf{Pretrained Detector} &
+\textbf{Fine-Tuned Detector} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{r}{{Continued on next page}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+Underlying method
+&
+Deep, single stage regression detector~\cite{redmon2016yolo}
+&
+Same architecture, fine tuned
+\\
+\hline
+
+Training performed
+&
+None (pretrained weights only)
+&
+Fine tuning, 50 epochs
+\\
+\hline
+
+Target class
+&
+Person (general)
+&
+Head (domain specific)
+\\
+\hline
+
+Confidence output
+&
+Graded score
+&
+Graded score
+\\
+\hline
+
+Quantitative evaluation
+&
+None (qualitative only)
+&
+Detection metrics (Table~\ref{tab:metrics})
+\\
+\hline
+
 \end{longtable}
 
 \subsection{Density Decision}
@@ -386,45 +354,13 @@ with $r = 0$ defined for $n<2$. The Intersection-over-Union quantity itself is t
 
 where $\tau_{\rho}$ (a density threshold, in detections per 1{,}000 pixels$^2$) and $\tau_{r}$ (an overlap ratio threshold in $[0,1]$) are configured constants. This rule means a frame can be classified dense either because it contains many detections relative to its area, or because a large fraction of its detections mutually overlap, even if the absolute detection count is moderate, capturing two distinct visual symptoms of crowding (numerosity and occlusion) with a single decision. 
 
-% Algorithm~\ref{alg:decision} restates this procedure.
-
-% \begin{algorithm}[H]
-	% \caption{Density Decision}
-	% \label{alg:decision}
-	% \begin{algorithmic}[1]
-		% \Function{DensityDecision}{$\mathcal{D}$, $(h,w)$}
-		%     \State $n \gets |\mathcal{D}|$
-		%     \If{$n < \tau_{\min}$}
-		%         \State \Return sparse
-		%     \EndIf
-		%     \State $a \gets (h \cdot w)/1000$
-		%     \State $\rho \gets n / a$
-		%     \State $r \gets$ fraction of detection pairs in $\mathcal{D}$ with IoU $>0$
-		%     \If{$\rho \ge \tau_{\rho}$ \textbf{or} $r \ge \tau_{r}$}
-		%         \State \Return dense
-		%     \Else
-		%         \State \Return sparse
-		%     \EndIf
-		% \EndFunction
-		% \end{algorithmic}
-	% \end{algorithm}
-	
 \subsection{Dense Scene Crowd Counting}
 \label{sec:dense}
 
-\subsubsection{Multi Column Density Estimator}
-\label{sec:fourcolumn-density}
+\subsubsection{Ground truth density maps}
 
-\begin{figure}[htbp]
-	\centering
-	\includegraphics[width=\textwidth]{figures/multi_column_architecture.png}
-	\caption{Architecture of Multi Column Density Estimator}
-	\label{fig:multi_column_architecture}
-\end{figure}
+For each training image, a ground truth density map is constructed by placing a unit impulse at each annotated head location after rescaling the annotation coordinates to the network's fixed input resolution of $768{\times}768$. The resulting point map is smoothed using a Gaussian filter with a standard deviation
 
-\textbf{Architecture:} The first learned density estimation technique follows the multi column convolutional design introduced by ~\cite{Zhu2020} as illustrated in Figure~\ref{fig:multi_column_architecture}, in which several parallel convolutional columns, each using different kernel sizes, process the same input so that each column's features are adapted to a different range of head sizes arising from perspective and scale variation. In the implementation examined, four parallel columns are used (rather than the three columns of the original design), with kernel sizes decreasing across columns (largest column: kernel sizes 11/9/7; smallest column: kernel sizes 5/3/3) and correspondingly increasing channel widths in the smaller kernel columns. Each column applies batch normalisation and ReLU activation after each convolution and reduces spatial resolution by a factor of 4 via two max-pooling stages, so that all four columns produce feature maps of identical spatial size despite their differing kernel sizes and channel depths. The four column outputs are concatenated channel wise and passed through a small fusion head a $1{\times}1$ convolution with ReLU, followed by a second $1{\times}1$ convolution with ReLU producing a single channel, non-negative output yielding the predicted density map $\hat D$.
-
-\textbf{Ground truth density maps:} For each training image, a ground truth density map is constructed by placing a unit impulse at each annotated head location (after coordinates are rescaled to the network's fixed input resolution of $512{\times}512$), then convolving with a Gaussian kernel of standard deviation
 \begin{equation}
 	\sigma =
 	\begin{cases}
@@ -433,93 +369,88 @@ where $\tau_{\rho}$ (a density threshold, in detections per 1{,}000 pixels$^2$) 
 	\end{cases}
 	\qquad \sigma_{\text{base}} = 5,
 \end{equation}
-where $N$ is the number of annotated heads in the image, so that denser images receive a narrower (less blurred) kernel. After smoothing, the map is renormalised so that its total mass exactly equals $N$, correcting for any mass lost near the image boundary, and is then downsampled by a factor of 4 (matching the network's spatial reduction) with a compensating $\times 16$ rescaling to preserve total count after downsampling.
 
-\textbf{Training:} The network is trained from randomly initialised weights using the Adam optimiser at a fixed learning rate of $1\times 10^{-4}$, a batch size of 8, for up to 200 epochs, with the checkpoint of lowest validation loss retained as best. The loss function is a weighted combination of pixel-wise error and count level error (Table~\ref{tab:metrics}),
+where $N$ is the number of annotated heads in the image. Thus, images containing more than 100 annotated heads use $\sigma=2.5$, whereas images with 100 or fewer heads use $\sigma=5$. After Gaussian smoothing, the density map is renormalised so that its total mass equals the ground truth head count $N$. The density map is subsequently downsampled by a factor of four to match the spatial resolution of the network output. Because the downsampling factor is four in each spatial dimension, the density values are multiplied by $4^2=16$ to compensate for the spatial reduction.
 
-\begin{equation}
-	\mathcal{L} = 0.9 \, \mathcal{L}_{\text{MSE}}(\hat D, D) + 0.1 \, \bigl|{\textstyle\sum}\hat D - N_{gt}\bigr|,
-\end{equation}
+\subsubsection{Multi Column Density Estimator}
+\label{sec:fourcolumn-density}
 
-where $N_{gt}$ is the ground truth head count for the training sample. Input images are normalised to $[0,1]$ by simple range scaling, without further channel wise normalisation. A data augmentation pipeline (horizontal flipping, small angle rotation, resized cropping, and colour jitter) is defined for this technique but is not active in the training configuration actually used, since the corresponding activation flag is left at its default (inactive) setting.
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{./../images/dense/mcnn/architecture.png}
+	\caption{Architecture of Multi Column Density Estimator}
+	\label{fig:multi_column_architecture}
+\end{figure}
+
+The first learned density estimation method is along the lines of the multi column convolutional architecture introduced by ~\cite{Zhu2020} (see Figure~\ref{fig:multi_column_architecture}) where multiple stacked parallel convolutional columns are trained on the same image, where each column uses a different kernel size to learn features for a different range of head sizes due to perspective and scale variations. Four parallel columns are used, with progressively smaller kernel sizes across the columns: the first column uses kernel sizes $11/9/7$, the second uses $9/7/5$, the third uses $7/5/3$, and the fourth uses $5/3/3$. The channel widths increase across the columns, with the four branches producing 64, 64, 80, and 96 output channels, respectively. Each convolution is followed by batch normalisation and ReLU activation, while two $2{\times}2$ max-pooling operations in each column reduce the spatial resolution by a factor of four. Thus, for the fixed input resolution of $768{\times}768$, all four branches produce feature maps of spatial size $192{\times}192$. The four feature maps are concatenated channel-wise, producing 304 channels, and are then passed through a fusion head consisting of a $1{\times}1$ convolution that reduces the channels from 304 to 64, followed by ReLU, and a second $1{\times}1$ convolution that produces a single channel output. A final ReLU ensures non-negative density values, yielding the predicted density map $\hat D$.
 
 \subsubsection{Dilated Convolution Density Estimator}
 \label{sec:csrnet-density}
 
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=\textwidth]{figures/csrnet_architecture.png}
+	\includegraphics[width=\textwidth]{./../images/dense/csrnet/architecture.png}
 	\caption{Architecture of Dilated Convolution Density Estimator.}
 	\label{fig:csrnet_architecture}
 \end{figure}
 
-\textbf{Architecture:} The second learned density estimation technique follows the two part frontend/backend design introduced for congested scene density regression~\cite{li2018csrnet} as illustrated in
-Figure~\ref{fig:csrnet_architecture}: a convolutional frontend for feature extraction, and a backend of dilated convolutions that enlarge the receptive field without further reducing spatial resolution, avoiding the loss of fine spatial detail that additional pooling would cause. The frontend is a deep 16 layer convolutional network pretrained for large scale image classification~\cite{simonyan2015vgg}, truncated after its third convolutional block, with all frontend layers held fixed (not updated) during training. The backend consists of six $3{\times}3$ convolutions with a uniform dilation rate of 2, decreasing filter width (512, 512, 512, 256, 128, 64), and a final $1{\times}1$ linear convolution producing the single channel predicted density map. This uniform dilation backend configuration is the specific variant implemented in this study and is reported as such, rather than as the general architecture described in the originating literature, since dilation rate choice is a design parameter that differs across published variants of this architecture family.
+The second learned density estimation technique follows a two-part frontend and backend design based on the CSRNet architecture for congested scene density regression~\cite{li2018csrnet}, as illustrated in Figure~\ref{fig:csrnet_architecture}. The frontend is based on a VGG16 convolutional network pretrained on ImageNet~\cite{simonyan2015vgg}. The VGG16 feature extractor is truncated after the \texttt{conv4\_3} layer, corresponding to the fourth convolutional block. The frontend reduces the spatial resolution of the input from $768 \times 768$ to $96 \times 96$, while the pretrained frontend parameters are frozen during training and are therefore not updated.
 
-\textbf{Ground-truth density maps:} A ground truth density map is constructed at full resolution by placing a unit impulse at each annotated head location and convolving with a Gaussian kernel of fixed standard deviation $\sigma = 4$ (constant across all images, unlike the annotation count adaptive bandwidth used by the multi column estimator above). The resulting map is downsampled by a factor of 8, matching the frontend's spatial reduction, with a compensating $64$ rescaling to preserve total mass.
+The backend consists of six $3{\times}3$ convolutional layers with a uniform dilation rate of 2 and output channel sizes of 512, 512, 512, 256, 128, and 64. The dilated convolutions enlarge the receptive field while maintaining the $96{\times}96$ spatial resolution. A final $1{\times}1$ convolution reduces the 64 channel feature representation to a single channel density map. The predicted density map is subsequently upsampled by a factor of 2 using bilinear interpolation, producing a final spatial resolution of $192{\times}192$.
 
-\textbf{Training:} Frames are resized to a fixed resolution of $768{\times}1024$ and normalised using the mean subtraction scheme associated with the pretrained frontend~\cite{simonyan2015vgg}. Training uses the Adam optimiser at a learning rate of $1\times 10^{-4}$, a batch size of 4, and pixel wise MSE as the sole training loss, with pixel wise MAE and count level MAE (Table~\ref{tab:metrics}) tracked as auxiliary metrics. Training runs for up to 200 epochs with learning rate reduction on validation loss plateau (factor 0.1, patience 5 epochs) and early stopping (patience 15 epochs, restoring the best weights). A second, optional fine-tuning stage that would unfreeze part of the pretrained frontend at a substantially lower learning rate is specified but not executed as part of the training run examined, and is reported here only for completeness.
+\subsubsection{Training}
 
-\subsubsection{Classical Detection and Edge Based Density Estimator}
-\label{sec:classical-density}
-
-The third density estimation technique requires no learned parameters: it constructs a density map for a single frame directly from the centroids of detections already produced by an upstream detector and from edge information extracted from the frame itself. Given a frame of height $h$ and width $w$ and a configured downsampling factor $s$, a coarse grid of size
-\begin{equation}
-	d_h = \max(1, \lfloor h/s \rfloor), \qquad d_w = \max(1, \lfloor w/s \rfloor)
-\end{equation}
-is initialised to zero. Each supplied detection centroid $(cx_i,cy_i)$ is mapped onto this grid by integer division, $dx_i = \lfloor cx_i/s\rfloor$, $dy_i = \lfloor cy_i/s\rfloor$, and, if in bounds, contributes a unit mass to the corresponding cell, giving an initial detection histogram $D_0$. This histogram is smoothed with a Gaussian kernel of effective standard deviation
-\begin{equation}
-	\sigma_{\text{eff}} = \max\!\left(1.0,\; \frac{\gamma}{s}\right)
-\end{equation}
-(where $\gamma$ is a configured base bandwidth), giving the smoothed detection density map $D = G_{\sigma_{\text{eff}}} * D_0$. Independently, the frame is converted to grayscale and passed through a Canny edge detector with fixed hysteresis thresholds of 60 and 150; the resulting binary edge map is downsampled to the same coarse grid by area averaging (so each grid cell reflects the local fraction of edge pixels), rescaled to $[0,1]$, and smoothed with the same Gaussian kernel used for the detection density, giving an edge density map $E$.
-
-Let $M = \sum D$ denote the total detection mass on the smoothed grid. If $M>0$ and $\sum E>0$, a fixed fraction of this mass is allocated as a correction budget,
-\begin{equation}
-	B = 0.15\,M,
-\end{equation}
-the edge density map is rescaled so that its total mass equals exactly this budget, $E' = E \cdot (B/\sum E)$, and the final density map is the sum of the detection density and the rescaled edge correction, $D_{\text{final}} = D + E'$; otherwise (no detections, or no edges), $D_{\text{final}} = D$. Because the edge correction is rescaled to sum to a fixed proportion of the detection mass whenever it is applied, the resulting count follows a closed form relationship,
+The network is trained from randomly initialised weights using the Adam optimiser with an initial learning rate of $1\times10^{-4}$ and a batch size of 8. A StepLR learning rate scheduler is used with a step size of 10 epochs and a multiplicative factor of 0.1. Training is configured for a maximum of 100 epochs with early stopping using a patience of 30 epochs, and the checkpoint with the lowest validation loss is retained as the best model. The training objective is a weighted combination of pixel wise density map error and count level error,
 
 \begin{equation}
-	\hat C = \sum D_{\text{final}} = M + 0.15\,M = 1.15\,M \qquad (\text{when } M>0 \text{ and } {\textstyle\sum} E>0),
-	\label{eq:classical-count}
+	\mathcal{L} = 0.9 \, \mathcal{L}_{\text{MSE}}(\hat D, D) + 0.1 \, \bigl|{\textstyle\sum}\hat D - N_{gt}\bigr|,
 \end{equation}
 
-that is, this technique reports 15\% more than the (Gaussian smoothed) detection based mass whenever both detections and edges are present, with the spatial edge map determining only where that additional mass is distributed, not how much additional mass is added. No loss function or training procedure applies to this technique; it is fully specified by the downsampling factor $s$, the base bandwidth $\gamma$, and the two fixed constants (edge thresholds 60/150 and correction fraction 0.15) observed in its implementation.
+where the count level loss is computed using the absolute difference between the predicted and ground truth counts. For an individual sample, the predicted count is obtained by summing all values in the predicted density map,
+
+\begin{equation}
+	\hat C=\sum_{x,y}\hat D(x,y),
+\end{equation}
+
+and the count loss is
+
+\begin{equation}
+	\mathcal{L}_{\text{count}}=|\hat C-N_{\text{gt}}|.
+\end{equation}
+
+For a training batch, the implemented $\mathrm{L1Loss}$ computes the mean absolute count error across the samples. Input images are converted to RGB, resized to $768{\times}768$, and normalised to the range $[0,1]$ by division by 255, without additional channel-wise normalisation. No image augmentation is applied in the training configuration.
 
 \subsubsection{Comparison of Dense Branch Techniques}
 \label{sec:dense-comparison}
 
-Table~\ref{tab:dense-compare} compares the three dense branch techniques in terms of their architectural design, density estimation capability, computational complexity, and overall suitability for handling variations in crowd density.
+Table~\ref{tab:dense-compare} compares the two dense branch techniques in terms of their architectural design, density estimation capability, computational complexity, and overall suitability for handling variations in crowd density.
 
 \begin{longtable}{|
-	>{\raggedright\arraybackslash}p{0.20\textwidth}|
-	>{\raggedright\arraybackslash}p{0.23\textwidth}|
-	>{\raggedright\arraybackslash}p{0.23\textwidth}|
-	>{\raggedright\arraybackslash}p{0.21\textwidth}|}
+	>{\raggedright\arraybackslash}p{0.22\textwidth}|
+	>{\raggedright\arraybackslash}p{0.36\textwidth}|
+	>{\raggedright\arraybackslash}p{0.34\textwidth}|}
 
-\caption{Comparison of the three dense-branch (density-estimation) techniques.}
+\caption{Comparison of the two dense branch (density estimation) techniques.}
 \label{tab:dense-compare}\\
 
 \hline
 \textbf{Aspect} &
 \textbf{Multi-column Estimator} &
-\textbf{Dilated CNN Estimator} &
-\textbf{Classical Estimator} \\
+\textbf{Dilated CNN Estimator} \\
 \hline
 \endfirsthead
 
-\multicolumn{4}{c}%
+\multicolumn{3}{c}%
 {{\tablename\ \thetable{} -- continued from previous page}} \\
 \hline
 \textbf{Aspect} &
 \textbf{Multi-column Estimator} &
-\textbf{Dilated CNN Estimator} &
-\textbf{Classical Estimator} \\
+\textbf{Dilated CNN Estimator} \\
 \hline
 \endhead
 
 \hline
-\multicolumn{4}{r}{{Continued on next page}} \\
+\multicolumn{3}{r}{{Continued on next page}} \\
 \endfoot
 
 \hline
@@ -530,8 +461,6 @@ Underlying method
 Multi-column CNN~\cite{Zhu2020}
 &
 VGG frontend + dilated backend~\cite{li2018csrnet, simonyan2015vgg}
-&
-Detection centroids + Canny edges
 \\
 \hline
 
@@ -540,8 +469,6 @@ Learned parameters
 Yes (trained from scratch)
 &
 Yes (frontend pretrained and frozen; backend trained)
-&
-None
 \\
 \hline
 
@@ -550,18 +477,14 @@ Depends on a detector
 No
 &
 No
-&
-Yes (consumes externally supplied detections)
 \\
 \hline
 
-Ground-truth smoothing $\sigma$
+ground truth smoothing $\sigma$
 &
 Adaptive: 5 or 2.5 by crowd size
 &
 Fixed: 4
-&
-Configured, applied identically to detection and edge maps
 \\
 \hline
 
@@ -570,41 +493,16 @@ Training loss
 $0.9\,\mathcal{L}_{\mathrm{MSE}} + 0.1\,\left|\sum \hat{D} - N_{\mathrm{gt}}\right|$
 &
 $\mathcal{L}_{\mathrm{MSE}}$ only
-&
-Not applicable
 \\
 \hline
 
 \end{longtable}
 
-% \begin{algorithm}[H]
-	% \caption{Classical Detection- and Edge-Based Density Estimation}
-	% \label{alg:classical}
-	% \begin{algorithmic}[1]
-		% \Require Frame $f$ of size $h\times w$; detection centroids $\{(cx_i,cy_i)\}$; downsample factor $s$; base bandwidth $\gamma$
-		% \Ensure Crowd count $\hat C$; density map $D_{\text{final}}$
-		% \State $d_h \gets \max(1,\lfloor h/s\rfloor)$, $\quad d_w \gets \max(1,\lfloor w/s\rfloor)$; $D_0 \gets \mathbf{0}$
-		% \For{each centroid $(cx_i,cy_i)$}
-		%     \State $dx_i \gets \lfloor cx_i/s\rfloor$, $\quad dy_i \gets \lfloor cy_i/s\rfloor$
-		%     \If{in bounds} $D_0(dy_i,dx_i) \gets D_0(dy_i,dx_i)+1$ \EndIf
-		% \EndFor
-		% \State $\sigma_{\text{eff}} \gets \max(1.0,\gamma/s)$; \quad $D \gets G_{\sigma_{\text{eff}}} * D_0$
-		% \State $E_{\text{full}} \gets \text{Canny}(\text{grayscale}(f), 60, 150)$
-		% \State $E \gets G_{\sigma_{\text{eff}}} * \bigl(\text{resize}(E_{\text{full}},(d_w,d_h))/255\bigr)$
-		% \State $M \gets \sum D$
-		% \If{$M>0$ and $\sum E>0$}
-		%     \State $B \gets 0.15\,M$; \quad $E \gets E\cdot(B/\sum E)$; \quad $D_{\text{final}} \gets D+E$
-		% \Else
-		%     \State $D_{\text{final}} \gets D$
-		% \EndIf
-		% \State \Return $\bigl(\sum D_{\text{final}},\; D_{\text{final}}\bigr)$
-		% \end{algorithmic}
-	% \end{algorithm}
-
 \subsection{Fusion and Final Crowd Count}
 \label{sec:fusion}
 
 The fusion component reconciles the sparse branch count $C_{\text{sparse}}$ and the dense branch count $C_{\text{dense}}$, both of which are computed for every frame regardless of the scene label $s$ assigned by the density decision component, into a single final count for that frame. The scene label determines which of the two branch counts is treated as primary and which as secondary:
+
 \begin{equation}
 	(P,S) =
 	\begin{cases}
@@ -612,14 +510,19 @@ The fusion component reconciles the sparse branch count $C_{\text{sparse}}$ and 
 		(C_{\text{dense}}, C_{\text{sparse}}), & s = \text{dense}
 	\end{cases}
 \end{equation}
+
 with corresponding weights $(w_P,w_S)$ drawn analogously from a pair of configured branch weights (a sparse weight and a dense weight). If the primary count is non positive, the fusion component falls back to whichever of the two counts is larger, avoiding a zero final count when the primary branch reports nothing but the secondary branch has positive signal:
+
 \begin{equation}
 	P \le 0 \;\Rightarrow\; C = \max(P,S).
 \end{equation}
+
 Otherwise, a relative disagreement between the two branches is computed,
+
 \begin{equation}
 	\Delta = \frac{|P-S|}{P},
 \end{equation}
+
 and if this disagreement exceeds a configured threshold $\tau_{\Delta}$, the branches are judged too discordant to blend meaningfully, and the fusion component reports the primary count alone, trusting the branch that the density decision component identified as authoritative for that frame:
 
 \begin{equation}
@@ -630,41 +533,7 @@ Otherwise, the final count is a weighted average of the two branch counts,
 	\Delta \le \tau_{\Delta} \;\Rightarrow\; C = \frac{P\,w_P + S\,w_S}{w_P + w_S}.
 \end{equation}
 
-This design means the fusion component only blends the two branches when they are already in reasonable agreement; substantial disagreement is resolved by deferring to the branch the density decision selected, rather than by averaging two potentially incommensurate estimates. 
-
-% Algorithm~\ref{alg:fusion} restates this procedure.
-
-% \begin{algorithm}[H]
-	% \caption{Fusion of Sparse- and Dense-Branch Counts}
-	% \label{alg:fusion}
-	% \begin{algorithmic}[1]
-		% \Function{Fuse}{$s$, $C_{\text{sparse}}$, $C_{\text{dense}}$}
-		%     \If{$s = $ sparse}
-		%         \State $(P,S,w_P,w_S) \gets (C_{\text{sparse}}, C_{\text{dense}}, w_{\text{sparse}}, w_{\text{dense}})$
-		%     \Else
-		%         \State $(P,S,w_P,w_S) \gets (C_{\text{dense}}, C_{\text{sparse}}, w_{\text{dense}}, w_{\text{sparse}})$
-		%     \EndIf
-		%     \If{$P \le 0$}
-		%         \State \Return $\max(P,S)$
-		%     \EndIf
-		%     \State $\Delta \gets |P-S|/P$
-		%     \If{$\Delta > \tau_{\Delta}$}
-		%         \State \Return $P$
-		%     \Else
-		%         \State \Return $(P\,w_P + S\,w_S)/(w_P+w_S)$
-		%     \EndIf
-		% \EndFunction
-		% \end{algorithmic}
-	% \end{algorithm}
-
-% \subsection{Comparison of the Techniques}
-% Table~\ref{tab:sparse-compare} and Table~\ref{tab:dense-compare} compare the sparse and dense branch techniques respectively along methodological axes (underlying method, training requirement, dependence on other components, and evaluation approach). Across the two branches, detection based techniques output a discrete, countable set of localisations, while density based techniques output a continuous map integrated to a count; the classical density technique occupies an intermediate position, since its base density map is itself built from externally supplied detection centroids, with only its correction term computed from the image directly. 
-
-% No experimental results comparing all six techniques against one another on a common test set were available for this chapter, and no claim of relative superiority among the techniques is made here; the comparison is limited to the methodological and implementation level differences established above.
-
-% \subsection{Implementation Environment and Reproducibility}
-
-% The two deep sparse branch detectors are built on a common open source detection framework~\cite{yolov8_ultralytics} implementing the regression based detection paradigm of ~\cite{redmon2016yolo}, with fine-tuning executed on a single GPU. The cascade classifier detector uses a general purpose computer vision library's cascade classification routines, requiring no GPU and no training. The two learned density estimators use two different deep learning frameworks (one graph based, one define-by-run), with GPU usage selected conditionally where available; both download their shared training data at runtime from a public dataset mirror. The classical density estimator uses only general purpose image processing routines (Gaussian smoothing, Canny edge detection, grayscale conversion, resizing) and has no trained artefact to persist; it is fully specified for reproduction by its two configuration values (downsampling factor and base Gaussian bandwidth) together with the fixed constants identified in ~\cref{sec:classical-density} (Canny thresholds 60/150 and correction fraction 0.15). The density-decision and fusion components are likewise fully specified by their configured thresholds and weights ($\tau_{\min}$, $\tau_{\rho}$, $\tau_{r}$ for the decision component; $w_{\text{sparse}}$, $w_{\text{dense}}$, $\tau_{\Delta}$ for the fusion component) together with the deterministic rules given in Sections~\ref{sec:density-decision} and \ref{sec:fusion}; the concrete numerical values assigned to these configuration parameters at runtime were not available for this chapter and are therefore not reported.
+The reason for this design is that the fusion component only blends the two branches where they are in reasonable agreement, and does not blend two potentially incommensurate density estimates, but rather just defers to the branch the density decision chose to take the lead.
 
 \subsection{Evaluation Metrics}
 \label{subsec:evaluation-metrics}
@@ -706,103 +575,89 @@ The evaluation strategy uses metrics appropriate to each component of the propos
 	&
 	Precision, recall, mAP@50, mAP@50:95
 	&
-	Single-image, qualitative demonstration only
+	Single image, qualitative demonstration only
 	\\
 	\hline
 	
-	Fine-tuned sparse detector
+	Fine tuned sparse detector
 	&
 	Precision, recall, mAP@50, mAP@50:95
 	&
 	Standard detection metrics at a fixed confidence/IoU operating point
 	\\
 	\hline
-	
-	Cascade classifier detector
-	&
-	None observed
-	&
-	Confidence fixed at 1.0 for all detections; the classifier does not output a graded score
-	\\
-	\hline
-	
+		
 	Dilated CNN density estimator
 	&
-	Pixel-wise MSE (training loss), pixel-wise MAE, and custom count-level MAE
+	Pixel wise MSE (training loss), pixel wise MAE, and custom count level MAE
 	&
-	Count-level MAE compares summed predicted and ground-truth density maps per batch
+	Count level MAE compares summed predicted and ground truth density maps per batch
 	\\
 	\hline
 	
-	Multi-column density estimator
+	Multi column density estimator
 	&
-	Combined pixel-wise MSE $+$ count-level MAE (training loss); count-level MAE tracked separately
+	Combined pixel wise MSE $+$ count level MAE (training loss); count level MAE tracked separately
 	&
 	Weighted combination, with weights fixed in the implementation
 	\\
 	\hline
 	
-	Classical density estimator
-	&
-	None (a single diagnostic log of detection count, detection mass, and final density sum)
-	&
-	No learned parameters; hence, no loss or training metric
-	\\
-	\hline
-	
-	% Density decision / fusion
-	% &
-	% None (deterministic rules)
-	% &
-	% Behaviour is fully determined by fixed thresholds and weights once configured
-	% \\
-	% \hline
-	
 \end{longtable}
 
-\subsection{Count-Based Evaluation Metrics}
+\subsubsection{Count Based Evaluation Metrics}
 
-For the sparse and dense branch evaluation, the following whole-image count metrics are used, with $\hat c_i$ the predicted count and $c_i$ the ground-truth count for image $i$ of $M$ evaluated images:
+For the sparse and dense branch evaluation, the following whole image count metrics are used, with $\hat c_i$ the predicted count and $c_i$ the ground truth count for image $i$ of $M$ evaluated images:
 
 \begin{equation}
 	\text{MAE} = \frac{1}{M}\sum_{i=1}^{M} \left| \hat{c}_i - c_i \right|, \qquad
 	\text{RMSE} = \sqrt{ \frac{1}{M}\sum_{i=1}^{M} \left( \hat{c}_i - c_i \right)^2 }
-	\end{equation}
+\end{equation}
+
 \begin{equation}
 	\text{MAPE} = \frac{1}{M}\sum_{i=1}^{M} \frac{\left| \hat{c}_i - c_i \right|}{c_i} \times 100\%, \qquad
 	\text{Bias} = \frac{1}{M}\sum_{i=1}^{M} \left( \hat{c}_i - c_i \right)
-	\end{equation}
-RMSE penalises large individual errors more heavily than MAE, so a wide MAE/RMSE gap indicates that error is concentrated in a minority of images rather than spread evenly. Bias indicates systematic direction: a negative value indicates the model under-counts on average. All four metrics are lower-is-better; bias is exceptional in that its \emph{sign}, not only its magnitude, is informative.
+\end{equation}
+
+RMSE penalises large individual errors more heavily than MAE, so a wide MAE/RMSE gap indicates that error is concentrated in a minority of images rather than spread evenly. Bias indicates systematic direction: a negative value indicates the model under counts on average. All four metrics are lower-is-better; bias is exceptional in that its \emph{sign}, not only its magnitude, is informative.
 
 \subsubsection{Detection Metrics (Fine Tuned Sparse Detector)}
 
-Detection quality is evaluated using precision ($P$), recall ($R$), and mean Average Precision (mAP), computed from matched predicted and ground-truth bounding boxes. The evaluation follows the object-detection protocol formalised for the PASCAL Visual Object Classes challenge~\cite{everingham2010voc}. In this study, detection performance is evaluated using a confidence threshold of 0.15, an Intersection-over-Union (IoU) threshold of 0.4, and a maximum of 500 detections per image. These settings are applied to the best checkpoint obtained during fine tuning.
+Detection quality is evaluated using precision ($P$), recall ($R$), and mean Average Precision (mAP), computed from matched predicted and ground truth bounding boxes. The evaluation follows the object detection protocol formalised for the PASCAL Visual Object Classes challenge~\cite{everingham2010voc}. In this study, detection performance is evaluated using a confidence threshold of 0.25, an Intersection-over-Union (IoU) threshold of 0.4, and a maximum of 500 detections per image. These settings are applied to the best checkpoint obtained during fine tuning.
 
-\textbf{Precision} measures the proportion of predicted head boxes that correspond to ground-truth heads. It is defined as:
-\begin{equation}
-P = \frac{TP}{TP + FP},
-\end{equation}
-where $TP$ (true positives) represents the number of predicted boxes that sufficiently overlap with a ground-truth head, while $FP$ (false positives) represents predictions that do not correspond to a ground-truth head. Higher precision indicates fewer spurious detections.
+\textbf{Precision} measures the proportion of predicted head boxes that correspond to ground truth heads. It is defined as:
 
-\textbf{Recall} measures the proportion of ground-truth heads that are successfully detected. It is defined as:
 \begin{equation}
-R = \frac{TP}{TP + FN},
+	P = \frac{TP}{TP + FP},
 \end{equation}
-where $FN$ (false negatives) represents the number of ground-truth heads for which no corresponding prediction is obtained. Higher recall indicates fewer missed heads.
 
-\textbf{Mean Average Precision (mAP)} provides a comprehensive measure of detection performance by summarising precision across the range of confidence thresholds. For \textbf{mAP@50}, Average Precision (AP) is calculated at a single IoU threshold of 0.50. The IoU between a predicted bounding box $A$ and a ground-truth bounding box $B$ is defined as:
+where $TP$ (true positives) represents the number of predicted boxes that sufficiently overlap with a ground truth head, while $FP$ (false positives) represents predictions that do not correspond to a ground truth head. Higher precision indicates fewer spurious detections.
+
+\textbf{Recall} measures the proportion of ground truth heads that are successfully detected. It is defined as:
+
 \begin{equation}
-\text{IoU}(A,B) = \frac{|A \cap B|}{|A \cup B|},
+	R = \frac{TP}{TP + FN},
 \end{equation}
+
+where $FN$ (false negatives) represents the number of ground truth heads for which no corresponding prediction is obtained. Higher recall indicates fewer missed heads.
+
+\textbf{Mean Average Precision (mAP)} provides a comprehensive measure of detection performance by summarising precision across the range of confidence thresholds. For \textbf{mAP@50}, Average Precision (AP) is calculated at a single IoU threshold of 0.50. The IoU between a predicted bounding box $A$ and a ground truth bounding box $B$ is defined as:
+
+\begin{equation}
+	\text{IoU}(A,B) = \frac{|A \cap B|}{|A \cup B|},
+\end{equation}
+
 while Average Precision is expressed as:
+
 \begin{equation}
-\text{AP} = \int_0^1 p(r),dr,
+	\text{AP} = \int_0^1 p(r),dr,
 \end{equation}
+
 where $p(r)$ represents precision as a function of recall $r$.
 
-The \textbf{mAP@50} metric therefore measures Average Precision at an IoU threshold of 0.50. In contrast, \textbf{mAP@50:95} averages AP across ten IoU thresholds from 0.50 to 0.95 in steps of 0.05. Consequently, mAP@50:95 provides a stricter and more localisation-sensitive assessment of detection performance than mAP@50. For all three metrics, higher values indicate better detection performance.
+The \textbf{mAP@50} metric therefore measures Average Precision at an IoU threshold of 0.50. In contrast, \textbf{mAP@50:95} averages AP across ten IoU thresholds from 0.50 to 0.95 in steps of 0.05. Consequently, mAP@50:95 provides a stricter and more localisation sensitive assessment of detection performance than mAP@50. For all three metrics, higher values indicate better detection performance.
 
-\subsection{Density-Estimation Training Metrics (Learned Dense Branch Estimators)}
+\subsubsection{Density Estimation Training Metrics (Learned Dense Branch Estimators)}
 
 Both learned density estimation techniques are trained with a pixel wise error term between the predicted density map $\hat D$ and the ground truth density map $D$,
 
@@ -816,7 +671,7 @@ where $N_p$ is the number of cells in the (downsampled) density map. In addition
 	\text{count\_MAE} = \frac{1}{B}\sum_{b=1}^{B}\left|\sum_{i} D_{b,i} - \sum_{i} \hat D_{b,i}\right|.
 \end{equation}
 
-This count level metric is used because pixel wise error on a density map is difficult to interpret directly in terms of people counted; expressing error in the same units as the final deliverable (a count) makes model comparison more directly meaningful. One of the two learned estimators uses only the pixel wise MSE as its training loss (with pixel wise MAE and count level MAE tracked as auxiliary metrics), while the other combines the pixel wise MSE and the count level error directly into its training loss (Section\ref{sec:dense}).
+This count level metric is used because pixel wise error on a density map is difficult to interpret directly in terms of people counted; expressing error in the same units as the final deliverable (a count) makes model comparison more directly meaningful. One of the two learned estimators uses only the pixel wise MSE as its training loss (with pixel wise MAE and count level MAE tracked as auxiliary metrics), while the other combines the pixel wise MSE and the count level error directly into its training loss (Section~\ref{sec:dense}).
 
 \subsubsection{Count Derivation from a Density Map}
 
@@ -827,45 +682,4 @@ For any density estimation technique, learned or classical, the predicted crowd 
 	\label{eq:density-sum}
 \end{equation}
 
-This relationship holds for the two learned estimators (where it is used directly in computing the count level MAE metric above) and, in a closed form variant, for the classical estimator (~\cref{sec:classical-density}, Equation~\ref{eq:classical-count}).
-
-
-
-% % \subsection{Overview of Available Experimental Materials}
-
-% % Table~\ref{tab:evidence_map} summarises the experimental evidence actually available across the six implemented counting approaches, prior to any analysis.
-
-% % \small
-% % \begin{longtable}{|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{1.5cm}|>{\raggedright\arraybackslash}p{1.7cm}|>{\raggedright\arraybackslash}p{1.7cm}|>{\raggedright\arraybackslash}p{2.2cm}|>{\raggedright\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{2cm}|}
-% % 	\caption{Evidence availability by method and result category}
-% % 	\label{tab:evidence_map}\\
-% % 	\hline
-% % 	\textbf{Category} & \textbf{Haar Cascade} & \textbf{Classic YOLO} & \textbf{SCUT-Head YOLO} & \textbf{Four-Column MDNN} & \textbf{CSRNet} & \textbf{Classical method} \\
-% % 	\hline
-% % 	\endfirsthead
-% % 	\hline
-% % 	\textbf{Category} & \textbf{Haar Cascade} & \textbf{Classic YOLO} & \textbf{SCUT-Head YOLO} & \textbf{Four-Column MDNN} & \textbf{CSRNet} & \textbf{Classical method} \\
-% % 	\hline
-% % 	\endhead
-% % 	\hline
-% % 	\endfoot
-% % 	\hline
-% % 	\endlastfoot
-% % 	Training performed & N/A (not learned) & No (pretrained) & Yes (45/50 ep.) & Yes (200/200 ep.) & Yes (200/200 ep.) & N/A (not learned) \\
-% % 	\hline
-% % 	Internal val. metrics & N/A & N/A & Yes & Yes & Yes  & N/A \\
-% % 	\hline
-% % 	% Held-out test-set metrics & Not tested & N/A & No & No (loader unused) & No & No \\
-% % 	% \hline
-% % 	% External image test & Not tested & 1 image, qualitative & No & No & No & No \\
-% % 	% \hline
-% % 	% External image test (quantitative, at scale) & Not tested & Yes, via pipeline (30 img.) & No & No & No & No \\
-% % 	% \hline
-% % 	% External video test & Not tested & No & No & No & No & No \\
-% % 	% \hline
-% % 	% Inference speed recorded & Not tested & No & Yes & No & No (train-step time only) & No \\
-% % 	% \hline
-% % \end{longtable}
-% % \normalsize
-
-% % Two consequences follow directly from Table~\ref{tab:evidence_map} and govern the scope of the rest of this chapter. First, no experiment in the available materials executes the complete adaptive pipeline end-to-end — that is, frame input through density-decision, branch selection, and fusion, with a resulting accuracy figure. Section~\ref{sec:hybrid_results} therefore reports this directly rather than estimating a hybrid accuracy figure. Second, quantitative external-image evaluation at scale (i.e. against manually verified ground truth over a meaningful sample size) exists only for the sparse, detection-based branch, obtained by running the deployed pipeline's YOLO-based detector — functionally the same pretrained detector demonstrated in the classic-YOLO notebook — over a 30-image external dataset. The three density-estimation approaches (Four-Column MDNN, CSRNet, and the classical method) were not evaluated against any external image or video dataset in the provided materials; their available evidence is limited to training/validation behaviour on their respective source datasets.
+This relationship holds for the two learned estimators (where it is used directly in computing the count level MAE metric above) and, in a closed form variant, for the classical estimator.

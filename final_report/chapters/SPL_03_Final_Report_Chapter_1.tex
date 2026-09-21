@@ -3,29 +3,41 @@
 
 \section{Background and Motivation}
 
-Public transportation is one of the essential components of today's urban fabric. Buses are the fastest growing mode of transport and carry the greatest proportion of daily commuters globally, especially in the developing world, which is undergoing rapid urbanization~\cite{itf_outlook_2023}. It is crucial that passenger occupancy information is accurate in order to optimize scheduling, fleet management, prevent overcrowding and ensure safety for passengers.
+Public transportation is one of the essential components of today's urban fabric. Buses are the fastest growing mode of transport and carry the greatest proportion of daily commuters globally, especially in the developing world, which is undergoing rapid urbanisation \cite{itf_outlook_2023}. It is crucial that passenger occupancy information is accurate in order to optimize scheduling, fleet management, prevent overcrowding and ensure safety for passengers.
 
-Typical APC systems use the hardware sensors including an infrared beam, a pressure mat or a ticketing system. The above mentioned methods are common, but they can also have drawbacks such as high installation and maintenance expenses, susceptibility to environmental conditions, and decreased accuracy with multiple passengers simultaneously entering or exiting the system~\cite{Chris2024}. Field evaluations comparing infrared, floor-based, WiFi and video-based APC solutions confirm that traditional sensing technologies show marked accuracy declines under crowded or high-throughput boarding conditions~\cite{grgurevic2021review}.
+Typical APC systems use the hardware sensors including an infrared beam, a pressure mat or a ticketing system. These methods are common, but they can also have drawbacks such as high installation and maintenance expenses, susceptibility to environmental conditions, and decreased accuracy with multiple passengers simultaneously entering or exiting the system. Field evaluations comparing infrared, WiFi and video based APC solutions confirm that traditional sensing technologies show accuracy declines under crowded or high-throughput boarding conditions~\cite{grgurevic2021review}.
 
-With some recent progress in computer vision and deep learning, camera based passenger counting systems have been developed. Many buses are already using surveillance cameras for security reasons, making vision an affordable and scalable solution that can be deployed without additional hardware~\cite{mccarthy2021field}. Neural networks can accurately assess occupancy in complex visual scenes; deep learning models that integrate object detection and density estimation have presented state of the art results in crowd counting benchmarks~\cite{gao2022caaisurvey}.
+With some recent progress in computer vision and deep learning, camera based passenger counting systems have been developed. Many buses are already using surveillance cameras for security reasons making vision an affordable and scalable solution \cite{Chris2023}. Neural networks can accurately assess occupancy in complex visual scenes, deep learning models that integrate object detection and density estimation have presented state of the art results in crowd counting benchmarks \cite{gao2022caaisurvey}.
 
-But bus interior scenes have special characteristics compared to crowd scenes. Occupants often obstruct one another in the frame, the cameras are often placed on the ceiling creating the illusion of perspective, and the passengers' heads often seem to be small in the photographs~\cite{tezcan2024fisheye}.
+But bus interior scenes have special characteristics compared to the crowd scenes. Occupants often obstruct one another in the frame, the cameras are often placed on the ceiling creating the illusion of perspective, and the passengers' heads often seem to be small in the photographs \cite{tezcan2024fisheye}.
 
 \section{Problem Statement}
 
-The ability to count passengers with high accuracy is a key need in intelligent public transportation systems. Accurate passenger data allows transport authorities and bus companies to make informed decisions, optimize routes, ensure passenger safety, and monitor bus occupancy. Traditional passenger count mechanisms like infrared sensors, pressure sensors and ticketing systems tend to be inaccurate as a result of malfunctions, simultaneous boarding and alighting, and passenger overlap ~\cite{Aleksander2024}.
+The ability to count passengers with high accuracy is a key need in intelligent public transportation systems. Accurate passenger data allows transport authorities and bus companies to make informed decisions, optimize routes, ensure passenger safety, and monitor bus occupancy. Traditional passengers' count mechanisms like infrared sensors, pressure sensors and ticketing systems tend to be inaccurate as a result of malfunctions, simultaneous boarding and alighting, and passenger overlap \cite{Aleksander2024}.
 
-In recent years, computer vision and deep learning have shown promising results in the field of crowd counting and object detection related to surveillance tasks~\cite{sindagi2022survey}. In the case of bus passenger counting, however, it is not so easy to apply the methods described above due to the special conditions found in the interior of a bus. The passengers are tightly packed, so occlusion is a serious issue, in which people partially or even completely cover each other~\cite{sundararaman2021}. In addition, surveillance cameras are usually installed on the ceiling, resulting in perspective distortion and making passenger heads appear small, especially in the rear sections of the bus~\cite{rapid2020}. Illumination, movement of the vehicle and frequent passenger movements add to the difficulty of accurately counting~\cite{Claire2021}.
+In rececompont years, computer vision and deep learning have shown promising results in the field of crowd counting and object detection related to surveillance tasks \cite{sindagi2022survey}. In the case of bus passenger counting, however, it is not so easy to apply the methods described above due to the special conditions found in the interior of a bus. The passengers are tightly packed, so occlusion is a serious issue, in which people partially or even completely cover each other \cite{sundararaman2021}. In addition, surveillance cameras are usually installed on the ceiling, resulting in perspective distortion and making passenger heads appear small, especially in the rear sections of the bus \cite{rapid2020}. Illuminations, movement of vehicles and frequent passenger movements add to the difficulty in accurately counting \cite{Claire2021}.
 
-The existing crowd counting methods have been developed and tested for public datasets which are primarily outdoor scenes or general crowd environments, such as ShanghaiTech~\cite{Zhu2020}, UCF-QNRF~\cite{ucf_qnrf_dataset} and NWPU-Crowd~\cite{wang2020nwpu}. These datasets are not representative enough of the visual properties and problems of the interior of a bus. Another drawback of many studies is the estimation of crowd density instead of the identification of the individuals who make up the crowd in video frames, which can cause double counting if used in a video based application and may lead to unstable counts~\cite{hassan2023crowd}.
+The existing crowd counting methods have been developed and tested for public datasets which are primarily outdoor scenes or general crowd environments, such as ShanghaiTech\cite{Zhu2020}, UCF-QNRF\cite{ucf_qnrf_dataset} and NWPU-Crowd\cite{wang2020nwpu}. The data sets are not representative enough of the visual properties and problems of the interior of a bus. Another drawback of many studies is the estimation of crowd density instead of the identification of the individuals who make up the crowd in video frames, which can cause double counting if used in a video based application and may lead to unstable counts \cite{hassan2023crowd}.
 
-Thus, it is important to test if head detection can accurately estimate the number of passengers in a bus environment, explore optimal head detection models to detect small heads, and evaluate if head detection combined with object tracking can enhance the stability of counting and avoid multiple counting of passengers among different frames ~\cite{occupancy2026mot}.
+Thus, it is important to test if head detection can accurately estimate the number of passengers in a bus environment, explore optimal head detection models to detect small heads, and evaluate if head detection combined with object tracking can enhance the stability of counting and avoid multiple counting of passengers among different frames \cite{occupancy2026mot}.
+
+\subsection{Research Question}
+
+Based on the aforementioned, the following research questions are proposed to guide the investigation and evaluation of the proposed passenger head-counting system:
+
+\begin{itemize}
+    \item \textbf{RQ1:} Can the number of passengers be accurately counted in the interior of the bus with head detection?
+    \item \textbf{RQ2:} What impact do camera angles have in the accuracy of head-counting in a bus with a high level of occupancy?
+    \item \textbf{RQ3:} What is the best detection model for the small-head detection of real bus scenes?
+    \item \textbf{RQ4:} How stable is the system in low light, occlusion and with motion blur?
+\end{itemize}
+
 
 \section{Research Objectives}
 
 \subsection{General Objective}
 
-The key aim of this study is to design and test a vision based passenger count system within a bus for the interior space using the head detection and object tracking method.
+The key aim of this research is to design and test a vision based passenger count system within a bus for the interior space using the head detection method.
 
 \subsection{Specific Objectives}
 
@@ -33,21 +45,18 @@ Specific objectives are given below:
 
 \begin{itemize}
 
-    \item To explore if head detection is an accurate way to count the number of people in a bus interior.
+    \item To investigate whether the method of detecting people's heads is a valid method for counting the number of people in the interior of a bus.
     
-    \item To analyze various object detection models and choose the most suitable model for detecting mini passenger heads in the real bus scenes.
+    \item To study the different object detection models and select the best model to detect passenger head in the real bus scenes.
     
-    \item To investigate density estimation based counting as an alternative to head detection under severe occlusion and high passenger density, where individual heads are difficult to separately localize.
+    \item To investigate the use of density estimation based counting as a method to handle counting in scenarios where the individual heads are difficult to accurately localise.
     
-    \item To design a density decision mechanism capable of distinguishing sparse from dense bus interior scenes, so that the most appropriate counting strategy can be applied on a per-scene basis.
+    \item To develop a density decision method that can differentiate between those bus interior scenes that contain only a few people and those that have more people.
     
-    \item To develop an adaptive hybrid counting framework that combines head detection and density estimation outputs into a single, more reliable passenger count.
+    \item To develop an adaptive hybrid counting model that can integrate the results of the head detection and density estimation to obtain an accurate count of passengers.
     
-    % \item To evaluate the proposed system's counting accuracy against manually verified ground truth using standard quantitative metrics, including Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), precision, and recall.
-    
-    % \item To assess the generalizability of the trained models by testing them on external, previously unseen bus interior images and video footage.
-
 \end{itemize}
+
 
 \section{Scope and Limitations}
 
@@ -57,16 +66,14 @@ In this study, a vision based passenger counting system by means of deep learnin
 
 The following are some of the scope of this study:
 
-\begin{itemize}
+\begin{itemize}[itemsep=0pt]
 
-    \item Conduct research into a passenger counting system using head detection instead of whole-body detection for better performance in high occupancy and heavily occluded bus environments~\cite{rpeeheads2024}.
-
-    \item Comparing and assessing several object detection models to detect small heads of passengers in bus surveillance videos~\cite{yolov8head2023}.
-
-    % \item Studying the performance of multi object tracking algorithms when keeping track of the identity of passengers across multiple video frames and mitigating the double counting problem.
-
-    % Evaluating the proposed system with the commonly used metrics such as Precision, Recall, mAP, MOTA, MAE and counting accuracy.
-
+    \item Conduct research into a passenger counting system using head detection instead of whole-body detection for better performance in high occupancy and heavily occluded bus environments \cite{rpeeheads2024}.
+    
+    \item Comparing and assessing several object detection models to detect small heads of passengers in bus surveillance videos.
+    
+    \item Evaluating the proposed system with the commonly used metrics such as Precision, Recall, mAP, MAE and counting accuracy.
+    
     \item Simultaneously running experiments with videos of the bus interior captured from CVC installed in the ceiling, for various lighting conditions and passenger loads.
 
 \end{itemize}
@@ -77,15 +84,13 @@ This study only provides for the number of passengers in buses and excludes othe
 
 The proposed solution is designed to offer an accurate and reliable passenger counting solution, but there are some limitations.
 
-\begin{itemize}
+\begin{itemize}[itemsep=0pt]
 
-    \item The system is based on video that is recorded from surveillance cameras mounted on a ceiling. Detection and tracking performance may be impacted by the camera position and/or the camera's point of view~\cite{tezcan2024fisheye}.
+    \item  The system is based on video that is recorded from surveillance cameras mounted on a ceiling. Detection and tracking performance may be impacted by the camera position and/or the camera's point of view.
 
-    \item Severe occlusion is a difficult problem. If there is no visibility of the head of a passenger, the head cannot be detected and undercounting may occur~\cite{tezcan2024fisheye}.
+    \item Severe occlusion is a difficult problem. If there is no visibility of the head of a passenger, the head can not be detected and undercounting may occur.
 
-    % \item The effectiveness of the tracking algorithm is strongly related to the effectiveness of the object detector. Identity switches or fragmented trajectories can result from missed detections or false detections.
-
-    \item The accuracy of the detection may be negatively affected by variations of light, shadows, movement of the bus and image quality~\cite{Claire2021}.
+    \item The accuracy of the detection may be negatively affected by variations of light, shadows, movement of the bus and image quality.
 
     \item The proposed system is based on the premise that the surveillance camera cannot be moved. In this study, camera movement or vibration, beyond normal bus operations, is not taken into consideration.
 
@@ -93,12 +98,12 @@ The proposed solution is designed to offer an accurate and reliable passenger co
 
 \end{itemize}
 
-Although the limitations of this study exist, it is hoped that the research will yield useful information on the feasibility of head detection and object tracking for accurate passenger counting within a bus environment and can be used as a basis for further intelligent transportation studies.
+Although the limitations of this study exist, it is hoped that the research will yield useful information on the feasibility of head detection for accurate passenger counting within a bus environment and can be used as a basis for further intelligent transportation studies.
 
 \section{Significance of the Study}
 
-The study is of relevance to both academia and practice. In the academic area, the research provides a contribution to the increasing research in the field of vision based passenger counting, by examining the integration of detection and tracking of heads and objects in a bus environment. In contrast to traditional crowd counting methods, which are based on density estimation, this paper aims to detect and track each individual passenger, thereby solving problems like occlusion, small object detection and crowd counting stability~\cite{hassan2023crowd}.
+The study is of relevance to both academia and practice. In the academic area, the research provides a contribution to the increasing research in the field of vision based passenger counting, by examining the integration of detection of heads in a bus environment. In contrast to traditional crowd counting methods, which are based on density estimation, this paper aims to detect and track each individual passenger, thereby solving problems like occlusion, small object detection and crowd counting stability.
 
-In practice, the passenger counting system could be used to give useful information to intelligent transportation systems. The real time passenger occupancy data can help transport authorities optimize bus schedules, minimize overcrowding, enhance the quality of service and passenger safety~\cite{itf_outlook_2023}. Additionally, many buses already have surveillance cameras, meaning that the proposed method could be implemented without needing to install new hardware, making it a cost effective solution for public transportation systems~\cite{mccarthy2021field}.
+In practice, the passenger counting system could be used to give useful information to intelligent transportation systems. The real time passenger occupancy data can help transport authorities optimize bus schedules, minimize overcrowding, enhance the quality of service and passenger safety. Additionally, many of the buses already have surveillance cameras, meaning that the proposed method could be implemented without needing to install new hardware making it a cost effective solution for public transportation systems.
 
-The results of this study can also be used to support the development of smart city applications in which real-time monitoring and decision making based on data are crucial~\cite{itf_outlook_2023}.
+The results of this study can also be used to support the development of smart city applications in which real-time monitoring and decision making based on data are crucial.
