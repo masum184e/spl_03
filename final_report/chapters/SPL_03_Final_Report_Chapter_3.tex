@@ -204,7 +204,7 @@ The first sparse branch technique employs the pretrained YOLOv8m object detector
 
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=\textwidth]{./../images/sparse/yolo/yolo_pretrained.png}
+	\includegraphics[width=\textwidth]{./../images/sparse/classical_yolo/architecture.png}
 	\caption{Architecture of the pretrained YOLOv8 based sparse branch technique.}
 	\label{fig:sparse_yolov8_pretrained}
 \end{figure}
@@ -219,13 +219,13 @@ The detector's built-in post-processing, including non-maximum suppression (NMS)
 
 For quantitative evaluation, the predicted bounding boxes are compared with the ground truth bounding boxes provided with the public transport crowd counting dataset. A predicted box and a ground truth box are considered a match when their intersection-over-union (IoU) is at least $0.50$. A greedy one-to-one matching procedure is then used to determine true positives (TP), false positives (FP), and false negatives (FN). Based on these detections, precision, recall, and F1-score are calculated. In addition, counting performance is evaluated using the absolute counting error, mean absolute error (MAE), root mean squared error (RMSE), and mean absolute percentage error (MAPE).
 
-\subsubsection{Fine-Tuned Head Detector}
+\subsubsection{Fine Tuned Head Detector}
 
 The second sparse branch technique fine tunes the pretrained YOLOv8m detector for single class head detection using the SCUT-HEAD dataset~\cite{peng2018scuthead}, as illustrated in Fig.~\ref{fig:sparse_yolov8_head}. The detector is initialized from the pretrained YOLO weights and fine tuned for 50 epochs with a batch size of 8 and an input image size of 1{,}280 pixels. Early stopping is enabled with a patience of 10 epochs, while a fixed random seed of 42 and deterministic training are used to improve reproducibility. The dataset contains a single object class, namely \textit{head} (class 0).
 
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=\textwidth]{./../images/sparse/yolo/yolo_scut_head.png}
+	\includegraphics[width=\textwidth]{./../images/sparse/scut_head_yolo/architecture.png}
 	\caption{Architecture of the fine-tuned YOLOv8 head detection technique.}
 	\label{fig:sparse_yolov8_head}
 \end{figure}
