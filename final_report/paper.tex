@@ -9,7 +9,7 @@
 \usepackage{enumitem} % control over list
 
 \setlength{\parindent}{0pt}  % remove paragraph indentation
-\setlength{\parskip}{6pt}    % add space between paragraphs
+\setlength{\parskip}{4pt}    % add space between paragraphs
 
 % ==================================================
 % Algorithm Packages
@@ -77,11 +77,11 @@
 }
 
 % ==================================================
-% Title and Author
+% Section 
 % ==================================================
-\title{\textbf{Your Paper Title}}
-\author{Your Name}
-\date{}
+\titlespacing*{\section}{0pt}{6pt}{4pt}
+\titlespacing*{\subsection}{0pt}{4pt}{3pt}
+\titlespacing*{\subsubsection}{0pt}{4pt}{2pt}
 
 \begin{document}
 
@@ -136,9 +136,16 @@
 % ==================================================
 % References
 % ==================================================
-\newpage
+% \newpage
+% \renewcommand{\bibname}{References}
+% \bibliographystyle{IEEEtran}
+% \bibliography{references}
+
+\begingroup
+\let\clearpage\relax
 \renewcommand{\bibname}{References}
 \bibliographystyle{IEEEtran}
 \bibliography{references}
-	
+\endgroup
+
 \end{document}

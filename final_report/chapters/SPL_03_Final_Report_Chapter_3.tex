@@ -114,7 +114,7 @@ Before any denoising or contrast operation is applied, the raw frame $I_{raw}$ p
 	\label{eq:resize}
 \end{equation}
 
-where $w_t$ is the configured target width, $h_t$ the resulting target height, and the aspect ratio of the original frame $(w_{raw}, h_{raw})$ is preserved throughout. Area based interpolation is used because it is the theoretically appropriate choice for downscaling: unlike bilinear or nearest neighbour interpolation, which sample a fixed, small neighbourhood regardless of the scale change, area interpolation averages over the full block of source pixels each destination pixel covers, which reduces aliasing artefacts that would otherwise appear as spurious high frequency texture exactly the kind of artefact non-local means denoising would otherwise mistake for genuine, similarity matchable structure~\cite{gonzalez2018digital}.
+where $w_t$ is the configured target width, $h_t$ the resulting target height, and the aspect ratio of the original frame $(w_{raw}, h_{raw})$ is preserved throughout. Area based interpolation is used because it is the theoretically appropriate choice for downscaling: unlike bilinear or nearest neighbour interpolation, which sample a fixed, small neighbourhood regardless of the scale change, area interpolation averages over the full block of source pixels each destination pixel covers, which reduces aliasing artefacts that would otherwise appear as spurious high frequency texture exactly the kind of artefact non-local means denoising would otherwise mistake for genuine, similarity matchable structure.
 
 \subsubsection{Non-Local Means Denoising}
 
@@ -154,7 +154,7 @@ CLAHE partitions the $L$-channel into an $8\times8$ grid of contextual tiles, eq
 	\label{eq:gaussian-blur}
 \end{equation}
 
-A final, optional Gaussian smoothing pass with configurable kernel size $k_{blur}$ removes residual high-frequency artefacts introduced by CLAHE's per-tile equalisation before the frame is passed to the detection and density branches~\cite{gonzalez2018digital}. Setting $\sigma=0$ allows the Gaussian standard deviation to be determined automatically from the selected kernel size.
+A final, optional Gaussian smoothing pass with configurable kernel size $k_{blur}$ removes residual high-frequency artefacts introduced by CLAHE's per-tile equalisation before the frame is passed to the detection and density branches. Setting $\sigma=0$ allows the Gaussian standard deviation to be determined automatically from the selected kernel size.
 
 \subsection{ShanghaiTech Dataset Preparation}
 
@@ -226,7 +226,7 @@ The second sparse branch technique fine tunes the pretrained YOLOv8m detector fo
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\textwidth]{./../images/sparse/scut_head_yolo/architecture.png}
-	\caption{Architecture of the fine-tuned YOLOv8 head detection technique.}
+	\caption{Architecture of the fine tuned YOLOv8 head detection technique.}
 	\label{fig:sparse_yolov8_head}
 \end{figure}
 

@@ -1,0 +1,18 @@
+\chapterpage{Conclusion and Future Work}
+\mychapter{Conclusion and Future Work}
+\label{chap:conclusion}
+
+\section{Summary of Contributions}
+\label{sec:conclusion_contributions}
+
+This work evaluated detection-based and density-based crowd head counting methods across different crowd densities and investigated their integration into a hybrid counting framework for public transport imagery. A consistent evaluation of fine-tuned YOLO, MCNN, and CSRNet models showed that detection and density estimation methods have complementary strengths across different density ranges, providing a basis for hybrid counting. Based on these findings, an interpretable fusion rule was developed to combine detector and density-regression counts without additional training. Two hybrid configurations, SCUT-Head YOLO + MCNN and SCUT-Head YOLO + CSRNet, were evaluated under the same conditions, with the latter providing more suitable complementary behaviour, particularly in sparse scenes. All models were evaluated using consistent aggregate metrics and density-based ground-truth ranges, enabling direct comparison of their counting performance. Finally, the proposed analysis was applied to real bus interior imagery to examine its relevance to practical passenger occupancy and overcrowding monitoring.
+
+\section{Limitations}
+\label{sec:conclusion_limitations}
+
+The main limitation of this study is the restricted diversity of the evaluation dataset. The images do not cover the full range of conditions that may occur in real deployments, including very large crowds, low-light or nighttime scenes, unusual camera angles, and other challenging environments. In addition, the density thresholds used by the hybrid framework were determined from the evaluation images rather than an independent held-out set, so their generalisation to unseen data remains uncertain. The detector can also fail when passengers are heavily occluded or hidden by bus structures, which affects the fallback behaviour of the hybrid framework. Finally, the models were evaluated on individual still images rather than video sequences, and computational factors such as inference latency, memory usage, and power consumption were not evaluated.
+
+\section{Future Work}
+\label{sec:conclusion_future_work}
+
+Future work should focus on improving the generalisation and practical deployment of the proposed hybrid framework. The fixed fusion threshold could be replaced with a learned decision mechanism that determines which counting method is more reliable for a given image. Evaluation should also be extended to a larger and more diverse public transport dataset covering different vehicles, camera positions, lighting conditions, and crowd densities, with separate unseen data used to validate the fusion strategy. Video-based evaluation should be conducted to investigate the use of temporal information for more stable passenger counting. Further fine-tuning of the detector on bus-specific images containing domain-specific occlusions such as seats, poles, and handrails may improve detection performance. Finally, inference latency, memory usage, and power consumption should be evaluated on representative edge devices, with model compression techniques such as quantisation or pruning considered where necessary.
