@@ -1722,7 +1722,7 @@ To further examine how the SCUT-Head YOLO + CSRNet hybrid performs across differ
 	\centering
 	\includegraphics[width=1.0\linewidth]{./../images/scut_head_csrnet/performance_by_gt_range.png}
 	\caption{Hybrid YOLO+CSRNet metrics across ground truth count ranges}
-	\label{fig:hybrid_csrnet_range_metrics}
+	\label{fig:hybrid_mcnn_range_metrics}
 \end{figure}
 
 The range-stratified results show the same broad shape as the MCNN based hybrid absolute error rising and relative error falling with crowd size as shown in Table~\ref{tab:hybrid_csrnet_range_breakdown} and Figure~\ref{fig:hybrid_csrnet_range_metrics}. However, there is a notably lower MAE and RMSE in the sparsest range (1--10), where the mean bias (-0.410984) is close to zero and only mildly negative, rather than the small positive bias seen in the same range for the MCNN based hybrid. This is broadly consistent with CSRNet's own range level behaviour (Table~\ref{tab:csrnet_range_breakdown}), which, while still weak in absolute terms, is less prone to the extreme sparse scene overestimation observed for MCNN (Table~\ref{tab:mcnn_range_breakdown}).
